@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
+  Briefcase,
   LogOut,
   Globe,
   ChevronDown,
@@ -48,6 +49,10 @@ export default function AdminLayout() {
           <NavLink to="/quotes" className={navLinkClass}>
             <FileText className="h-4 w-4" />
             Quotes
+          </NavLink>
+          <NavLink to="/job-applications" className={navLinkClass}>
+            <Briefcase className="h-4 w-4" />
+            Job Applications
           </NavLink>
 
           <button

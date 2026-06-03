@@ -63,6 +63,7 @@ export const api = {
   me: () => request("/api/auth/me"),
   stats: () => request("/api/admin/stats"),
   quotes: () => request("/api/admin/quotes"),
+  jobApplications: () => request("/api/admin/job-applications"),
   listPages: () => request("/api/admin/pages"),
   getPage: (slug) => request(`/api/admin/pages/${slug}`),
   updatePage: (slug, body) =>

@@ -4,15 +4,11 @@ import {
   Plus,
   Trash2,
   Pencil,
-  Briefcase,
-  Building2,
-  Headset,
-  Users,
-  CarFront,
   ImageIcon,
   Megaphone,
   Sparkles,
   ListChecks,
+  ClipboardList,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { DEFAULT_CAREERS_SECTIONS, mergeCareersSections } from "../constants/careersDefaults.js";
@@ -30,22 +26,6 @@ const btnOutline =
 
 const btnDanger =
   "inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50";
-
-const CAREER_ICON_OPTIONS = [
-  { value: "Briefcase", label: "Briefcase" },
-  { value: "Headset", label: "Support / CRM" },
-  { value: "Building2", label: "Office" },
-  { value: "Users", label: "Team" },
-  { value: "CarFront", label: "Valet / Car" },
-];
-
-const CAREER_ICON_COMPONENTS = {
-  Briefcase,
-  Headset,
-  Building2,
-  Users,
-  CarFront,
-};
 
 function Modal({ open, title, children, onClose, footer }) {
   if (!open) return null;
@@ -100,12 +80,13 @@ export default function CareersPageEditor() {
   const [paragraphModalOpen, setParagraphModalOpen] = useState(false);
   const [whyJoinModalOpen, setWhyJoinModalOpen] = useState(false);
   const [ctaModalOpen, setCtaModalOpen] = useState(false);
-  const [opportunityModalOpen, setOpportunityModalOpen] = useState(false);
+  const [openPositionsModalOpen, setOpenPositionsModalOpen] = useState(false);
+  const [jobPostModalOpen, setJobPostModalOpen] = useState(false);
   const [reasonModalOpen, setReasonModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [editParagraphIndex, setEditParagraphIndex] = useState(null);
-  const [editOpportunityIndex, setEditOpportunityIndex] = useState(null);
+  const [editJobPostIndex, setEditJobPostIndex] = useState(null);
   const [editReasonIndex, setEditReasonIndex] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -114,15 +95,20 @@ export default function CareersPageEditor() {
   const [paragraphText, setParagraphText] = useState("");
   const [whyJoinForm, setWhyJoinForm] = useState(DEFAULT_CAREERS_SECTIONS.whyJoin);
   const [ctaForm, setCtaForm] = useState(DEFAULT_CAREERS_SECTIONS.cta);
-  const [opportunityForm, setOpportunityForm] = useState({
+  const [openPositionsForm, setOpenPositionsForm] = useState(DEFAULT_CAREERS_SECTIONS.openPositions);
+  const [jobPostForm, setJobPostForm] = useState({
     title: "",
+    department: "",
+    location: "",
+    employmentType: "",
     description: "",
-    badge: "",
-    icon: "Briefcase",
+    applyLabel: "Apply Now",
+    applyMode: "form",
+    applyLink: "/contact",
   });
   const [reasonText, setReasonText] = useState("");
 
-  const opportunityCount = content.opportunities.length;
+  const jobPostCount = content.openPositions?.posts?.length ?? 0;
   const reasonCount = content.whyJoin.reasons.length;
   const paragraphCount = content.building.paragraphs.length;
 
@@ -151,6 +137,7 @@ export default function CareersPageEditor() {
       hero,
       building: nextContent.building,
       opportunities: nextContent.opportunities,
+      openPositions: nextContent.openPositions,
       whyJoin: nextContent.whyJoin,
       cta: nextContent.cta,
     };
@@ -191,13 +178,16 @@ export default function CareersPageEditor() {
         void persistSections(next, "Paragraph deleted.");
         return next;
       });
-    } else if (type === "opportunity") {
+    } else if (type === "jobPost") {
       setContent((prev) => {
         const next = {
           ...prev,
-          opportunities: prev.opportunities.filter((_, i) => i !== index),
+          openPositions: {
+            ...prev.openPositions,
+            posts: prev.openPositions.posts.filter((_, i) => i !== index),
+          },
         };
-        void persistSections(next, "Opportunity deleted.");
+        void persistSections(next, "Job post deleted.");
         return next;
       });
     } else if (type === "reason") {
@@ -279,47 +269,89 @@ export default function CareersPageEditor() {
     setEditParagraphIndex(null);
   }
 
-  function openAddOpportunity() {
-    setEditOpportunityIndex(null);
-    setOpportunityForm({ title: "", description: "", badge: "", icon: "Briefcase" });
-    setOpportunityModalOpen(true);
-  }
-
-  function openEditOpportunity(index) {
-    const item = content.opportunities[index];
-    if (!item) return;
-    setEditOpportunityIndex(index);
-    setOpportunityForm({
-      title: item.title ?? "",
-      description: item.description ?? "",
-      badge: item.badge ?? "",
-      icon: item.icon ?? "Briefcase",
+  function openOpenPositionsModal() {
+    setOpenPositionsForm({
+      title: content.openPositions?.title ?? "",
+      subtitle: content.openPositions?.subtitle ?? "",
     });
-    setOpportunityModalOpen(true);
+    setOpenPositionsModalOpen(true);
   }
 
-  function saveOpportunity() {
+  function saveOpenPositionsSection() {
+    const next = {
+      ...content,
+      openPositions: {
+        ...content.openPositions,
+        title: openPositionsForm.title.trim() || "Open Positions",
+        subtitle: openPositionsForm.subtitle.trim(),
+      },
+    };
+    setContent(next);
+    void persistSections(next, "Open positions section updated.");
+    setOpenPositionsModalOpen(false);
+  }
+
+  function openAddJobPost() {
+    setEditJobPostIndex(null);
+    setJobPostForm({
+      title: "",
+      department: "",
+      location: "",
+      employmentType: "",
+      description: "",
+      applyLabel: "Apply Now",
+      applyMode: "form",
+      applyLink: "/contact",
+    });
+    setJobPostModalOpen(true);
+  }
+
+  function openEditJobPost(index) {
+    const item = content.openPositions?.posts?.[index];
+    if (!item) return;
+    setEditJobPostIndex(index);
+    setJobPostForm({
+      title: item.title ?? "",
+      department: item.department ?? "",
+      location: item.location ?? "",
+      employmentType: item.employmentType ?? "",
+      description: item.description ?? "",
+      applyLabel: item.applyLabel ?? "Apply Now",
+      applyMode: item.applyMode ?? "link",
+      applyLink: item.applyLink ?? "/contact",
+    });
+    setJobPostModalOpen(true);
+  }
+
+  function saveJobPost() {
     const item = {
-      icon: opportunityForm.icon || "Briefcase",
-      title: opportunityForm.title.trim() || "New role",
-      description: opportunityForm.description.trim(),
-      badge: opportunityForm.badge.trim() || "Role",
+      title: jobPostForm.title.trim() || "New position",
+      department: jobPostForm.department.trim(),
+      location: jobPostForm.location.trim(),
+      employmentType: jobPostForm.employmentType.trim(),
+      description: jobPostForm.description.trim(),
+      applyLabel: jobPostForm.applyLabel.trim() || "Apply Now",
+      applyMode: jobPostForm.applyMode === "form" ? "form" : "link",
+      applyLink: jobPostForm.applyLink.trim() || "/contact",
     };
 
     setContent((prev) => {
-      const opportunities =
-        editOpportunityIndex === null
-          ? [...prev.opportunities, item]
-          : prev.opportunities.map((o, i) => (i === editOpportunityIndex ? item : o));
-      const next = { ...prev, opportunities };
+      const posts =
+        editJobPostIndex === null
+          ? [...(prev.openPositions?.posts ?? []), item]
+          : (prev.openPositions?.posts ?? []).map((p, i) => (i === editJobPostIndex ? item : p));
+      const next = {
+        ...prev,
+        openPositions: { ...prev.openPositions, posts },
+      };
       void persistSections(
         next,
-        editOpportunityIndex === null ? "Opportunity added." : "Opportunity updated.",
+        editJobPostIndex === null ? "Job post added." : "Job post updated.",
       );
       return next;
     });
-    setOpportunityModalOpen(false);
-    setEditOpportunityIndex(null);
+    setJobPostModalOpen(false);
+    setEditJobPostIndex(null);
   }
 
   function openWhyJoinModal() {
@@ -426,7 +458,7 @@ export default function CareersPageEditor() {
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
         <p className="text-sm font-medium text-slate-700">
-          {opportunityCount} opportunities · {paragraphCount} paragraphs · {reasonCount} reasons
+          {jobPostCount} job posts · {paragraphCount} paragraphs · {reasonCount} reasons
           {saving ? <span className="ml-2 text-[#0088FF]">Saving…</span> : null}
         </p>
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
@@ -541,47 +573,68 @@ export default function CareersPageEditor() {
           </div>
         </div>
 
-        {/* Opportunities */}
+        {/* Open positions */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF6FF]">
-                <Briefcase className="h-4 w-4 text-[#0088FF]" />
+                <ClipboardList className="h-4 w-4 text-[#0088FF]" />
               </div>
-              <p className="text-sm font-semibold text-[#050A13]">Opportunities</p>
+              <p className="text-sm font-semibold text-[#050A13]">Open Positions</p>
             </div>
-            <button type="button" onClick={openAddOpportunity} className={btnPrimary}>
-              <Plus className="h-3.5 w-3.5" />
-              Add opportunity
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={openOpenPositionsModal} className={btnOutline}>
+                <Pencil className="h-3.5 w-3.5" />
+                Edit section
+              </button>
+              <button type="button" onClick={openAddJobPost} className={btnPrimary}>
+                <Plus className="h-3.5 w-3.5" />
+                Add job post
+              </button>
+            </div>
           </div>
-          <div className="space-y-3">
-            {content.opportunities.map((item, index) => {
-              const Icon = CAREER_ICON_COMPONENTS[item.icon] ?? Briefcase;
-              return (
+          <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
+            <PreviewRow label="Section title" value={content.openPositions?.title} />
+            <PreviewRow label="Subtitle" value={content.openPositions?.subtitle} />
+          </div>
+
+          {jobPostCount === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+              No job posts yet. Add one to show open positions on the careers page.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {content.openPositions.posts.map((post, index) => (
                 <div
-                  key={`opp-${index}-${item.title}`}
+                  key={`job-${index}-${post.title}`}
                   className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
                 >
                   <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#EEF6FF] text-[#0088FF]">
-                        <Icon className="h-5 w-5" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                        Job {index + 1}
+                      </p>
+                      <p className="mt-1 font-semibold text-[#050A13]">{post.title}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {post.department ? (
+                          <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[#0088FF]">
+                            {post.department}
+                          </span>
+                        ) : null}
+                        {post.employmentType ? (
+                          <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-slate-600">
+                            {post.employmentType}
+                          </span>
+                        ) : null}
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
-                          Role {index + 1}
-                        </p>
-                        <p className="mt-1 font-semibold text-[#050A13]">{item.title}</p>
-                        <span className="mt-1 inline-block rounded-full border border-[#C6DEFF] bg-[#EEF6FF] px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[#0088FF]">
-                          {item.badge}
-                        </span>
-                      </div>
+                      {post.location ? (
+                        <p className="mt-2 text-xs text-slate-500">{post.location}</p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => openEditOpportunity(index)}
+                        onClick={() => openEditJobPost(index)}
                         className={btnOutline}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -589,9 +642,7 @@ export default function CareersPageEditor() {
                       </button>
                       <button
                         type="button"
-                        onClick={() =>
-                          openDeleteConfirm("opportunity", index, item.title)
-                        }
+                        onClick={() => openDeleteConfirm("jobPost", index, post.title)}
                         className={btnDanger}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -599,11 +650,20 @@ export default function CareersPageEditor() {
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm leading-relaxed text-slate-500">{item.description}</p>
+                  {post.description ? (
+                    <p className="mb-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
+                      {post.description}
+                    </p>
+                  ) : null}
+                  <p className="text-xs text-slate-400">
+                    {post.applyMode === "form"
+                      ? `${post.applyLabel ?? "Apply Now"} → application form`
+                      : `${post.applyLabel ?? "Apply Now"} → ${post.applyLink ?? "/contact"}`}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Why join */}
@@ -820,84 +880,156 @@ export default function CareersPageEditor() {
         />
       </Modal>
 
-      {/* Opportunity modal */}
+      {/* Open positions section modal */}
       <Modal
-        open={opportunityModalOpen}
-        title={editOpportunityIndex === null ? "Add opportunity" : "Edit opportunity"}
-        onClose={() => setOpportunityModalOpen(false)}
+        open={openPositionsModalOpen}
+        title="Edit open positions section"
+        onClose={() => setOpenPositionsModalOpen(false)}
         footer={
           <>
             <button
               type="button"
-              onClick={() => setOpportunityModalOpen(false)}
+              onClick={() => setOpenPositionsModalOpen(false)}
               className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={saveOpportunity}
+              onClick={saveOpenPositionsSection}
               disabled={saving}
               className="rounded-lg bg-[#0088FF] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             >
-              {editOpportunityIndex === null ? "Add" : "Update"}
+              Update
             </button>
           </>
         }
       >
         <div className="grid gap-3">
           <label className="grid gap-1">
-            <span className={labelClass}>Role title</span>
+            <span className={labelClass}>Section title</span>
             <input
-              value={opportunityForm.title}
-              onChange={(e) => setOpportunityForm((p) => ({ ...p, title: e.target.value }))}
+              value={openPositionsForm.title}
+              onChange={(e) => setOpenPositionsForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              placeholder="Open Positions"
             />
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Description</span>
-            <textarea
-              value={opportunityForm.description}
-              onChange={(e) =>
-                setOpportunityForm((p) => ({ ...p, description: e.target.value }))
-              }
+            <span className={labelClass}>Subtitle</span>
+            <input
+              value={openPositionsForm.subtitle}
+              onChange={(e) => setOpenPositionsForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
-              rows={4}
+              placeholder="Explore our current job openings"
+            />
+          </label>
+        </div>
+      </Modal>
+
+      {/* Job post modal */}
+      <Modal
+        open={jobPostModalOpen}
+        title={editJobPostIndex === null ? "Add job post" : "Edit job post"}
+        onClose={() => setJobPostModalOpen(false)}
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setJobPostModalOpen(false)}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={saveJobPost}
+              disabled={saving || !jobPostForm.title.trim()}
+              className="rounded-lg bg-[#0088FF] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {editJobPostIndex === null ? "Add" : "Update"}
+            </button>
+          </>
+        }
+      >
+        <div className="grid gap-3">
+          <label className="grid gap-1">
+            <span className={labelClass}>Job title</span>
+            <input
+              value={jobPostForm.title}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, title: e.target.value }))}
+              className={inputClass}
+              placeholder="e.g. Senior Valet Supervisor"
             />
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Badge</span>
+            <span className={labelClass}>Department</span>
             <input
-              value={opportunityForm.badge}
-              onChange={(e) => setOpportunityForm((p) => ({ ...p, badge: e.target.value }))}
+              value={jobPostForm.department}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, department: e.target.value }))}
+              className={inputClass}
+              placeholder="e.g. Operations"
+            />
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Location</span>
+            <input
+              value={jobPostForm.location}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, location: e.target.value }))}
+              className={inputClass}
+              placeholder="e.g. Dubai, UAE"
+            />
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Employment type</span>
+            <input
+              value={jobPostForm.employmentType}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, employmentType: e.target.value }))}
               className={inputClass}
               placeholder="e.g. Full-Time"
             />
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Icon</span>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {CAREER_ICON_OPTIONS.map((option) => {
-                const Icon = CAREER_ICON_COMPONENTS[option.value] ?? Briefcase;
-                const active = opportunityForm.icon === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setOpportunityForm((p) => ({ ...p, icon: option.value }))}
-                    className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition ${
-                      active
-                        ? "border-[#0088FF] bg-[#EEF6FF] text-[#0088FF]"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-[#0088FF]/40"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
+            <span className={labelClass}>Description</span>
+            <textarea
+              value={jobPostForm.description}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, description: e.target.value }))}
+              className={inputClass}
+              rows={4}
+              placeholder="Brief job description shown on the careers page"
+            />
           </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Apply button text</span>
+            <input
+              value={jobPostForm.applyLabel}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, applyLabel: e.target.value }))}
+              className={inputClass}
+              placeholder="Apply Now"
+            />
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Apply action</span>
+            <select
+              value={jobPostForm.applyMode}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, applyMode: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="form">Open application form (modal)</option>
+              <option value="link">Link to URL</option>
+            </select>
+          </label>
+          {jobPostForm.applyMode === "link" ? (
+            <label className="grid gap-1">
+              <span className={labelClass}>Apply link</span>
+              <input
+                value={jobPostForm.applyLink}
+                onChange={(e) => setJobPostForm((p) => ({ ...p, applyLink: e.target.value }))}
+                className={inputClass}
+                placeholder="/contact or https://..."
+              />
+            </label>
+          ) : null}
         </div>
       </Modal>
 

@@ -3,7 +3,8 @@ import AdminLayout from "./components/AdminLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
-import SignupPage from "./pages/SignupPage.jsx";
+// Signup is disabled — admin accounts are provisioned manually, not self-registered.
+// import SignupPage from "./pages/SignupPage.jsx";
 import QuotesPage from "./pages/QuotesPage.jsx";
 import JobApplicationsPage from "./pages/JobApplicationsPage.jsx";
 import PageEditorPage from "./pages/PageEditorPage.jsx";
@@ -13,7 +14,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        {/* <Route path="/signup" element={<SignupPage />} /> */}
         <Route
           element={
             <ProtectedRoute>

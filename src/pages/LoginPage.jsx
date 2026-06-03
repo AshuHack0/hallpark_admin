@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api, setToken, setUser } from "../lib/api";
 
 export default function LoginPage() {
@@ -82,12 +82,14 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {/* Signup link hidden — admin accounts are provisioned manually.
         <p className="mt-6 text-center text-sm text-slate-500">
           No account?{" "}
           <Link to="/signup" className="font-semibold text-[#0088FF] hover:underline">
             Sign up
           </Link>
         </p>
+        */}
       </div>
     </div>
   );

@@ -71,6 +71,52 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(body),
     }),
+  uploadSignature: () =>
+    request("/api/admin/uploads/signature", { method: "POST" }),
 };
+
+/**
+ * Upload a video file directly to Cloudinary using a signed request.
+ * The backend signs the params; the file goes straight to Cloudinary,
+ * never through our API server. Returns the secure delivery URL.
+ */
+export async function uploadVideoToCloudinary(file, onProgress) {
+  const { cloudName, apiKey, timestamp, folder, signature } =
+    await api.uploadSignature();
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("api_key", apiKey);
+  form.append("timestamp", timestamp);
+  form.append("folder", folder);
+  form.append("signature", signature);
+
+  const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+
+  // Use XHR so we can report upload progress.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && typeof onProgress === "function") {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300 && res.secure_url) {
+          resolve(res.secure_url);
+        } else {
+          reject(new Error(res?.error?.message ?? `Upload failed (${xhr.status})`));
+        }
+      } catch {
+        reject(new Error("Unexpected upload response from Cloudinary"));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.send(form);
+  });
+}
 
 export { API_URL };

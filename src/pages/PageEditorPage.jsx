@@ -6,6 +6,8 @@ import {
   Plus,
   Trash2,
   Pencil,
+  Upload,
+  Loader2,
   Building2,
   CalendarCheck2,
   CarFront,
@@ -20,11 +22,18 @@ import {
   BellRing,
   Headset,
   ShieldAlert,
+  PlugZap,
+  MapPin,
+  KeyRound,
+  ScanLine,
+  Settings2,
+  Droplets,
+  Truck,
 } from "lucide-react";
 import AboutPageEditor from "../components/AboutPageEditor.jsx";
 import CareersPageEditor from "../components/CareersPageEditor.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
-import { api } from "../lib/api";
+import { api, uploadVideoToCloudinary } from "../lib/api";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -44,6 +53,13 @@ const FAQ_ICON_OPTIONS = [
   { value: "BellRing", label: "Notifications" },
   { value: "Headset", label: "Support" },
   { value: "ShieldAlert", label: "Fraud / Security Alert" },
+  { value: "PlugZap", label: "EV / Charging" },
+  { value: "MapPin", label: "Location / City" },
+  { value: "KeyRound", label: "Tenant / Access Key" },
+  { value: "ScanLine", label: "Plate Scan / ANPR" },
+  { value: "Settings2", label: "Technical / Operations" },
+  { value: "Droplets", label: "Car Wash" },
+  { value: "Truck", label: "Fleet / Business" },
 ];
 
 const FAQ_ICON_COMPONENTS = {
@@ -61,6 +77,13 @@ const FAQ_ICON_COMPONENTS = {
   BellRing,
   Headset,
   ShieldAlert,
+  PlugZap,
+  MapPin,
+  KeyRound,
+  ScanLine,
+  Settings2,
+  Droplets,
+  Truck,
 };
 
 function toSlug(value = "") {
@@ -69,6 +92,24 @@ function toSlug(value = "") {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+// Strip blank video slots and empty optional fields before persisting an item.
+function normalizeFaqItem(item) {
+  const videos = Array.isArray(item.videos)
+    ? item.videos.map((v) => (typeof v === "string" ? v.trim() : "")).filter(Boolean)
+    : [];
+  const legacyVideoUrl = item.videoUrl?.trim();
+  return {
+    ...item,
+    videos,
+    videoUrl: undefined,
+    videoFolderUrl: item.videoFolderUrl?.trim() ? item.videoFolderUrl.trim() : undefined,
+    // Preserve any legacy single videoUrl by folding it into the array.
+    ...(legacyVideoUrl && !videos.includes(legacyVideoUrl)
+      ? { videos: [...videos, legacyVideoUrl] }
+      : {}),
+  };
 }
 
 export default function PageEditorPage() {
@@ -106,6 +147,8 @@ export default function PageEditorPage() {
     answer: "",
     videoUrl: "",
   });
+  // Per-slot upload progress, keyed by `${categoryIndex}-${itemIndex}-${videoIndex}`.
+  const [uploadProgress, setUploadProgress] = useState({});
 
   useEffect(() => {
     document.title = `${pageMeta?.name ?? slug} — HalaPark Admin`;
@@ -138,10 +181,7 @@ export default function PageEditorPage() {
           ...sectionsObj,
           faqCategories: faqCategories.map((category) => ({
             ...category,
-            items: (category.items ?? []).map((item) => ({
-              ...item,
-              videoUrl: item.videoUrl?.trim() ? item.videoUrl.trim() : undefined,
-            })),
+            items: (category.items ?? []).map(normalizeFaqItem),
           })),
         };
       } else {
@@ -164,10 +204,7 @@ export default function PageEditorPage() {
       ...sectionsObj,
       faqCategories: nextCategories.map((category) => ({
         ...category,
-        items: (category.items ?? []).map((item) => ({
-          ...item,
-          videoUrl: item.videoUrl?.trim() ? item.videoUrl.trim() : undefined,
-        })),
+        items: (category.items ?? []).map(normalizeFaqItem),
       })),
     };
 
@@ -357,6 +394,82 @@ export default function PageEditorPage() {
     );
   }
 
+  // Apply a transform to one item's videos array and return the resulting
+  // categories (so callers can also persist them, since the FAQ editor
+  // auto-saves rather than relying on a Save button).
+  function applyVideos(categories, categoryIndex, itemIndex, fn) {
+    return categories.map((category, index) =>
+      index === categoryIndex
+        ? {
+            ...category,
+            items: (category.items ?? []).map((item, i) =>
+              i === itemIndex
+                ? { ...item, videos: fn(Array.isArray(item.videos) ? item.videos : []) }
+                : item,
+            ),
+          }
+        : category,
+    );
+  }
+
+  const addVideoSlot = (categoryIndex, itemIndex) =>
+    setFaqCategories((prev) => applyVideos(prev, categoryIndex, itemIndex, (v) => [...v, ""]));
+
+  // Local-only edit while typing; persisted on blur via persistInlineEdits.
+  const updateVideoSlot = (categoryIndex, itemIndex, videoIndex, value) =>
+    setFaqCategories((prev) =>
+      applyVideos(prev, categoryIndex, itemIndex, (videos) =>
+        videos.map((v, vi) => (vi === videoIndex ? value : v)),
+      ),
+    );
+
+  // Persist the current in-memory FAQ edits (used on input blur, since the
+  // FAQ editor auto-saves instead of using a Save button).
+  function persistInlineEdits() {
+    setFaqCategories((prev) => {
+      void persistFaqCategories(prev, "Changes saved.");
+      return prev;
+    });
+  }
+
+  function removeVideoSlot(categoryIndex, itemIndex, videoIndex) {
+    setFaqCategories((prev) => {
+      const next = applyVideos(prev, categoryIndex, itemIndex, (videos) =>
+        videos.filter((_, vi) => vi !== videoIndex),
+      );
+      void persistFaqCategories(next, "Video removed and saved.");
+      return next;
+    });
+  }
+
+  async function handleVideoUpload(categoryIndex, itemIndex, videoIndex, file) {
+    if (!file) return;
+    const key = `${categoryIndex}-${itemIndex}-${videoIndex}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadVideoToCloudinary(file, (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      // Update state AND persist the new URL immediately (no Save button on FAQ).
+      setFaqCategories((prev) => {
+        const next = applyVideos(prev, categoryIndex, itemIndex, (videos) =>
+          videos.map((v, vi) => (vi === videoIndex ? url : v)),
+        );
+        void persistFaqCategories(next, "Video uploaded and saved.");
+        return next;
+      });
+    } catch (err) {
+      setError(err.message ?? "Video upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -491,22 +604,93 @@ export default function PageEditorPage() {
                         <input
                           value={item.question ?? ""}
                           onChange={(e) => updateQuestion(categoryIndex, itemIndex, "question", e.target.value)}
+                          onBlur={persistInlineEdits}
                           className={inputClass}
                           placeholder="Question"
                         />
                         <textarea
                           value={item.answer ?? ""}
                           onChange={(e) => updateQuestion(categoryIndex, itemIndex, "answer", e.target.value)}
+                          onBlur={persistInlineEdits}
                           className={inputClass}
                           rows={3}
                           placeholder="Answer"
                         />
                         <input
-                          value={item.videoUrl ?? ""}
-                          onChange={(e) => updateQuestion(categoryIndex, itemIndex, "videoUrl", e.target.value)}
+                          value={item.videoFolderUrl ?? ""}
+                          onChange={(e) => updateQuestion(categoryIndex, itemIndex, "videoFolderUrl", e.target.value)}
+                          onBlur={persistInlineEdits}
                           className={inputClass}
-                          placeholder="Optional video URL (YouTube/Vimeo/embed)"
+                          placeholder="Optional Drive folder URL (fallback link)"
                         />
+                        <div className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                            Videos {Array.isArray(item.videos) && item.videos.length ? `(${item.videos.length})` : ""}
+                          </p>
+                          {(Array.isArray(item.videos) ? item.videos : []).map((video, videoIndex) => {
+                            const uploadKey = `${categoryIndex}-${itemIndex}-${videoIndex}`;
+                            const progress = uploadProgress[uploadKey];
+                            const uploading = progress !== undefined;
+                            return (
+                            <div key={videoIndex} className="flex items-center gap-2">
+                              <input
+                                value={video ?? ""}
+                                onChange={(e) => updateVideoSlot(categoryIndex, itemIndex, videoIndex, e.target.value)}
+                                onBlur={persistInlineEdits}
+                                className={inputClass}
+                                placeholder={`Video ${videoIndex + 1} URL (Cloudinary .mp4 / YouTube / Vimeo / Drive file)`}
+                              />
+                              <label
+                                className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
+                                  uploading
+                                    ? "cursor-not-allowed border-slate-200 text-slate-400"
+                                    : "cursor-pointer border-[#0088FF]/30 bg-[#EEF6FF] text-[#0088FF] hover:bg-[#dcecff]"
+                                }`}
+                                title="Upload video to Cloudinary"
+                              >
+                                {uploading ? (
+                                  <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    {progress}%
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload className="h-3.5 w-3.5" />
+                                    Upload
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="video/*"
+                                  className="hidden"
+                                  disabled={uploading}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    e.target.value = "";
+                                    handleVideoUpload(categoryIndex, itemIndex, videoIndex, file);
+                                  }}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => removeVideoSlot(categoryIndex, itemIndex, videoIndex)}
+                                className="shrink-0 rounded-lg border border-slate-200 p-2 text-slate-400 hover:border-red-300 hover:text-red-500"
+                                title="Remove video"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            );
+                          })}
+                          <button
+                            type="button"
+                            onClick={() => addVideoSlot(categoryIndex, itemIndex)}
+                            className="inline-flex w-fit items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Add Video
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

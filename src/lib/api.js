@@ -64,6 +64,14 @@ export const api = {
   stats: () => request("/api/admin/stats"),
   quotes: () => request("/api/admin/quotes"),
   jobApplications: () => request("/api/admin/job-applications"),
+  getJobApplication: (id) => request(`/api/admin/job-applications/${id}`),
+  updateJobApplicationStatus: (id, status) =>
+    request(`/api/admin/job-applications/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deleteJobApplication: (id) =>
+    request(`/api/admin/job-applications/${id}`, { method: "DELETE" }),
   listPages: () => request("/api/admin/pages"),
   getPage: (slug) => request(`/api/admin/pages/${slug}`),
   updatePage: (slug, body) =>
@@ -73,14 +81,26 @@ export const api = {
     }),
   uploadSignature: () =>
     request("/api/admin/uploads/signature", { method: "POST" }),
+  contacts: () => request("/api/admin/contacts"),
+  updateContactStatus: (id, status) =>
+    request(`/api/admin/contacts/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deleteContact: (id) =>
+    request(`/api/admin/contacts/${id}`, { method: "DELETE" }),
 };
 
 /**
- * Upload a video file directly to Cloudinary using a signed request.
+ * Upload a file directly to Cloudinary using a signed request.
  * The backend signs the params; the file goes straight to Cloudinary,
  * never through our API server. Returns the secure delivery URL.
+ *
+ * @param {File} file
+ * @param {"image"|"video"} resourceType
+ * @param {(pct:number)=>void} [onProgress]
  */
-export async function uploadVideoToCloudinary(file, onProgress) {
+export async function uploadMediaToCloudinary(file, resourceType = "video", onProgress) {
   const { cloudName, apiKey, timestamp, folder, signature } =
     await api.uploadSignature();
 
@@ -91,7 +111,8 @@ export async function uploadVideoToCloudinary(file, onProgress) {
   form.append("folder", folder);
   form.append("signature", signature);
 
-  const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+  const type = resourceType === "image" ? "image" : "video";
+  const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${type}/upload`;
 
   // Use XHR so we can report upload progress.
   return new Promise((resolve, reject) => {
@@ -118,5 +139,9 @@ export async function uploadVideoToCloudinary(file, onProgress) {
     xhr.send(form);
   });
 }
+
+// Back-compat: FAQ editor uploads videos.
+export const uploadVideoToCloudinary = (file, onProgress) =>
+  uploadMediaToCloudinary(file, "video", onProgress);
 
 export { API_URL };

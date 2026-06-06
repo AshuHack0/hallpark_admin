@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import AboutPageEditor from "../components/AboutPageEditor.jsx";
 import CareersPageEditor from "../components/CareersPageEditor.jsx";
+import HomePageEditor from "../components/HomePageEditor.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { api, uploadVideoToCloudinary } from "../lib/api";
 
@@ -114,6 +115,10 @@ function normalizeFaqItem(item) {
 
 export default function PageEditorPage() {
   const { slug } = useParams();
+
+  if (slug === "home") {
+    return <HomePageEditor />;
+  }
 
   if (slug === "careers") {
     return <CareersPageEditor />;
@@ -482,7 +487,7 @@ export default function PageEditorPage() {
         </div>
         {!isFaqs ? (
           <a
-            href={`http://localhost:3000${page.path}`}
+            href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}${page.path}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-[#0088FF] hover:text-[#0088FF]"

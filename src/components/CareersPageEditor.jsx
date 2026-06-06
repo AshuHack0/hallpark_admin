@@ -131,7 +131,7 @@ export default function CareersPageEditor() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function persistSections(nextContent, successMessage = "Saved.") {
+  async function persistSections(nextContent, successMessage = "Saved.", publishedOverride) {
     const { eyebrow: _removed, ...hero } = nextContent.hero ?? {};
     const sections = {
       hero,
@@ -142,10 +142,12 @@ export default function CareersPageEditor() {
       cta: nextContent.cta,
     };
 
+    const publishedValue = publishedOverride !== undefined ? publishedOverride : published;
+
     try {
       setSaving(true);
       setError("");
-      const data = await api.updatePage(slug, { sections, published });
+      const data = await api.updatePage(slug, { sections, published: publishedValue });
       setPage(data.page);
       setContent(mergeCareersSections(data.page.sections));
       setSuccess(successMessage);
@@ -446,7 +448,7 @@ export default function CareersPageEditor() {
           <p className="mt-1 text-sm text-slate-500">{page.path}</p>
         </div>
         <a
-          href={`http://localhost:3000${page.path}`}
+          href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}${page.path}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-[#0088FF] hover:text-[#0088FF]"
@@ -468,7 +470,7 @@ export default function CareersPageEditor() {
             onChange={(e) => {
               const next = e.target.checked;
               setPublished(next);
-              void persistSections(content, next ? "Page published." : "Page unpublished.");
+              void persistSections(content, next ? "Page published." : "Page unpublished.", next);
             }}
             className="h-4 w-4 rounded border-slate-300 text-[#0088FF]"
           />

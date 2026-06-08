@@ -33,6 +33,8 @@ import {
 import AboutPageEditor from "../components/AboutPageEditor.jsx";
 import CareersPageEditor from "../components/CareersPageEditor.jsx";
 import HomePageEditor from "../components/HomePageEditor.jsx";
+import AppPageEditor from "../components/AppPageEditor.jsx";
+import BusinessPageEditor from "../components/BusinessPageEditor.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { api, uploadVideoToCloudinary } from "../lib/api";
 
@@ -126,6 +128,14 @@ export default function PageEditorPage() {
 
   if (slug === "about") {
     return <AboutPageEditor />;
+  }
+
+  if (slug === "app") {
+    return <AppPageEditor />;
+  }
+
+  if (slug === "business") {
+    return <BusinessPageEditor />;
   }
 
   const pageMeta = FRONTEND_PAGES.find((p) => p.slug === slug);

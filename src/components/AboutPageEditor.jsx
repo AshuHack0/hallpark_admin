@@ -11,8 +11,11 @@ import {
   Layers,
   Cpu,
   Megaphone,
+  Save,
+  Loader2,
+  Upload,
 } from "lucide-react";
-import { api } from "../lib/api";
+import { api, uploadMediaToCloudinary } from "../lib/api";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
 const inputClass =
@@ -78,6 +81,7 @@ export default function AboutPageEditor() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
 
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [missionSectionModalOpen, setMissionSectionModalOpen] = useState(false);
@@ -174,6 +178,31 @@ export default function AboutPageEditor() {
       setError(err.message ?? "Failed to save");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleImageUpload(field, file) {
+    const key = `image-${field}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setContent((prev) => ({
+        ...prev,
+        [field === "heroImage" ? "hero" : field]: {
+          ...prev[field === "heroImage" ? "hero" : field],
+          image: url,
+        },
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
     }
   }
 
@@ -618,55 +647,33 @@ export default function AboutPageEditor() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="w-full space-y-6 px-6 py-6">
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0088FF]">
-            Website Page
-          </p>
-          <h2 className="text-2xl font-semibold text-[#050A13]">{page.name}</h2>
-          <p className="mt-1 text-sm text-slate-500">{page.path}</p>
+          <h1 className="text-3xl font-bold text-[#050A13]">About Page Editor</h1>
+          <p className="mt-2 text-sm text-slate-600">Manage mission, vision, story, highlights and ecosystem sections</p>
         </div>
-        <a
-          href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}${page.path}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-[#0088FF] hover:text-[#0088FF]"
-        >
-          Preview
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-        <p className="text-sm font-medium text-slate-700">
-          {missionParagraphCount} mission · {visionParagraphCount} vision · {storyParagraphCount}{" "}
-          story paragraphs · {highlightCount} highlights · {ecosystemCount} ecosystem items
-          {saving ? <span className="ml-2 text-[#0088FF]">Saving…</span> : null}
-        </p>
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setPublished(next);
-              void persistSections(content, next ? "Page published." : "Page unpublished.", next);
-            }}
-            className="h-4 w-4 rounded border-slate-300 text-[#0088FF]"
-          />
-          Published
-        </label>
       </div>
 
       {error ? (
-        <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">{error}</div>
       ) : null}
       {success ? (
-        <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p>
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">✅ {success}</div>
       ) : null}
 
-      <div className="mt-6 space-y-4">
+      {/* Save Button */}
+      <button
+        onClick={() => persistSections(content, "Page saved successfully.", published)}
+        disabled={saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {saving ? "Saving..." : "Save Changes"}
+      </button>
+
+      <div className="space-y-6">
         {/* Hero */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -1002,12 +1009,35 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Image path</span>
-            <input
-              value={heroForm.image}
-              onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
+            <div className="flex gap-2">
+              <input
+                value={heroForm.image}
+                onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
+                className={inputClass}
+                placeholder="/your-image.png"
+              />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                <Upload className="h-3.5 w-3.5" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageUpload("heroImage", file).then(() => {
+                        setContent((prev) => ({
+                          ...prev,
+                          hero: { ...prev.hero, image: prev.hero.image },
+                        }));
+                        setHeroForm((p) => ({ ...p, image: p.image }));
+                      });
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>

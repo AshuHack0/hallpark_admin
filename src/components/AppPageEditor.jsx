@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown } from "lucide-react";
-import { api } from "../lib/api";
+import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
+import { api, uploadMediaToCloudinary } from "../lib/api";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -141,10 +141,11 @@ export default function AppPageEditor() {
     featureCards: DEFAULT_FEATURE_CARDS,
     halapark: DEFAULT_HALAPARK_IN_ACTION,
   });
-  const [published, setPublished] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState({});
   const [openSections, setOpenSections] = useState({ hero: true });
 
   useEffect(() => {
@@ -154,13 +155,13 @@ export default function AppPageEditor() {
       .getPage("app")
       .then((data) => {
         setPage(data);
-        setPublished(data.published ?? true);
         if (data.page?.sections) {
           setSections((prev) => ({ ...prev, ...data.page.sections }));
         }
         setLoading(false);
       })
       .catch((err) => {
+        setError("Failed to load page");
         console.error("Failed to load page:", err);
         setLoading(false);
       });
@@ -169,14 +170,15 @@ export default function AppPageEditor() {
   async function handleSave() {
     if (!page) return;
     setSaving(true);
+    setError("");
     try {
       await api.updatePage("app", {
         sections,
-        published,
       });
       setSuccess("App page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
+      setError(err.message || "Failed to save page");
       console.error("Save failed:", err);
     } finally {
       setSaving(false);
@@ -189,6 +191,28 @@ export default function AppPageEditor() {
       [sectionName]: !prev[sectionName],
     }));
   };
+
+  async function handleImageUpload(section, field, file) {
+    const key = `${section}-${field}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setSections((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [field]: url },
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
 
   if (loading) {
     return (
@@ -203,25 +227,38 @@ export default function AppPageEditor() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between border-b border-slate-200 pb-6">
+      <div className="border-b border-slate-200 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-[#050A13]">App Page Editor</h1>
           <p className="mt-2 text-sm text-slate-600">Manage all 7 app page sections</p>
         </div>
-        <a
-          href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}/app`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Preview
-        </a>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+      {/* Status Messages */}
+      {success && (
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+          ❌ {error}
+        </div>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {saving ? "Saving..." : "Save Changes"}
+      </button>
+
+      <div className="space-y-6">
         {/* 1. Hero Section */}
         <CollapsibleSection
           title="1. HeroSection"
@@ -258,12 +295,28 @@ export default function AppPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Hero Image URL</label>
-              <input
-                type="text"
-                value={sections.hero.image}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
-                className={inputClass}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sections.hero.image}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
+                  className={inputClass}
+                />
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("hero", "image", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -671,48 +724,7 @@ export default function AppPageEditor() {
             </div>
           </div>
         </CollapsibleSection>
-
-        {/* Publish Status */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
-              className="h-5 w-5 rounded border-slate-300 text-[#0088FF]"
-            />
-            <div>
-              <p className="font-medium text-[#050A13]">Published</p>
-              <p className="text-sm text-slate-600">
-                {published ? "This page is published and visible" : "This page is hidden"}
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-3 font-semibold text-white hover:brightness-110 disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-      </form>
+      </div>
     </div>
   );
 }

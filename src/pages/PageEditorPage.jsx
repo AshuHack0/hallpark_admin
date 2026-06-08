@@ -35,6 +35,8 @@ import CareersPageEditor from "../components/CareersPageEditor.jsx";
 import HomePageEditor from "../components/HomePageEditor.jsx";
 import AppPageEditor from "../components/AppPageEditor.jsx";
 import BusinessPageEditor from "../components/BusinessPageEditor.jsx";
+import ServicePageEditor from "../components/ServicePageEditor.jsx";
+import SolutionPageEditor from "../components/SolutionPageEditor.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { api, uploadVideoToCloudinary } from "../lib/api";
 
@@ -136,6 +138,14 @@ export default function PageEditorPage() {
 
   if (slug === "business") {
     return <BusinessPageEditor />;
+  }
+
+  if (slug === "services") {
+    return <ServicePageEditor />;
+  }
+
+  if (slug === "solutions") {
+    return <SolutionPageEditor />;
   }
 
   const pageMeta = FRONTEND_PAGES.find((p) => p.slug === slug);
@@ -486,50 +496,40 @@ export default function PageEditorPage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="w-full space-y-6 px-6 py-6">
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0088FF]">
-            Website Page
-          </p>
-          <h2 className="text-2xl font-semibold text-[#050A13]">{page.name}</h2>
-          <p className="mt-1 text-sm text-slate-500">{page.path}</p>
+          <h1 className="text-3xl font-bold text-[#050A13]">{page.name} Page Editor</h1>
+          <p className="mt-2 text-sm text-slate-600">Manage all page sections and content</p>
         </div>
-        {!isFaqs ? (
-          <a
-            href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}${page.path}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-[#0088FF] hover:text-[#0088FF]"
-          >
-            Preview
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        ) : null}
       </div>
 
-      {isHome ? (
-        <p className="mt-4 rounded-xl border border-[#C6DEFF] bg-[#EEF6FF] px-4 py-3 text-sm text-[#050A13]">
-          Landing page hero uses <code className="text-xs">sections.hero.slides</code> — an array of slide objects (tag, title, subtitle, description, image, cardImg, video).
-        </p>
-      ) : isFaqs ? null : (
-        <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-          Other pages use <code className="text-xs">sections.hero</code> with eyebrow, title, subtitle, description, and image.
-        </p>
+      {/* Status Messages */}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">
+          ❌ {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+          ✅ {success}
+        </div>
       )}
 
-      <form onSubmit={handleSave} className="mt-6 space-y-5">
-        {!isFaqs ? (
-          <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
-            <input
-              type="checkbox"
-              checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-[#0088FF]"
-            />
-            Published (visible on website)
-          </label>
-        ) : null}
+      {/* Save Button */}
+      {!isFaqs ? (
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      ) : null}
+
+      <div className="space-y-6">
 
         {isFaqs ? (
           <div className="space-y-4">
@@ -756,7 +756,6 @@ export default function PageEditorPage() {
             {saving ? "Saving…" : "Save page"}
           </button>
         ) : null}
-      </form>
 
       {categoryModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
@@ -862,6 +861,7 @@ export default function PageEditorPage() {
           </div>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

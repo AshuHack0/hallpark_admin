@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown } from "lucide-react";
-import { api } from "../lib/api";
+import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
+import { api, uploadMediaToCloudinary } from "../lib/api";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -30,9 +30,75 @@ const DEFAULT_WHY_CHOOSE = [
 const DEFAULT_SOLUTIONS = [
   {
     title: "Smart Public Parking",
-    description: "Modernize public parking operations with mobile payments and real-time tracking.",
+    description: "Modernize public parking operations with mobile payments, virtual tickets, real-time availability tracking, and seamless digital parking experiences.",
     image: "/hf_20260327_064316_9c7b1a28-dbfa-456e-b88a-0087cb567a61.png",
     icon: "🅿️",
+  },
+  {
+    title: "Private Parking Rental",
+    description: "Enable property owners and businesses to monetize unused parking spaces through hourly, daily, monthly, or annual rentals.",
+    image: "/hf_20260327_062407_6dca49c0-90dd-468a-96f9-b36bba13ea8b.png",
+    icon: "🏠",
+  },
+  {
+    title: "Residential Parking Management",
+    description: "Simplify resident and visitor parking with secure access control, automated entry systems, guest management, and smart allocation tools.",
+    image: "/hf_20260327_065515_cd3808b8-d99d-4faa-817d-e3f772726da6.png",
+    icon: "🏢",
+  },
+  {
+    title: "Commercial & Retail Parking",
+    description: "Enhance customer convenience with frictionless parking experiences designed for malls, offices, retail destinations, and hospitality environments.",
+    image: "/hf_20260327_061010_f3bc038b-576f-4903-8896-5d998cc78527.png",
+    icon: "🛍️",
+  },
+  {
+    title: "AI Access & Gate Control",
+    description: "Automate entry and exit using smart gate systems, license plate recognition, and digital verification technologies.",
+    image: "/hf_20260327_070648_996630bc-828e-4cd7-8cb1-f42c30332d86.png",
+    icon: "🤖",
+  },
+  {
+    title: "Fleet & Mobility Solutions",
+    description: "Support businesses with fleet parking management, mobility integration, logistics coordination, and operational parking optimization.",
+    image: "/hf_20260327_061900_db12a62e-2867-44b6-83f0-ea7f1a5442ef.png",
+    icon: "🚗",
+  },
+  {
+    title: "Smart City Parking Integration",
+    description: "Connect parking systems with city infrastructure for real-time traffic coordination, municipal dashboards, and urban mobility optimization.",
+    image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+    icon: "🌆",
+  },
+  {
+    title: "Mobile App Parking Ecosystem",
+    description: "Provide users with booking, payments, navigation, and parking history in one seamless mobile platform.",
+    image: "/hf_20260327_060926_cbb82448-441c-42ee-9589-785e7acd7565.png",
+    icon: "📱",
+  },
+  {
+    title: "Data & AI Analytics Dashboard",
+    description: "Deliver actionable insights on occupancy trends, peak hours, revenue performance, and space utilization.",
+    image: "/hf_20260327_064316_9c7b1a28-dbfa-456e-b88a-0087cb567a61.png",
+    icon: "📊",
+  },
+  {
+    title: "Cashless Payment Ecosystem",
+    description: "Support multiple payment methods including cards, wallets, QR payments, and subscription billing models.",
+    image: "/hf_20260327_062407_6dca49c0-90dd-468a-96f9-b36bba13ea8b.png",
+    icon: "💳",
+  },
+  {
+    title: "Security & Surveillance Integration",
+    description: "Integrate CCTV, ANPR/LPR systems, and automated alerts to enhance safety and compliance.",
+    image: "/hf_20260327_061010_f3bc038b-576f-4903-8896-5d998cc78527.png",
+    icon: "🔒",
+  },
+  {
+    title: "EV Charging Parking Integration",
+    description: "Combine parking with electric vehicle charging stations for future-ready mobility infrastructure.",
+    image: "/hf_20260327_070648_996630bc-828e-4cd7-8cb1-f42c30332d86.png",
+    icon: "⚡",
   },
 ];
 
@@ -144,10 +210,11 @@ export default function BusinessPageEditor() {
     advantage: DEFAULT_ADVANTAGE,
     cta: DEFAULT_CTA,
   });
-  const [published, setPublished] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState({});
   const [openSections, setOpenSections] = useState({ hero: true });
 
   useEffect(() => {
@@ -157,7 +224,6 @@ export default function BusinessPageEditor() {
       .getPage("business")
       .then((data) => {
         setPage(data);
-        setPublished(data.published ?? true);
         if (data.page?.sections) {
           setSections((prev) => ({ ...prev, ...data.page.sections }));
         }
@@ -175,7 +241,6 @@ export default function BusinessPageEditor() {
     try {
       await api.updatePage("business", {
         sections,
-        published,
       });
       setSuccess("Business page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -193,6 +258,35 @@ export default function BusinessPageEditor() {
     }));
   };
 
+  async function handleImageUpload(section, field, file, itemIndex = null) {
+    const key = `${section}-${field}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setSections((prev) => {
+        if (itemIndex !== null && Array.isArray(prev[section])) {
+          const updated = [...prev[section]];
+          updated[itemIndex] = { ...updated[itemIndex], [field]: url };
+          return { ...prev, [section]: updated };
+        }
+        return {
+          ...prev,
+          [section]: { ...prev[section], [field]: url },
+        };
+      });
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -206,25 +300,38 @@ export default function BusinessPageEditor() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between border-b border-slate-200 pb-6">
+      <div className="border-b border-slate-200 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-[#050A13]">Business Page Editor</h1>
           <p className="mt-2 text-sm text-slate-600">Manage all 9 business page sections</p>
         </div>
-        <a
-          href={`${import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}/business`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Preview
-        </a>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+      {/* Status Messages */}
+      {success && (
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+          ❌ {error}
+        </div>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {saving ? "Saving..." : "Save Changes"}
+      </button>
+
+      <div className="space-y-6">
         {/* 1. Hero Section */}
         <CollapsibleSection
           title="1. BusinessHero"
@@ -262,12 +369,28 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Background Image/Video URL</label>
-              <input
-                type="text"
-                value={sections.hero.image}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
-                className={inputClass}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sections.hero.image}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
+                  className={inputClass}
+                />
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("hero", "image", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -404,12 +527,27 @@ export default function BusinessPageEditor() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Image URL</label>
-                    <input
-                      type="text"
-                      value={item.image}
-                      onChange={(e) => update(i, { image: e.target.value })}
-                      className={inputClass}
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={item.image}
+                        onChange={(e) => update(i, { image: e.target.value })}
+                        className={inputClass}
+                      />
+                      <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                        <Upload className="h-3.5 w-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload("solutions", "image", file, i);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
                   <div>
                     <label className={labelClass}>Icon (emoji)</label>
@@ -637,48 +775,7 @@ export default function BusinessPageEditor() {
             </div>
           </div>
         </CollapsibleSection>
-
-        {/* Publish Status */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
-              className="h-5 w-5 rounded border-slate-300 text-[#0088FF]"
-            />
-            <div>
-              <p className="font-medium text-[#050A13]">Published</p>
-              <p className="text-sm text-slate-600">
-                {published ? "This page is published and visible" : "This page is hidden"}
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-3 font-semibold text-white hover:brightness-110 disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-      </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,703 @@
+import { useEffect, useState } from "react";
+import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
+import { api, uploadMediaToCloudinary } from "../lib/api";
+
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
+const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
+
+const DEFAULT_SERVICE_HERO = {
+  title: "Smart Parking. Vehicle Care Partner.",
+  subtitle: "Smart parking and vehicle care built for convenience, safety, and innovation.",
+  ctaLabel: "Get a Quote",
+};
+
+const DEFAULT_PARTNERS_SECTION = {
+  heading: "Clients & Partners",
+  headingGradient: "Partners",
+  subtitle: "Trusted by the UAE's leading brands.",
+  description: "HalaPark partners with global hotel chains, residential towers, retail destinations, and enterprises across the UAE.",
+  ctaText: "Want to become a partner?",
+  ctaLink: "/contact",
+};
+
+const DEFAULT_TRUST_SECTION = {
+  heading: "Trust & Safety",
+  headingGradient: "Safety",
+  subtitle: "Your safety is our priority.",
+  items: [
+    { label: "24/7 Surveillance", icon: "Camera" },
+    { label: "Insurance / Vehicle Safety Assurance", icon: "Shield" },
+    { label: "Verified Valet Staff", icon: "BadgeCheck" },
+    { label: "Secure Payment System", icon: "CreditCard" },
+    { label: "Controlled Access Zones", icon: "Lock" },
+  ],
+};
+
+const DEFAULT_CTA_SECTION = {
+  heading: "Looking for Long-Term Parking?",
+  headingGradient: "Parking?",
+  subtitle: "Secure, flexible, and smart parking solutions for businesses, residents, airports, and yearly vehicle storage.",
+  ctaLabel: "Get a Quote",
+};
+
+const DEFAULT_SERVICE = {
+  id: 1,
+  slug: "",
+  name: "",
+  mediaType: "image",
+  mediaSrc: "",
+  fullDesc: "",
+  whatsIncluded: [],
+  includedLabel: "What's Included",
+  subCategoriesLabel: "",
+  subCategories: [],
+};
+
+function CollapsibleSection({ title, children, defaultOpen = false }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 hover:bg-slate-50 transition"
+      >
+        <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+        <ChevronDown
+          className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      {isOpen && <div className="border-t border-slate-200 px-4 py-4 sm:px-5">{children}</div>}
+    </div>
+  );
+}
+
+function ArrayItemEditor({ label, items, onAdd, onRemove, onUpdate, renderItem }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className={labelClass}>{label}</label>
+      </div>
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-2">
+          <div className="flex-1">
+            {renderItem(item, i, onUpdate)}
+          </div>
+          <button
+            type="button"
+            onClick={() => onRemove(i)}
+            className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={onAdd}
+        className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Add {label}
+      </button>
+    </div>
+  );
+}
+
+export default function ServicePageEditor() {
+  const [hero, setHero] = useState(DEFAULT_SERVICE_HERO);
+  const [services, setServices] = useState([]);
+  const [partnersSection, setPartnersSection] = useState(DEFAULT_PARTNERS_SECTION);
+  const [trustSection, setTrustSection] = useState(DEFAULT_TRUST_SECTION);
+  const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState({});
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      const data = await api.getPage("services");
+      console.log("Loaded services page data:", data);
+      if (data?.page?.sections) {
+        setHero(data.page.sections.hero || DEFAULT_SERVICE_HERO);
+        const loadedServices = data.page.sections.services || [];
+        console.log(`Loaded ${loadedServices.length} services`);
+        setServices(loadedServices);
+        setPartnersSection(data.page.sections.partnersSection || DEFAULT_PARTNERS_SECTION);
+        setTrustSection(data.page.sections.trustSection || DEFAULT_TRUST_SECTION);
+        setCtaSection(data.page.sections.ctaSection || DEFAULT_CTA_SECTION);
+      }
+    } catch (err) {
+      setError("Failed to load page data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSave() {
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      await api.updatePage("services", {
+        sections: { hero, services, partnersSection, trustSection, ctaSection },
+      });
+      setSuccess("Service page saved successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to save page");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function updateHero(field, value) {
+    setHero((p) => ({ ...p, [field]: value }));
+  }
+
+  function updateService(i, field, value) {
+    setServices((prev) =>
+      prev.map((srv, idx) => (idx === i ? { ...srv, [field]: value } : srv))
+    );
+  }
+
+  function addService() {
+    setServices((prev) => [...prev, { ...DEFAULT_SERVICE, id: Math.max(...prev.map(s => s.id), 0) + 1 }]);
+  }
+
+  function removeService(i) {
+    setServices((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  function updateServiceIncluded(i, j, value) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i
+          ? { ...srv, whatsIncluded: srv.whatsIncluded.map((item, jdx) => (jdx === j ? value : item)) }
+          : srv
+      )
+    );
+  }
+
+  function removeServiceIncluded(i, j) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i ? { ...srv, whatsIncluded: srv.whatsIncluded.filter((_, jdx) => jdx !== j) } : srv
+      )
+    );
+  }
+
+  function addServiceIncluded(i) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i ? { ...srv, whatsIncluded: [...(srv.whatsIncluded || []), ""] } : srv
+      )
+    );
+  }
+
+  function updateServiceCategory(i, j, field, value) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i
+          ? {
+              ...srv,
+              subCategories: srv.subCategories.map((cat, jdx) =>
+                jdx === j ? { ...cat, [field]: value } : cat
+              ),
+            }
+          : srv
+      )
+    );
+  }
+
+  function removeServiceCategory(i, j) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i
+          ? { ...srv, subCategories: srv.subCategories.filter((_, jdx) => jdx !== j) }
+          : srv
+      )
+    );
+  }
+
+  function addServiceCategory(i) {
+    setServices((prev) =>
+      prev.map((srv, idx) =>
+        idx === i
+          ? { ...srv, subCategories: [...(srv.subCategories || []), { title: "", description: "" }] }
+          : srv
+      )
+    );
+  }
+
+  async function handleServiceImageUpload(i, file) {
+    const key = `service-${i}-image`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      updateService(i, "mediaSrc", url);
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  if (loading) {
+    return <div className="p-6 text-center">Loading...</div>;
+  }
+
+  return (
+    <div className="w-full space-y-6 px-6 py-6">
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[#050A13]">Services Page Editor</h1>
+          <p className="mt-2 text-sm text-slate-600">Manage all service page sections</p>
+        </div>
+      </div>
+
+      {/* Status Messages */}
+      {success && (
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+          ❌ {error}
+        </div>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {saving ? "Saving..." : "Save Changes"}
+      </button>
+
+      <div className="space-y-6">
+
+      {/* HERO SECTION */}
+      <CollapsibleSection title="Hero Section" defaultOpen={true}>
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>Title</label>
+            <input
+              value={hero.title ?? ""}
+              onChange={(e) => updateHero("title", e.target.value)}
+              className={inputClass}
+              placeholder="Smart Parking. Vehicle Care Partner."
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <textarea
+              value={hero.subtitle ?? ""}
+              onChange={(e) => updateHero("subtitle", e.target.value)}
+              className={inputClass}
+              rows={2}
+              placeholder="Smart parking and vehicle care built for convenience, safety, and innovation."
+            />
+          </div>
+          <div>
+            <label className={labelClass}>CTA Label</label>
+            <input
+              value={hero.ctaLabel ?? ""}
+              onChange={(e) => updateHero("ctaLabel", e.target.value)}
+              className={inputClass}
+              placeholder="Get a Quote"
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* SERVICES */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">Services ({services.length})</h2>
+          <button
+            type="button"
+            onClick={addService}
+            className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add Service
+          </button>
+        </div>
+
+        {services.map((service, i) => (
+          <CollapsibleSection key={i} title={`Service: ${service.name || `#${i + 1}`}`}>
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Service Name</label>
+                  <input
+                    value={service.name ?? ""}
+                    onChange={(e) => updateService(i, "name", e.target.value)}
+                    className={inputClass}
+                    placeholder="Self-Parking"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Slug</label>
+                  <input
+                    value={service.slug ?? ""}
+                    onChange={(e) => updateService(i, "slug", e.target.value)}
+                    className={inputClass}
+                    placeholder="self-parking"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Full Description</label>
+                <textarea
+                  value={service.fullDesc ?? ""}
+                  onChange={(e) => updateService(i, "fullDesc", e.target.value)}
+                  className={inputClass}
+                  rows={3}
+                  placeholder="Service description..."
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Media Type</label>
+                <select
+                  value={service.mediaType ?? "image"}
+                  onChange={(e) => updateService(i, "mediaType", e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="image">Image</option>
+                  <option value="video">Video</option>
+                </select>
+              </div>
+
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className={labelClass}>Media URL / Path</label>
+                  <input
+                    value={service.mediaSrc ?? ""}
+                    onChange={(e) => updateService(i, "mediaSrc", e.target.value)}
+                    className={inputClass}
+                    placeholder="/image.jpg or /path/to/video.mp4"
+                  />
+                </div>
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleServiceImageUpload(i, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div>
+                <label className={labelClass}>Included Label</label>
+                <input
+                  value={service.includedLabel ?? ""}
+                  onChange={(e) => updateService(i, "includedLabel", e.target.value)}
+                  className={inputClass}
+                  placeholder="What's Included"
+                />
+              </div>
+
+              <ArrayItemEditor
+                label="What's Included Items"
+                items={service.whatsIncluded || []}
+                onAdd={() => addServiceIncluded(i)}
+                onRemove={(j) => removeServiceIncluded(i, j)}
+                onUpdate={(j, val) => updateServiceIncluded(i, j, val)}
+                renderItem={(item, j) => (
+                  <textarea
+                    value={item ?? ""}
+                    onChange={(e) => updateServiceIncluded(i, j, e.target.value)}
+                    className={inputClass}
+                    rows={2}
+                    placeholder="Feature item..."
+                  />
+                )}
+              />
+
+              {(service.subCategories?.length ?? 0) > 0 && (
+                <>
+                  <div>
+                    <label className={labelClass}>Sub Categories Label</label>
+                    <input
+                      value={service.subCategoriesLabel ?? ""}
+                      onChange={(e) => updateService(i, "subCategoriesLabel", e.target.value)}
+                      className={inputClass}
+                      placeholder="Service Categories"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className={labelClass}>Sub Categories</label>
+                    {service.subCategories.map((cat, j) => (
+                      <div key={j} className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            value={cat.title ?? ""}
+                            onChange={(e) => updateServiceCategory(i, j, "title", e.target.value)}
+                            className={inputClass}
+                            placeholder="Category title..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeServiceCategory(i, j)}
+                            className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <textarea
+                          value={cat.description ?? ""}
+                          onChange={(e) => updateServiceCategory(i, j, "description", e.target.value)}
+                          className={inputClass}
+                          rows={2}
+                          placeholder="Category description..."
+                        />
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addServiceCategory(i)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Sub Category
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => removeService(i)}
+                className="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Remove Service
+              </button>
+            </div>
+          </CollapsibleSection>
+        ))}
+      </div>
+
+      {/* PARTNERS SECTION */}
+      <CollapsibleSection title="Partners Section" defaultOpen={false}>
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                value={partnersSection.heading ?? ""}
+                onChange={(e) => setPartnersSection((p) => ({ ...p, heading: e.target.value }))}
+                className={inputClass}
+                placeholder="Clients & Partners"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient Word</label>
+              <input
+                value={partnersSection.headingGradient ?? ""}
+                onChange={(e) => setPartnersSection((p) => ({ ...p, headingGradient: e.target.value }))}
+                className={inputClass}
+                placeholder="Partners"
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <input
+              value={partnersSection.subtitle ?? ""}
+              onChange={(e) => setPartnersSection((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              placeholder="Trusted by the UAE's leading brands."
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea
+              value={partnersSection.description ?? ""}
+              onChange={(e) => setPartnersSection((p) => ({ ...p, description: e.target.value }))}
+              className={inputClass}
+              rows={2}
+              placeholder="HalaPark partners with global hotel chains..."
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>CTA Text</label>
+              <input
+                value={partnersSection.ctaText ?? ""}
+                onChange={(e) => setPartnersSection((p) => ({ ...p, ctaText: e.target.value }))}
+                className={inputClass}
+                placeholder="Want to become a partner?"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>CTA Link</label>
+              <input
+                value={partnersSection.ctaLink ?? ""}
+                onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLink: e.target.value }))}
+                className={inputClass}
+                placeholder="/contact"
+              />
+            </div>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* TRUST SECTION */}
+      <CollapsibleSection title="Trust & Safety Section" defaultOpen={false}>
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                value={trustSection.heading ?? ""}
+                onChange={(e) => setTrustSection((p) => ({ ...p, heading: e.target.value }))}
+                className={inputClass}
+                placeholder="Trust & Safety"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient Word</label>
+              <input
+                value={trustSection.headingGradient ?? ""}
+                onChange={(e) => setTrustSection((p) => ({ ...p, headingGradient: e.target.value }))}
+                className={inputClass}
+                placeholder="Safety"
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <input
+              value={trustSection.subtitle ?? ""}
+              onChange={(e) => setTrustSection((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              placeholder="Your safety is our priority."
+            />
+          </div>
+          <div className="space-y-3">
+            <label className={labelClass}>Trust Items</label>
+            {trustSection.items?.map((item, j) => (
+              <div key={j} className="flex gap-2">
+                <div className="flex-1">
+                  <input
+                    value={item.label ?? ""}
+                    onChange={(e) => setTrustSection((p) => ({
+                      ...p,
+                      items: p.items.map((it, idx) => idx === j ? { ...it, label: e.target.value } : it)
+                    }))}
+                    className={inputClass}
+                    placeholder="Trust item label..."
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    value={item.icon ?? ""}
+                    onChange={(e) => setTrustSection((p) => ({
+                      ...p,
+                      items: p.items.map((it, idx) => idx === j ? { ...it, icon: e.target.value } : it)
+                    }))}
+                    className={inputClass}
+                    placeholder="Icon name..."
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTrustSection((p) => ({ ...p, items: p.items.filter((_, idx) => idx !== j) }))}
+                  className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setTrustSection((p) => ({ ...p, items: [...(p.items || []), { label: "", icon: "" }] }))}
+              className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Item
+            </button>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* CTA SECTION */}
+      <CollapsibleSection title="Long-Term CTA Section" defaultOpen={false}>
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                value={ctaSection.heading ?? ""}
+                onChange={(e) => setCtaSection((p) => ({ ...p, heading: e.target.value }))}
+                className={inputClass}
+                placeholder="Looking for Long-Term Parking?"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient Word</label>
+              <input
+                value={ctaSection.headingGradient ?? ""}
+                onChange={(e) => setCtaSection((p) => ({ ...p, headingGradient: e.target.value }))}
+                className={inputClass}
+                placeholder="Parking?"
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <textarea
+              value={ctaSection.subtitle ?? ""}
+              onChange={(e) => setCtaSection((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              rows={2}
+              placeholder="Secure, flexible, and smart parking solutions..."
+            />
+          </div>
+          <div>
+            <label className={labelClass}>CTA Label</label>
+            <input
+              value={ctaSection.ctaLabel ?? ""}
+              onChange={(e) => setCtaSection((p) => ({ ...p, ctaLabel: e.target.value }))}
+              className={inputClass}
+              placeholder="Get a Quote"
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+      </div>
+    </div>
+  );
+}

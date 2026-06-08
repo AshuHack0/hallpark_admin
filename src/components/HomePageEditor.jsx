@@ -22,11 +22,48 @@ const DEFAULT_WHO_WE_ARE = {
   ],
 };
 
-const WHY_ICONS = ["Gauge", "ScanLine", "CircleDollarSign", "Clock3", "BarChart3", "Zap"];
+const WHY_ICONS = ["Gauge", "ScanLine", "CircleDollarSign", "Clock3", "BarChart3", "Zap", "Package", "Activity", "TrendingUp", "Users", "Lock"];
 const DEFAULT_WHY = {
-  heading: "Why Halapark",
-  subtitle: "Next-generation platform for intelligent parking solutions",
-  items: [],
+  heading: "Why HalaPark",
+  subtitle: "What Makes Us Different",
+  items: [
+    {
+      title: "AI-Powered Intelligence",
+      subtitle: "Smart automation that learns and adapts to deliver the best parking experience.",
+      icon: "Zap",
+      image: "",
+    },
+    {
+      title: "End-to-End Solutions",
+      subtitle: "From mobile apps to backend operations, we handle every aspect of modern parking.",
+      icon: "Package",
+      image: "",
+    },
+    {
+      title: "Real-Time Operations",
+      subtitle: "Live tracking, instant updates, and immediate insights to optimize your parking ecosystem.",
+      icon: "Activity",
+      image: "",
+    },
+    {
+      title: "Scalable Infrastructure",
+      subtitle: "Built to grow with your business, from single properties to enterprise networks.",
+      icon: "TrendingUp",
+      image: "",
+    },
+    {
+      title: "User-Centric Design",
+      subtitle: "Intuitive interfaces and seamless experiences that customers love.",
+      icon: "Users",
+      image: "",
+    },
+    {
+      title: "Security & Compliance",
+      subtitle: "Enterprise-grade security with full compliance for financial and operational data.",
+      icon: "Lock",
+      image: "",
+    },
+  ],
 };
 
 // 9 Remaining sections defaults
@@ -248,7 +285,6 @@ export default function HomePageEditor() {
   const [globalMobility, setGlobalMobility] = useState(DEFAULT_GLOBAL_MOBILITY);
   const [halaParkInAction, setHalaParkInAction] = useState(DEFAULT_HALAPARK_IN_ACTION);
   const [sectionsObj, setSectionsObj] = useState({});
-  const [published, setPublished] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -276,7 +312,6 @@ export default function HomePageEditor() {
         setClientsPartners({ ...DEFAULT_CLIENTS_PARTNERS, ...(sections.clientsPartners ?? {}) });
         setGlobalMobility({ ...DEFAULT_GLOBAL_MOBILITY, ...(sections.globalMobility ?? {}) });
         setHalaParkInAction({ ...DEFAULT_HALAPARK_IN_ACTION, ...(sections.halaParkInAction ?? {}) });
-        setPublished(data.page.published ?? true);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -307,6 +342,20 @@ export default function HomePageEditor() {
     setWhyHalapark((prev) => ({
       ...prev,
       items: (prev.items ?? []).map((it, idx) => (idx === i ? { ...it, [field]: value } : it)),
+    }));
+  }
+
+  function addWhyItem() {
+    setWhyHalapark((prev) => ({
+      ...prev,
+      items: [...(prev.items ?? []), { icon: "Gauge", title: "", subtitle: "", image: "" }],
+    }));
+  }
+
+  function removeWhyItem(i) {
+    setWhyHalapark((prev) => ({
+      ...prev,
+      items: (prev.items ?? []).filter((_, idx) => idx !== i),
     }));
   }
 
@@ -447,7 +496,7 @@ export default function HomePageEditor() {
         globalMobility,
         halaParkInAction,
       };
-      const data = await api.updatePage(slug, { sections, published });
+      const data = await api.updatePage(slug, { sections });
       setPage(data.page);
       setSectionsObj(data.page.sections ?? sections);
       setSuccess("Home page saved successfully.");
@@ -470,37 +519,38 @@ export default function HomePageEditor() {
   const prog = (i, f) => uploadProgress[`${i}-${f}`];
 
   return (
-    <div>
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="w-full space-y-6 px-6 py-6">
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0088FF]">Website Page</p>
-          <h2 className="text-2xl font-semibold text-[#050A13]">Home</h2>
-          <p className="mt-1 text-sm text-slate-500">/ (landing hero slides and sections)</p>
+          <h1 className="text-3xl font-bold text-[#050A13]">Home Page Editor</h1>
+          <p className="mt-2 text-sm text-slate-600">Manage all hero slides and page sections</p>
         </div>
-        <a
-          href={import.meta.env.VITE_FRONTEND_URL ?? "http://localhost:3000"}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-[#0088FF] hover:text-[#0088FF]"
-        >
-          Preview <ExternalLink className="h-4 w-4" />
-        </a>
       </div>
 
-      <p className="mt-4 rounded-xl border border-[#C6DEFF] bg-[#EEF6FF] px-4 py-3 text-sm text-[#050A13]">
-        Edit all home page sections below. Collapse sections to manage your workflow. Upload images/videos to Cloudinary or paste a URL / public path.
-      </p>
+      {/* Status Messages */}
+      {success && (
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+          ❌ {error}
+        </div>
+      )}
 
-      <form onSubmit={handleSave} className="mt-6 space-y-5">
-        <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-[#0088FF]"
-          />
-          Published (visible on website)
-        </label>
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        {saving ? "Saving..." : "Save Changes"}
+      </button>
+
+      <div className="space-y-6">
 
         {/* HERO SLIDES */}
         <div className="space-y-4">
@@ -743,10 +793,25 @@ export default function HomePageEditor() {
                         }}
                       />
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => removeWhyItem(i)}
+                      className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               );
             })}
+            <button
+              type="button"
+              onClick={addWhyItem}
+              className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Feature Item
+            </button>
           </div>
         </CollapsibleSection>
 
@@ -1178,19 +1243,7 @@ export default function HomePageEditor() {
             ))}
           </div>
         </CollapsibleSection>
-
-        {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p> : null}
-        {success ? <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p> : null}
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex items-center gap-2 rounded-full bg-[#0088FF] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
-        >
-          <Save className="h-4 w-4" />
-          {saving ? "Saving…" : "Save page"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

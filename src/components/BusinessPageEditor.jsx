@@ -375,6 +375,7 @@ export default function BusinessPageEditor() {
                   value={sections.hero.image}
                   onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
                   className={inputClass}
+                  placeholder="e.g., /image.png or https://..."
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -391,6 +392,7 @@ export default function BusinessPageEditor() {
                   />
                 </label>
               </div>
+              <p className="mt-1 text-xs text-slate-500">Upload images (PNG, JPG) or use a PNG from your uploads</p>
             </div>
           </div>
         </CollapsibleSection>

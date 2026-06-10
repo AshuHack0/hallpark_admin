@@ -105,9 +105,69 @@ const DEFAULT_SOLUTIONS = [
 const DEFAULT_WHO_WE_WORK = [
   {
     title: "Property Developers",
-    description: "Transform residential and commercial projects with intelligent parking infrastructure.",
+    description: "Transform residential and commercial projects with intelligent parking infrastructure that increases property value, improves traffic flow, and delivers future-ready smart mobility experiences.",
     image: "/hf_20260327_065515_cd3808b8-d99d-4faa-817d-e3f772726da6.png",
-    benefits: ["Increased Property Value", "Smart Infrastructure"],
+    benefits: ["Increased Property Value", "Smart Infrastructure", "Future-Ready Design"],
+  },
+  {
+    title: "Shopping Malls & Retail",
+    description: "Create faster, smoother, and stress-free visitor experiences with automated parking, digital payments, real-time availability tracking, and seamless customer journeys.",
+    image: "/hf_20260327_061010_f3bc038b-576f-4903-8896-5d998cc78527.png",
+    benefits: ["Better Customer Experience", "Increased Foot Traffic", "Digital Payments"],
+  },
+  {
+    title: "Residential Communities",
+    description: "Deliver secure, organized, and hassle-free parking management for residents, visitors, and tenants with smart access control and automated entry systems.",
+    image: "/hf_20260327_061900_db12a62e-2867-44b6-83f0-ea7f1a5442ef.png",
+    benefits: ["Secure Access Control", "Visitor Management", "Resident Satisfaction"],
+  },
+  {
+    title: "Hotels & Hospitality",
+    description: "Enhance guest experiences with premium valet integration, frictionless parking access, digital visitor management, and luxury smart parking services.",
+    image: "/hf_20260327_060926_cbb82448-441c-42ee-9589-785e7acd7565.png",
+    benefits: ["Premium Guest Experience", "Valet Integration", "Digital Management"],
+  },
+  {
+    title: "Government & Public",
+    description: "Support smart city initiatives with scalable parking ecosystems, AI-powered mobility solutions, real-time analytics, and intelligent urban traffic management.",
+    image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+    benefits: ["Smart City Solutions", "Traffic Management", "Real-Time Analytics"],
+  },
+  {
+    title: "Service Providers",
+    description: "Collaborate with HalaPark to integrate innovative parking technologies, EV charging systems, automation tools, and mobility solutions into a growing smart ecosystem.",
+    image: "/hf_20260327_070648_996630bc-828e-4cd7-8cb1-f42c30332d86.png",
+    benefits: ["Technology Integration", "Scalable Solutions", "Growing Ecosystem"],
+  },
+  {
+    title: "Commercial Towers",
+    description: "Simplify employee and visitor parking with automated access control, reserved parking management, and seamless daily parking experiences for modern workplaces.",
+    image: "/hf_20260327_064316_9c7b1a28-dbfa-456e-b88a-0087cb567a61.png",
+    benefits: ["Employee Satisfaction", "Automated Access", "Reserved Spaces"],
+  },
+  {
+    title: "Airports & Hubs",
+    description: "Reduce congestion and improve vehicle movement with intelligent parking systems designed for high-traffic environments and large-scale mobility operations.",
+    image: "/hf_20260327_062407_6dca49c0-90dd-468a-96f9-b36bba13ea8b.png",
+    benefits: ["Congestion Reduction", "High-Volume Handling", "Smooth Traffic"],
+  },
+  {
+    title: "Universities",
+    description: "Manage student, faculty, and visitor parking efficiently using smart permits, digital parking management, and real-time occupancy monitoring.",
+    image: "/hf_20260327_065515_cd3808b8-d99d-4faa-817d-e3f772726da6.png",
+    benefits: ["Smart Permits", "Digital Management", "Occupancy Tracking"],
+  },
+  {
+    title: "Healthcare Facilities",
+    description: "Provide stress-free parking experiences for patients, staff, and visitors with smart guidance systems, automated entry, and optimized traffic flow.",
+    image: "/hf_20260327_061010_f3bc038b-576f-4903-8896-5d998cc78527.png",
+    benefits: ["Patient Comfort", "Staff Efficiency", "Visitor Guidance"],
+  },
+  {
+    title: "Event Venues",
+    description: "Handle large parking demand during concerts, exhibitions, and events with intelligent crowd management, dynamic parking allocation, and faster vehicle access.",
+    image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+    benefits: ["Crowd Management", "Dynamic Allocation", "Fast Access"],
   },
 ];
 
@@ -119,16 +179,67 @@ const DEFAULT_PARTNERS_STATS = [
 
 const DEFAULT_TRANSFORM_PARKING = {
   title: "Ready to Transform Your Parking Business?",
-  description: "Partner with HalaPark and unlock the future of intelligent parking management.",
-  image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+  description: "Partner with HalaPark and unlock the future of intelligent parking management, smart mobility, and connected urban infrastructure.",
+  parkingPartnerTitle: "Become a Parking Partner",
+  parkingPartnerSubtitle: "Turn your parking assets into profitable smart mobility solutions.",
+  parkingPartnerDescription: "HalaPark enables landlords, parking operators, residential buildings, commercial properties, and public entities to digitize and monetize their parking infrastructure through advanced automation and intelligent management tools. Existing parking platforms increasingly focus on ticketless entry, occupancy optimization, AI-powered access control, and cloud-based management systems to improve efficiency and user convenience.",
+  parkingPartnerPerks: ["Smart parking management dashboard", "Digital payment integration", "Parking categorization & organization", "Real-time occupancy monitoring", "Traffic & congestion management", "Advanced reporting & analytics", "Secure automated access systems", "Mobile & cloud-based management", "Revenue optimization tools", "Flexible subscription & booking models"],
+  servicePartnerTitle: "Become a Service Partner",
+  servicePartnerSubtitle: "Join the future of smart mobility and parking innovation.",
+  servicePartnerDescription1: "HalaPark collaborates with service providers, technology suppliers, hardware manufacturers, and mobility partners to deliver integrated parking experiences across the UAE and beyond.",
+  servicePartnerDescription2: "Whether you specialize in automation, EV charging, security systems, maintenance services, mobility solutions, or smart city technologies, we create opportunities for strategic growth and long-term collaboration.",
+  servicePartnerPerks: ["Smart parking hardware", "AI & automation systems", "EV charging infrastructure", "Security & surveillance solutions", "Facility management services", "Mobility & logistics solutions", "Software integrations", "IoT & smart city technologies"],
 };
 
 const DEFAULT_ADVANTAGE = [
   {
     title: "Smart Mobility Ecosystem",
-    description: "We connect drivers, property owners, operators, and service providers.",
+    description: "We connect drivers, property owners, operators, and service providers through one intelligent platform.",
+  },
+  {
+    title: "Seamless Digital Experience",
+    description: "From booking to payment and access control, every interaction is optimized for speed, simplicity, and convenience.",
+  },
+  {
+    title: "Future-Ready Technology",
+    description: "Built for modern cities, evolving mobility demands, and scalable smart infrastructure.",
+  },
+  {
+    title: "Data-Driven Operations",
+    description: "Make smarter business decisions using live operational insights, occupancy analytics, and performance reporting.",
   },
 ];
+
+const DEFAULT_PARTNERS_SHOWCASE = {
+  heading: "Helping you to correctly",
+  headingGradient: "set-up, build,",
+  subheading: "and protect your brand and business",
+  description: "Unsure of the next steps toward your business expansion? Want to ensure your logistics are in order? With 20+ years of business experience & extensive legal training, we'll help you navigate your legal issue and provide the best solution for:",
+  image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+  stats: [
+    { value: "5th", label: "Field Expertise" },
+    { value: "95%", label: "Client Satisfaction" },
+    { value: "120", label: "CP Clients Trusted" },
+  ],
+  ctaLabel: "Get Started",
+  partners: {
+    heading: "Trusted by Industry Leaders",
+    subheading: "Work with some of the most recognized brands and organizations",
+    row1: [
+      { name: "Company A", industry: "Retail", initials: "CA", color: "#0088FF" },
+      { name: "Company B", industry: "Tech", initials: "CB", color: "#1AB2FF" },
+    ],
+    row2: [
+      { name: "Company C", industry: "Finance", initials: "CC", color: "#FF6B6B" },
+      { name: "Company D", industry: "Hospitality", initials: "CD", color: "#FFB347" },
+    ],
+  },
+  ctaSection: {
+    title: "Ready to Partner with HalaPark?",
+    description: "Join our growing network of trusted partners and transform your parking infrastructure today.",
+    image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
+  },
+};
 
 const DEFAULT_CTA = {
   title: "Start a Smart Parking Business with No Upfront Investment",
@@ -206,6 +317,7 @@ export default function BusinessPageEditor() {
     solutions: DEFAULT_SOLUTIONS,
     whoWeWork: DEFAULT_WHO_WE_WORK,
     partnersStats: DEFAULT_PARTNERS_STATS,
+    partnersShowcase: DEFAULT_PARTNERS_SHOWCASE,
     transformParking: DEFAULT_TRANSFORM_PARKING,
     advantage: DEFAULT_ADVANTAGE,
     cta: DEFAULT_CTA,
@@ -606,12 +718,27 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Image URL</label>
-                  <input
-                    type="text"
-                    value={item.image}
-                    onChange={(e) => update(i, { image: e.target.value })}
-                    className={inputClass}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.image}
+                      onChange={(e) => update(i, { image: e.target.value })}
+                      className={inputClass}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("whoWeWork", "image", file, i);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
                 <div>
                   <label className={labelClass}>Benefits (comma-separated)</label>
@@ -670,33 +797,127 @@ export default function BusinessPageEditor() {
           isOpen={openSections.transformParking}
           onToggle={() => toggleSection("transformParking")}
         >
-          <div className="space-y-4">
-            <div>
-              <label className={labelClass}>Title</label>
-              <input
-                type="text"
-                value={sections.transformParking.title}
-                onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, title: e.target.value } })}
-                className={inputClass}
-              />
+          <div className="space-y-6">
+            {/* Main Section */}
+            <div className="border-b border-slate-200 pb-6">
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Main Section</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.title}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, title: e.target.value } })}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <textarea
+                    value={sections.transformParking.description}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: e.target.value } })}
+                    className={inputClass}
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.transformParking.description}
-                onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: e.target.value } })}
-                className={inputClass}
-                rows={3}
-              />
+
+            {/* Parking Partner */}
+            <div className="border-b border-slate-200 pb-6">
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Parking Partner Card</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerTitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerTitle: e.target.value } })}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Subtitle</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerSubtitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerSubtitle: e.target.value } })}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <textarea
+                    value={sections.transformParking.parkingPartnerDescription}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: e.target.value } })}
+                    className={inputClass}
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Perks (comma-separated)</label>
+                  <textarea
+                    value={Array.isArray(sections.transformParking.parkingPartnerPerks) ? sections.transformParking.parkingPartnerPerks.join(", ") : ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: e.target.value.split(",").map((p) => p.trim()) } })}
+                    className={inputClass}
+                    rows={4}
+                    placeholder="Smart parking management dashboard, Digital payment integration, ..."
+                  />
+                </div>
+              </div>
             </div>
+
+            {/* Service Partner */}
             <div>
-              <label className={labelClass}>Image URL</label>
-              <input
-                type="text"
-                value={sections.transformParking.image}
-                onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, image: e.target.value } })}
-                className={inputClass}
-              />
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Service Partner Card</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerTitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerTitle: e.target.value } })}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Subtitle</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerSubtitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerSubtitle: e.target.value } })}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Description 1</label>
+                  <textarea
+                    value={sections.transformParking.servicePartnerDescription1}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: e.target.value } })}
+                    className={inputClass}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Description 2</label>
+                  <textarea
+                    value={sections.transformParking.servicePartnerDescription2}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: e.target.value } })}
+                    className={inputClass}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Partnership Opportunities (comma-separated)</label>
+                  <textarea
+                    value={Array.isArray(sections.transformParking.servicePartnerPerks) ? sections.transformParking.servicePartnerPerks.join(", ") : ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: e.target.value.split(",").map((p) => p.trim()) } })}
+                    className={inputClass}
+                    rows={4}
+                    placeholder="Smart parking hardware, AI & automation systems, ..."
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -741,6 +962,357 @@ export default function BusinessPageEditor() {
           />
         </CollapsibleSection>
 
+        {/* 8.5. Partners Showcase */}
+        <CollapsibleSection
+          title="8.5. PartnersShowcase"
+          isOpen={openSections.partnersShowcase}
+          onToggle={() => toggleSection("partnersShowcase")}
+        >
+          <div className="space-y-6">
+            <div className="space-y-4 border-b border-slate-200 pb-4">
+              <div>
+                <label className={labelClass}>Heading</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.heading}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, heading: e.target.value } })}
+                  className={inputClass}
+                  placeholder="Helping you to correctly"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Heading Gradient (highlighted text)</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.headingGradient}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, headingGradient: e.target.value } })}
+                  className={inputClass}
+                  placeholder="set-up, build,"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Subheading</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.subheading}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, subheading: e.target.value } })}
+                  className={inputClass}
+                  placeholder="and protect your brand and business"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Description</label>
+                <textarea
+                  value={sections.partnersShowcase.description}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, description: e.target.value } })}
+                  className={inputClass}
+                  rows={4}
+                  placeholder="Description text..."
+                />
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-700">Stats ({sections.partnersShowcase.stats?.length ?? 0})</h3>
+                <button
+                  onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: [...(sections.partnersShowcase.stats ?? []), { value: "0", label: "New Stat" }] } })}
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Stat
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(sections.partnersShowcase.stats ?? []).map((stat, i) => (
+                  <div key={i} className="flex gap-2 items-end">
+                    <input
+                      value={stat.value}
+                      onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, value: e.target.value } : s) } })}
+                      className={inputClass}
+                      placeholder="Value (e.g., 5th, 95%)"
+                    />
+                    <input
+                      value={stat.label}
+                      onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s) } })}
+                      className={inputClass}
+                      placeholder="Label"
+                    />
+                    <button
+                      onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded transition shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 border-t border-slate-200 pt-4">
+              <div>
+                <label className={labelClass}>Image URL</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.partnersShowcase.image}
+                    onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, image: e.target.value } })}
+                    className={inputClass}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    <Upload className="h-3.5 w-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload("partnersShowcase", "image", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>CTA Label</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.ctaLabel}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaLabel: e.target.value } })}
+                  className={inputClass}
+                  placeholder="Get Started"
+                />
+              </div>
+            </div>
+
+            {/* Partners Carousel Section */}
+            <div className="space-y-4 border-t border-slate-200 pt-4">
+              <h3 className="text-sm font-semibold text-slate-700">Partners Carousel</h3>
+              <div>
+                <label className={labelClass}>Carousel Heading</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.partners?.heading || ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, heading: e.target.value } } })}
+                  className={inputClass}
+                  placeholder="Trusted by Industry Leaders"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Carousel Subheading</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.partners?.subheading || ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, subheading: e.target.value } } })}
+                  className={inputClass}
+                  placeholder="Work with some of the most recognized brands..."
+                />
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="text-xs font-semibold text-slate-700 mb-4">Row 1 Partners ({sections.partnersShowcase.partners?.row1?.length ?? 0})</p>
+                <div className="space-y-2">
+                  {(sections.partnersShowcase.partners?.row1 ?? []).map((partner, i) => (
+                    <div key={i} className="flex gap-2 items-end">
+                      <input
+                        value={partner.name}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row1];
+                          updated[i].name = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
+                        }}
+                        className={inputClass}
+                        placeholder="Company Name"
+                      />
+                      <input
+                        value={partner.industry}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row1];
+                          updated[i].industry = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
+                        }}
+                        className={inputClass}
+                        placeholder="Industry"
+                      />
+                      <input
+                        value={partner.initials}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row1];
+                          updated[i].initials = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
+                        }}
+                        className="w-20 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15"
+                        placeholder="Initials"
+                        maxLength="2"
+                      />
+                      <input
+                        type="color"
+                        value={partner.color}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row1];
+                          updated[i].color = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
+                        }}
+                        className="w-16 h-10 rounded-lg cursor-pointer shrink-0"
+                      />
+                      <button
+                        onClick={() => {
+                          const updated = sections.partnersShowcase.partners.row1.filter((_, idx) => idx !== i);
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
+                        }}
+                        className="text-red-600 hover:bg-red-50 p-2 rounded transition shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    const newPartner = { name: "New Partner", industry: "Industry", initials: "NP", color: "#0088FF" };
+                    setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: [...(sections.partnersShowcase.partners?.row1 ?? []), newPartner] } } });
+                  }}
+                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Partner
+                </button>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="text-xs font-semibold text-slate-700 mb-4">Row 2 Partners ({sections.partnersShowcase.partners?.row2?.length ?? 0})</p>
+                <div className="space-y-2">
+                  {(sections.partnersShowcase.partners?.row2 ?? []).map((partner, i) => (
+                    <div key={i} className="flex gap-2 items-end">
+                      <input
+                        value={partner.name}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row2];
+                          updated[i].name = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
+                        }}
+                        className={inputClass}
+                        placeholder="Company Name"
+                      />
+                      <input
+                        value={partner.industry}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row2];
+                          updated[i].industry = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
+                        }}
+                        className={inputClass}
+                        placeholder="Industry"
+                      />
+                      <input
+                        value={partner.initials}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row2];
+                          updated[i].initials = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
+                        }}
+                        className="w-20 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15"
+                        placeholder="Initials"
+                        maxLength="2"
+                      />
+                      <input
+                        type="color"
+                        value={partner.color}
+                        onChange={(e) => {
+                          const updated = [...sections.partnersShowcase.partners.row2];
+                          updated[i].color = e.target.value;
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
+                        }}
+                        className="w-16 h-10 rounded-lg cursor-pointer shrink-0"
+                      />
+                      <button
+                        onClick={() => {
+                          const updated = sections.partnersShowcase.partners.row2.filter((_, idx) => idx !== i);
+                          setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
+                        }}
+                        className="text-red-600 hover:bg-red-50 p-2 rounded transition shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    const newPartner = { name: "New Partner", industry: "Industry", initials: "NP", color: "#0088FF" };
+                    setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: [...(sections.partnersShowcase.partners?.row2 ?? []), newPartner] } } });
+                  }}
+                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Partner
+                </button>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="space-y-4 border-t border-slate-200 pt-4">
+              <h3 className="text-sm font-semibold text-slate-700">CTA Section</h3>
+              <div>
+                <label className={labelClass}>CTA Title</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.ctaSection?.title || ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, title: e.target.value } } })}
+                  className={inputClass}
+                  placeholder="Ready to Partner with HalaPark?"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>CTA Description</label>
+                <textarea
+                  value={sections.partnersShowcase.ctaSection?.description || ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, description: e.target.value } } })}
+                  className={inputClass}
+                  rows={3}
+                  placeholder="Join our growing network..."
+                />
+              </div>
+              <div>
+                <label className={labelClass}>CTA Section Image URL</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.partnersShowcase.ctaSection?.image || ""}
+                    onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, image: e.target.value } } })}
+                    className={inputClass}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    <Upload className="h-3.5 w-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": 0 }));
+                          uploadMediaToCloudinary(file, (progress) => {
+                            setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": progress }));
+                          }).then((url) => {
+                            setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, image: url } } });
+                            setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": null }));
+                          }).catch(() => {
+                            setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": null }));
+                          });
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
+
         {/* 9. Business CTA */}
         <CollapsibleSection
           title="9. BusinessCTA"
@@ -768,12 +1340,27 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
-              <input
-                type="text"
-                value={sections.cta.image}
-                onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, image: e.target.value } })}
-                className={inputClass}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sections.cta.image}
+                  onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, image: e.target.value } })}
+                  className={inputClass}
+                />
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  <Upload className="h-3.5 w-3.5" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("cta", "image", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </CollapsibleSection>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Plus, Trash2, Save, ChevronDown, Loader2, Upload } from "lucide-react";
+import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -80,6 +80,357 @@ const DEFAULT_CTA = {
   ctaSecondaryLabel: "Talk to Our Team",
 };
 
+// Detail (blog-style) pages rendered at /solutions/[slug]. Empty by default —
+// loadData() pulls the real list from the DB.
+const DEFAULT_DETAILS = [];
+
+const slugify = (s = "") =>
+  s
+    .toLowerCase()
+    .replace(/&/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+function makeBlankDetail() {
+  return {
+    slug: "",
+    eyebrow: "New Solution",
+    title: "New Solution Detail",
+    intro: "",
+    image: "/image.png",
+    systemsHeading: "Integrated Systems",
+    systems: [],
+    benefitsHeading: "Key Benefit",
+    benefits: [],
+    problemHeading: "Problem We Solve",
+    problemBody: "",
+    ctaLabel: "Talk to Our Team",
+    ctaLink: "/contact",
+  };
+}
+
+// Editable heading + list of plain-string bullet items (used for a detail's
+// "Integrated Systems" and "Key Benefit" lists).
+// eslint-disable-next-line react/prop-types
+function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceholder, items, onItemChange, onAdd, onRemove }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <label className={labelClass}>{label} — heading</label>
+          <input
+            value={headingValue}
+            onChange={(e) => onHeadingChange(e.target.value)}
+            className={inputClass}
+            placeholder={headingPlaceholder}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-5 shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add Item
+        </button>
+      </div>
+      <div className="space-y-2">
+        {(items ?? []).length === 0 ? (
+          <p className="text-xs text-slate-400">No items yet.</p>
+        ) : (
+          (items ?? []).map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                value={item ?? ""}
+                onChange={(e) => onItemChange(idx, e.target.value)}
+                className={inputClass}
+                placeholder={`${label} item ${idx + 1}`}
+              />
+              <button
+                type="button"
+                onClick={() => onRemove(idx)}
+                className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Full add/edit modal for a single solution detail page. Edits a local draft and
+// returns it via onSave; the parent merges it into `details` (persisted on the
+// page's main "Save Changes").
+// eslint-disable-next-line react/prop-types
+function DetailEditModal({ initial, isNew, onSave, onClose }) {
+  const [draft, setDraft] = useState(initial);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const [err, setErr] = useState("");
+
+  const setField = (field, value) => setDraft((d) => ({ ...d, [field]: value }));
+  const setListItem = (field, idx, value) =>
+    setDraft((d) => ({ ...d, [field]: (d[field] ?? []).map((v, i) => (i === idx ? value : v)) }));
+  const addListItem = (field) => setDraft((d) => ({ ...d, [field]: [...(d[field] ?? []), ""] }));
+  const removeListItem = (field, idx) =>
+    setDraft((d) => ({ ...d, [field]: (d[field] ?? []).filter((_, i) => i !== idx) }));
+
+  async function handleUpload(file) {
+    setErr("");
+    setUploading(true);
+    setUploadPct(0);
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadPct(pct));
+      setField("image", url);
+    } catch {
+      setErr("Image upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleSubmit() {
+    if (!draft.slug?.trim()) {
+      setErr("A slug is required (the URL: /solutions/<slug>).");
+      return;
+    }
+    const cleanedSlug = slugify(draft.slug);
+    onSave({
+      ...draft,
+      slug: cleanedSlug,
+      systems: (draft.systems ?? []).map((s) => s.trim()).filter(Boolean),
+      benefits: (draft.benefits ?? []).map((s) => s.trim()).filter(Boolean),
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div>
+            <h3 className="text-lg font-bold text-[#050A13]">
+              {isNew ? "Add Solution Detail" : "Edit Solution Detail"}
+            </h3>
+            <p className="text-xs text-slate-500">
+              Shown at <code className="rounded bg-slate-100 px-1 py-0.5">/solutions/{draft.slug || "<slug>"}</code>
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Body (scrollable) */}
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+          {err && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm font-medium text-red-700">
+              {err}
+            </div>
+          )}
+
+          {/* Slug + Eyebrow */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Slug (URL) *</label>
+              <div className="flex gap-2">
+                <input
+                  value={draft.slug ?? ""}
+                  onChange={(e) => setField("slug", e.target.value)}
+                  className={inputClass}
+                  placeholder="seamless-integrations"
+                />
+                <button
+                  type="button"
+                  onClick={() => setField("slug", slugify(draft.title || draft.eyebrow))}
+                  className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:text-[#0088FF]"
+                  title="Generate slug from title"
+                >
+                  Auto
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Eyebrow (card label)</label>
+              <input
+                value={draft.eyebrow ?? ""}
+                onChange={(e) => setField("eyebrow", e.target.value)}
+                className={inputClass}
+                placeholder="Seamless Integrations"
+              />
+            </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className={labelClass}>Title</label>
+            <input
+              value={draft.title ?? ""}
+              onChange={(e) => setField("title", e.target.value)}
+              className={inputClass}
+              placeholder="End-to-End Connected Infrastructure for Smart Parking"
+            />
+          </div>
+
+          {/* Intro */}
+          <div>
+            <label className={labelClass}>Intro (italic paragraph)</label>
+            <textarea
+              value={draft.intro ?? ""}
+              onChange={(e) => setField("intro", e.target.value)}
+              className={inputClass}
+              rows={3}
+              placeholder="HalaPark connects with existing infrastructure to..."
+            />
+          </div>
+
+          {/* Image */}
+          <div>
+            <label className={labelClass}>Image / Diagram</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.image && draft.image !== "/image.png" ? (
+                  <img src={draft.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={draft.image ?? ""}
+                  onChange={(e) => setField("image", e.target.value)}
+                  className={inputClass}
+                  placeholder="Image URL"
+                />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {uploadPct}%
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5" />
+                      Upload image
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Integrated Systems */}
+          <DetailStringList
+            label="Integrated Systems"
+            headingValue={draft.systemsHeading ?? ""}
+            onHeadingChange={(v) => setField("systemsHeading", v)}
+            headingPlaceholder="Integrated Systems"
+            items={draft.systems ?? []}
+            onItemChange={(idx, v) => setListItem("systems", idx, v)}
+            onAdd={() => addListItem("systems")}
+            onRemove={(idx) => removeListItem("systems", idx)}
+          />
+
+          {/* Key Benefit */}
+          <DetailStringList
+            label="Key Benefit"
+            headingValue={draft.benefitsHeading ?? ""}
+            onHeadingChange={(v) => setField("benefitsHeading", v)}
+            headingPlaceholder="Key Benefit"
+            items={draft.benefits ?? []}
+            onItemChange={(idx, v) => setListItem("benefits", idx, v)}
+            onAdd={() => addListItem("benefits")}
+            onRemove={(idx) => removeListItem("benefits", idx)}
+          />
+
+          {/* Problem We Solve */}
+          <div className="grid gap-3">
+            <div>
+              <label className={labelClass}>Problem Heading</label>
+              <input
+                value={draft.problemHeading ?? ""}
+                onChange={(e) => setField("problemHeading", e.target.value)}
+                className={inputClass}
+                placeholder="Problem We Solve"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Problem Body</label>
+              <textarea
+                value={draft.problemBody ?? ""}
+                onChange={(e) => setField("problemBody", e.target.value)}
+                className={inputClass}
+                rows={3}
+                placeholder="Parking and facility systems are often disconnected..."
+              />
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>CTA Label</label>
+              <input
+                value={draft.ctaLabel ?? ""}
+                onChange={(e) => setField("ctaLabel", e.target.value)}
+                className={inputClass}
+                placeholder="Talk to Our Team"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>CTA Link</label>
+              <input
+                value={draft.ctaLink ?? ""}
+                onChange={(e) => setField("ctaLink", e.target.value)}
+                className={inputClass}
+                placeholder="/contact"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-5 py-4">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={uploading}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-5 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            {isNew ? "Add detail" : "Apply changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -106,15 +457,53 @@ export default function SolutionPageEditor() {
   const [features, setFeatures] = useState(DEFAULT_FEATURES);
   const [why, setWhy] = useState(DEFAULT_WHY);
   const [cta, setCtA] = useState(DEFAULT_CTA);
+  const [details, setDetails] = useState(DEFAULT_DETAILS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Detail modal: editingDetail = { index, draft, isNew } | null
+  const [editingDetail, setEditingDetail] = useState(null);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Open the detail-page editor modal for a given solution card. Finds the
+  // matching detail by slug, or seeds a new one from the card's own fields.
+  function openDetailForCard(card) {
+    const cardSlug = card.slug || slugify(card.title);
+    const existing = details.find((d) => d.slug === cardSlug);
+    if (existing) {
+      setEditingDetail({ slug: cardSlug, draft: { ...existing }, isNew: false });
+    } else {
+      setEditingDetail({
+        slug: cardSlug,
+        isNew: true,
+        draft: {
+          ...makeBlankDetail(),
+          slug: cardSlug,
+          eyebrow: card.title || "New Solution",
+          title: card.title || "New Solution Detail",
+          intro: card.description || "",
+          image: card.image && card.image !== "/image.png" ? card.image : "/image.png",
+        },
+      });
+    }
+  }
+
+  // Merge the modal's draft back into `details` by slug (update or append).
+  function saveDetailFromModal(updated) {
+    setDetails((list) => {
+      const idx = list.findIndex((d) => d.slug === updated.slug);
+      if (idx === -1) return [...list, updated];
+      const next = [...list];
+      next[idx] = updated;
+      return next;
+    });
+    setEditingDetail(null);
+  }
 
   async function loadData() {
     try {
@@ -129,6 +518,7 @@ export default function SolutionPageEditor() {
         setFeatures(data.page.sections.features || DEFAULT_FEATURES);
         setWhy(data.page.sections.why || DEFAULT_WHY);
         setCtA(data.page.sections.cta || DEFAULT_CTA);
+        setDetails(Array.isArray(data.page.sections.details) ? data.page.sections.details : DEFAULT_DETAILS);
       }
     } catch (err) {
       setError("Failed to load page data");
@@ -144,7 +534,7 @@ export default function SolutionPageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("solutions", {
-        sections: { hero, challenges, solutions, integration, trust, features, why, cta },
+        sections: { hero, challenges, solutions, integration, trust, features, why, cta, details },
       });
       setSuccess("Solutions page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -389,7 +779,7 @@ export default function SolutionPageEditor() {
               <button
                 onClick={() => setSolutions((p) => ({
                   ...p,
-                  cards: [...(p.cards ?? []), { title: "New Solution", description: "Description", image: "/image.png" }]
+                  cards: [...(p.cards ?? []), { slug: "", title: "New Solution", description: "Description", image: "/image.png" }]
                 }))}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
@@ -398,7 +788,10 @@ export default function SolutionPageEditor() {
               </button>
             </div>
             <div className="space-y-3">
-              {(solutions.cards ?? []).map((card, i) => (
+              {(solutions.cards ?? []).map((card, i) => {
+                const cardSlug = card.slug || slugify(card.title);
+                const hasDetail = details.some((d) => d.slug === cardSlug);
+                return (
                 <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
@@ -467,9 +860,53 @@ export default function SolutionPageEditor() {
                         />
                       </label>
                     </div>
+
+                    {/* Slug — links the card to its detail page */}
+                    <div className="flex items-center gap-2">
+                      <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">/solutions/</span>
+                      <input
+                        value={card.slug ?? ""}
+                        onChange={(e) => setSolutions((p) => ({
+                          ...p,
+                          cards: p.cards.map((c, idx) => idx === i ? { ...c, slug: e.target.value } : c)
+                        }))}
+                        className={inputClass}
+                        placeholder={slugify(card.title) || "slug"}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSolutions((p) => ({
+                          ...p,
+                          cards: p.cards.map((c, idx) => idx === i ? { ...c, slug: slugify(c.title) } : c)
+                        }))}
+                        className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:text-[#0088FF]"
+                        title="Generate slug from title"
+                      >
+                        Auto
+                      </button>
+                    </div>
+
+                    {/* Edit this card's detail page */}
+                    <div className="flex items-center justify-between gap-3 rounded-lg border border-[#0088FF]/20 bg-[#F4F9FF] px-3 py-2.5">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[#0078E0]">Detail Page</p>
+                        <p className="truncate text-[11px] text-slate-500">
+                          {hasDetail ? "Has its own content — edit it." : "No content yet — add it."}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openDetailForCard(card)}
+                        className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        {hasDetail ? "Edit Detail Page" : "Add Detail Page"}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -775,6 +1212,15 @@ export default function SolutionPageEditor() {
         </div>
       </CollapsibleSection>
       </div>
+
+      {editingDetail && (
+        <DetailEditModal
+          initial={editingDetail.draft}
+          isNew={editingDetail.isNew}
+          onSave={saveDetailFromModal}
+          onClose={() => setEditingDetail(null)}
+        />
+      )}
     </div>
   );
 }

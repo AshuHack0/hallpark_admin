@@ -94,12 +94,14 @@ const slugify = (s = "") =>
 function makeBlankDetail() {
   return {
     slug: "",
+    group: "",
     eyebrow: "New Solution",
     title: "New Solution Detail",
     intro: "",
     image: "/image.png",
-    systemsHeading: "Integrated Systems",
-    systems: [],
+    howItOperates: "",
+    systemComponentsHeading: "System Components",
+    systemComponents: [],
     benefitsHeading: "Key Benefit",
     benefits: [],
     problemHeading: "Problem We Solve",
@@ -201,6 +203,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
     onSave({
       ...draft,
       slug: cleanedSlug,
+      systemComponents: (draft.systemComponents ?? []).map((s) => s.trim()).filter(Boolean),
       systems: (draft.systems ?? []).map((s) => s.trim()).filter(Boolean),
       benefits: (draft.benefits ?? []).map((s) => s.trim()).filter(Boolean),
     });
@@ -339,16 +342,28 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Integrated Systems */}
+          {/* How It Operates (optional) */}
+          <div>
+            <label className={labelClass}>How It Operates (optional)</label>
+            <textarea
+              value={draft.howItOperates ?? ""}
+              onChange={(e) => setField("howItOperates", e.target.value)}
+              className={inputClass}
+              rows={2}
+              placeholder="Vehicles are identified and validated automatically through AI cameras, QR codes..."
+            />
+          </div>
+
+          {/* System Components / Integrated Systems */}
           <DetailStringList
-            label="Integrated Systems"
-            headingValue={draft.systemsHeading ?? ""}
-            onHeadingChange={(v) => setField("systemsHeading", v)}
-            headingPlaceholder="Integrated Systems"
-            items={draft.systems ?? []}
-            onItemChange={(idx, v) => setListItem("systems", idx, v)}
-            onAdd={() => addListItem("systems")}
-            onRemove={(idx) => removeListItem("systems", idx)}
+            label="System Components"
+            headingValue={draft.systemComponentsHeading ?? ""}
+            onHeadingChange={(v) => setField("systemComponentsHeading", v)}
+            headingPlaceholder="System Components / Integrated Systems"
+            items={draft.systemComponents ?? []}
+            onItemChange={(idx, v) => setListItem("systemComponents", idx, v)}
+            onAdd={() => addListItem("systemComponents")}
+            onRemove={(idx) => removeListItem("systemComponents", idx)}
           />
 
           {/* Key Benefit */}
@@ -907,6 +922,83 @@ export default function SolutionPageEditor() {
                 </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Advantages of Our Solutions (shown on every detail page) */}
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700">Advantages of Our Solutions</h3>
+                <p className="text-[11px] text-slate-400">Shared block shown on every solution detail page.</p>
+              </div>
+              <button
+                onClick={() => setSolutions((p) => ({
+                  ...p,
+                  advantages: {
+                    heading: p.advantages?.heading || "Advantages of Our Solutions",
+                    items: [...(p.advantages?.items ?? []), { title: "New Advantage", description: "" }],
+                  },
+                }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Advantage
+              </button>
+            </div>
+
+            <div className="mb-3">
+              <label className={labelClass}>Heading</label>
+              <input
+                value={solutions.advantages?.heading ?? ""}
+                onChange={(e) => setSolutions((p) => ({
+                  ...p,
+                  advantages: { ...(p.advantages ?? { items: [] }), heading: e.target.value },
+                }))}
+                className={inputClass}
+                placeholder="Advantages of Our Solutions"
+              />
+            </div>
+
+            <div className="space-y-3">
+              {(solutions.advantages?.items ?? []).map((adv, ai) => (
+                <div key={ai} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-600">Advantage {ai + 1}</p>
+                    <button
+                      onClick={() => setSolutions((p) => ({
+                        ...p,
+                        advantages: { ...p.advantages, items: p.advantages.items.filter((_, idx) => idx !== ai) },
+                      }))}
+                      className="rounded p-1 text-red-600 transition hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <input
+                    value={adv.title ?? ""}
+                    onChange={(e) => setSolutions((p) => ({
+                      ...p,
+                      advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, title: e.target.value } : a) },
+                    }))}
+                    className={`${inputClass} mb-2`}
+                    placeholder="Advantage title"
+                  />
+                  <textarea
+                    value={adv.description ?? ""}
+                    onChange={(e) => setSolutions((p) => ({
+                      ...p,
+                      advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, description: e.target.value } : a) },
+                    }))}
+                    className={inputClass}
+                    rows={2}
+                    placeholder="Advantage description"
+                  />
+                </div>
+              ))}
+              {(solutions.advantages?.items ?? []).length === 0 && (
+                <p className="text-xs text-slate-400">No advantages yet. Click &quot;Add Advantage&quot;.</p>
+              )}
             </div>
           </div>
         </div>

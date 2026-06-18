@@ -181,29 +181,67 @@ export default function AboutPageEditor() {
     }
   }
 
-  async function handleImageUpload(field, file) {
-    const key = `image-${field}`;
+  // Generic upload that writes the resulting URL into a given form's `field`
+  // (defaults to "image"). Used by every section modal's image field so each
+  // one has a working Upload button — not just the hero.
+  async function uploadImageForForm(uploadKey, setForm, file, field = "image") {
     setError("");
-    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    setUploadProgress((p) => ({ ...p, [uploadKey]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
-        setUploadProgress((p) => ({ ...p, [key]: pct }))
+        setUploadProgress((p) => ({ ...p, [uploadKey]: pct })),
       );
-      setContent((prev) => ({
-        ...prev,
-        [field === "heroImage" ? "hero" : field]: {
-          ...prev[field === "heroImage" ? "hero" : field],
-          image: url,
-        },
-      }));
+      setForm((p) => ({ ...p, [field]: url }));
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError("Image upload failed");
       console.error(err);
     } finally {
-      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+      setUploadProgress((p) => ({ ...p, [uploadKey]: undefined }));
     }
+  }
+
+  // Small reusable image field: path input + preview + Upload button.
+  // eslint-disable-next-line react/prop-types
+  function ImageField({ label = "Image", value, onChange, setForm, uploadKey, field = "image" }) {
+    return (
+      <label className="grid gap-1">
+        <span className={labelClass}>{label}</span>
+        <div className="flex items-start gap-2">
+          <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+            {value && value !== "/image.png" ? (
+              <img src={value} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-slate-300">
+                <ImageIcon className="h-5 w-5" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-1 gap-2">
+            <input value={value ?? ""} onChange={onChange} className={inputClass} placeholder="/your-image.png" />
+            <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+              {uploadProgress[uploadKey] !== undefined ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[uploadKey]}%</>
+              ) : (
+                <><Upload className="h-3.5 w-3.5" />Upload</>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadProgress[uploadKey] !== undefined}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadImageForForm(uploadKey, setForm, file, field);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+        </div>
+      </label>
+    );
   }
 
   function openDeleteConfirm(type, index, label) {
@@ -1007,38 +1045,13 @@ export default function AboutPageEditor() {
               rows={5}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <div className="flex gap-2">
-              <input
-                value={heroForm.image}
-                onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
-                className={inputClass}
-                placeholder="/your-image.png"
-              />
-              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
-                <Upload className="h-3.5 w-3.5" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload("heroImage", file).then(() => {
-                        setContent((prev) => ({
-                          ...prev,
-                          hero: { ...prev.hero, image: prev.hero.image },
-                        }));
-                        setHeroForm((p) => ({ ...p, image: p.image }));
-                      });
-                    }
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
-          </label>
+          <ImageField
+            label="Image path"
+            value={heroForm.image}
+            onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setHeroForm}
+            uploadKey="image-hero"
+          />
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
             <input
@@ -1118,15 +1131,13 @@ export default function AboutPageEditor() {
               className={inputClass}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={missionSectionForm.image}
-              onChange={(e) => setMissionSectionForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={missionSectionForm.image}
+            onChange={(e) => setMissionSectionForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setMissionSectionForm}
+            uploadKey="image-mission"
+          />
         </div>
       </Modal>
 
@@ -1172,15 +1183,13 @@ export default function AboutPageEditor() {
               className={inputClass}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={visionSectionForm.image}
-              onChange={(e) => setVisionSectionForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={visionSectionForm.image}
+            onChange={(e) => setVisionSectionForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setVisionSectionForm}
+            uploadKey="image-vision"
+          />
         </div>
       </Modal>
 
@@ -1280,15 +1289,13 @@ export default function AboutPageEditor() {
               className={inputClass}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={storySectionForm.image}
-              onChange={(e) => setStorySectionForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={storySectionForm.image}
+            onChange={(e) => setStorySectionForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setStorySectionForm}
+            uploadKey="image-story"
+          />
         </div>
       </Modal>
 
@@ -1345,15 +1352,13 @@ export default function AboutPageEditor() {
               rows={4}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={whatWeDoSectionForm.image}
-              onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={whatWeDoSectionForm.image}
+            onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setWhatWeDoSectionForm}
+            uploadKey="image-whatWeDo"
+          />
         </div>
       </Modal>
 
@@ -1408,15 +1413,13 @@ export default function AboutPageEditor() {
               rows={6}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={technologyForm.image}
-              onChange={(e) => setTechnologyForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={technologyForm.image}
+            onChange={(e) => setTechnologyForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setTechnologyForm}
+            uploadKey="image-technology"
+          />
           <label className="grid gap-1">
             <span className={labelClass}>Image badge</span>
             <input
@@ -1472,15 +1475,13 @@ export default function AboutPageEditor() {
               rows={3}
             />
           </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Image path</span>
-            <input
-              value={ctaForm.image}
-              onChange={(e) => setCtaForm((p) => ({ ...p, image: e.target.value }))}
-              className={inputClass}
-              placeholder="/your-image.png"
-            />
-          </label>
+          <ImageField
+            label="Image path"
+            value={ctaForm.image}
+            onChange={(e) => setCtaForm((p) => ({ ...p, image: e.target.value }))}
+            setForm={setCtaForm}
+            uploadKey="image-cta"
+          />
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
             <input

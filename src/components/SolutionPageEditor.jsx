@@ -65,6 +65,36 @@ const DEFAULT_FEATURES = {
   heading: "Built for High-Demand Environments",
   headingGradient: "Environments",
   subtitle: "From airports to smart cities, HalaPark scales across every high-traffic environment.",
+  image: "",
+  industries: [
+    { icon: "Zap", label: "Airports" },
+    { icon: "Building2", label: "Shopping Malls" },
+    { icon: "BadgeCheck", label: "Hotels" },
+    { icon: "Cctv", label: "Residential Towers" },
+    { icon: "Shield", label: "Hospitals" },
+    { icon: "MapPin", label: "Universities" },
+    { icon: "Lock", label: "Government Facilities" },
+    { icon: "TrendingUp", label: "Smart Cities" },
+  ],
+};
+
+// Icon names the frontend (INDUSTRY_ICONS) knows how to render.
+const INDUSTRY_ICON_NAMES = [
+  "Zap", "Building2", "BadgeCheck", "Cctv", "Shield", "MapPin", "Lock", "TrendingUp", "Car", "CreditCard", "Check",
+];
+
+const DEFAULT_DEPLOYMENT = {
+  heading: "Deployment",
+  headingGradient: "Journey",
+  subtitle: "We ensure a smooth rollout by understanding your environment, integrating with existing systems, and improving performance over time without disruption.",
+  steps: [
+    { step: "01", title: "Audit Current Setup", description: "Mapping gates, cameras, payment flows, access rules, and workflows." },
+    { step: "02", title: "Connect the Stack", description: "Integration with hardware, software, and payment systems while preserving operations." },
+    { step: "03", title: "Launch & Optimize", description: "Go live with dashboards, alerts, reporting, and continuous optimization." },
+  ],
+  image: "",
+  panelTitle: "Go live in days,",
+  panelTitleAccent: "not months.",
 };
 
 const DEFAULT_WHY = {
@@ -470,6 +500,7 @@ export default function SolutionPageEditor() {
   const [integration, setIntegration] = useState(DEFAULT_INTEGRATION);
   const [trust, setTrust] = useState(DEFAULT_TRUST);
   const [features, setFeatures] = useState(DEFAULT_FEATURES);
+  const [deployment, setDeployment] = useState(DEFAULT_DEPLOYMENT);
   const [why, setWhy] = useState(DEFAULT_WHY);
   const [cta, setCtA] = useState(DEFAULT_CTA);
   const [details, setDetails] = useState(DEFAULT_DETAILS);
@@ -530,7 +561,8 @@ export default function SolutionPageEditor() {
         setSolutions(data.page.sections.solutions || DEFAULT_SOLUTIONS);
         setIntegration(data.page.sections.integration || DEFAULT_INTEGRATION);
         setTrust(data.page.sections.trust || DEFAULT_TRUST);
-        setFeatures(data.page.sections.features || DEFAULT_FEATURES);
+        setFeatures({ ...DEFAULT_FEATURES, ...(data.page.sections.features || {}) });
+        setDeployment({ ...DEFAULT_DEPLOYMENT, ...(data.page.sections.deployment || {}) });
         setWhy(data.page.sections.why || DEFAULT_WHY);
         setCtA(data.page.sections.cta || DEFAULT_CTA);
         setDetails(Array.isArray(data.page.sections.details) ? data.page.sections.details : DEFAULT_DETAILS);
@@ -549,7 +581,7 @@ export default function SolutionPageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("solutions", {
-        sections: { hero, challenges, solutions, integration, trust, features, why, cta, details },
+        sections: { hero, challenges, solutions, integration, trust, features, deployment, why, cta, details },
       });
       setSuccess("Solutions page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -598,6 +630,12 @@ export default function SolutionPageEditor() {
           ...p,
           cards: p.cards.map((c, i) => i === cardIndex ? { ...c, image: url } : c)
         }));
+      } else if (section === "cta") {
+        setCtA((p) => ({ ...p, image: url }));
+      } else if (section === "features") {
+        setFeatures((p) => ({ ...p, image: url }));
+      } else if (section === "deployment") {
+        setDeployment((p) => ({ ...p, image: url }));
       }
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -1221,6 +1259,218 @@ export default function SolutionPageEditor() {
               placeholder="From airports to smart cities..."
             />
           </div>
+
+          {/* Background image */}
+          <div>
+            <label className={labelClass}>Background Image</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                {features.image && features.image !== "/image.png" ? (
+                  <img src={features.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={features.image ?? ""}
+                  onChange={(e) => setFeatures((p) => ({ ...p, image: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Image URL (leave blank for default)"
+                />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["features-0"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["features-0"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload image</>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["features-0"] !== undefined}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("features", 0, f); e.target.value = ""; }} />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Industries / Environments list */}
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-700">Environments ({(features.industries ?? []).length})</h3>
+              <button
+                onClick={() => setFeatures((p) => ({ ...p, industries: [...(p.industries ?? []), { icon: "Building2", label: "New Environment" }] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Environment
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(features.industries ?? []).map((ind, ii) => (
+                <div key={ii} className="flex items-center gap-2">
+                  <select
+                    value={ind.icon ?? "Building2"}
+                    onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, icon: e.target.value } : x) }))}
+                    className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
+                  >
+                    {INDUSTRY_ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <input
+                    value={ind.label ?? ""}
+                    onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, label: e.target.value } : x) }))}
+                    className={inputClass}
+                    placeholder="Environment label (e.g. Airports)"
+                  />
+                  <button
+                    onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) }))}
+                    className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* DEPLOYMENT JOURNEY SECTION */}
+      <CollapsibleSection title="Deployment Journey Section">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                value={deployment.heading ?? ""}
+                onChange={(e) => setDeployment((p) => ({ ...p, heading: e.target.value }))}
+                className={inputClass}
+                placeholder="Deployment"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient</label>
+              <input
+                value={deployment.headingGradient ?? ""}
+                onChange={(e) => setDeployment((p) => ({ ...p, headingGradient: e.target.value }))}
+                className={inputClass}
+                placeholder="Journey"
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <textarea
+              value={deployment.subtitle ?? ""}
+              onChange={(e) => setDeployment((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              rows={2}
+              placeholder="We ensure a smooth rollout by understanding your environment..."
+            />
+          </div>
+
+          {/* Steps */}
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-700">Steps ({(deployment.steps ?? []).length})</h3>
+              <button
+                onClick={() => setDeployment((p) => ({ ...p, steps: [...(p.steps ?? []), { step: String((p.steps?.length ?? 0) + 1).padStart(2, "0"), title: "New Step", description: "" }] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Step
+              </button>
+            </div>
+            <div className="space-y-3">
+              {(deployment.steps ?? []).map((st, si) => (
+                <div key={si} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-600">Step {si + 1}</p>
+                    <button
+                      onClick={() => setDeployment((p) => ({ ...p, steps: p.steps.filter((_, idx) => idx !== si) }))}
+                      className="rounded p-1 text-red-600 transition hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={st.step ?? ""}
+                      onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, step: e.target.value } : x) }))}
+                      className={`${inputClass} w-20 shrink-0`}
+                      placeholder="01"
+                    />
+                    <input
+                      value={st.title ?? ""}
+                      onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, title: e.target.value } : x) }))}
+                      className={inputClass}
+                      placeholder="Step title"
+                    />
+                  </div>
+                  <textarea
+                    value={st.description ?? ""}
+                    onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: e.target.value } : x) }))}
+                    className={`${inputClass} mt-2`}
+                    rows={2}
+                    placeholder="Step description"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Side panel */}
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="mb-3 text-sm font-semibold text-slate-700">Side Panel</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Panel Title</label>
+                <input
+                  value={deployment.panelTitle ?? ""}
+                  onChange={(e) => setDeployment((p) => ({ ...p, panelTitle: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Go live in days,"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Panel Title (accent)</label>
+                <input
+                  value={deployment.panelTitleAccent ?? ""}
+                  onChange={(e) => setDeployment((p) => ({ ...p, panelTitleAccent: e.target.value }))}
+                  className={inputClass}
+                  placeholder="not months."
+                />
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className={labelClass}>Panel Background Image</label>
+              <div className="flex items-start gap-3">
+                <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                  {deployment.image && deployment.image !== "/image.png" ? (
+                    <img src={deployment.image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-slate-300">
+                      <ImageIcon className="h-6 w-6" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input
+                    value={deployment.image ?? ""}
+                    onChange={(e) => setDeployment((p) => ({ ...p, image: e.target.value }))}
+                    className={inputClass}
+                    placeholder="Image URL (leave blank for default)"
+                  />
+                  <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                    {uploadProgress["deployment-0"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["deployment-0"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload image</>
+                    )}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["deployment-0"] !== undefined}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("deployment", 0, f); e.target.value = ""; }} />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
 
@@ -1299,6 +1549,54 @@ export default function SolutionPageEditor() {
                 className={inputClass}
                 placeholder="Talk to Our Team"
               />
+            </div>
+          </div>
+
+          {/* Background Image */}
+          <div>
+            <label className={labelClass}>Background Image</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                {cta.image && cta.image !== "/image.png" ? (
+                  <img src={cta.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={cta.image ?? ""}
+                  onChange={(e) => setCtA((p) => ({ ...p, image: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Image URL (leave blank to use the default skyline)"
+                />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["cta-0"] !== undefined ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {uploadProgress["cta-0"]}%
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5" />
+                      Upload image
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadProgress["cta-0"] !== undefined}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("cta", 0, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>

@@ -6,9 +6,11 @@ const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 p
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
 
 const DEFAULT_HERO = {
-  title: "Intelligent Parking Infrastructure",
-  subtitle: "HalaPark delivers an AI-powered smart parking solution for large-scale residential, commercial, and mixed-use developments across the UAE.",
+  title: "Intelligent Parking Experiences",
+  titleAccent: "Built for the Future",
+  subtitle: "HalaPark delivers an AI-powered smart parking ecosystem designed for large-scale residential, commercial, and mixed-use developments across the UAE, enabling seamless mobility, automation, and real-time operational control.",
   ctaLabel: "Get In Touch",
+  ctaLink: "/contact",
   videoUrl: "/Halapark Hero Page-Ai.mp4",
 };
 
@@ -145,30 +147,36 @@ function makeBlankDetail() {
 // "Integrated Systems" and "Key Benefit" lists).
 // eslint-disable-next-line react/prop-types
 function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceholder, items, onItemChange, onAdd, onRemove }) {
+  const count = (items ?? []).length;
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="flex-1">
-          <label className={labelClass}>{label} — heading</label>
-          <input
-            value={headingValue}
-            onChange={(e) => onHeadingChange(e.target.value)}
-            className={inputClass}
-            placeholder={headingPlaceholder}
-          />
-        </div>
+      <div className="mb-2">
+        <label className={labelClass}>{label} — heading</label>
+        <input
+          value={headingValue}
+          onChange={(e) => onHeadingChange(e.target.value)}
+          className={inputClass}
+          placeholder={headingPlaceholder}
+        />
+      </div>
+
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs font-semibold text-slate-600">{label} items ({count})</span>
         <button
           type="button"
           onClick={onAdd}
-          className="mt-5 shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Item
         </button>
       </div>
+
       <div className="space-y-2">
-        {(items ?? []).length === 0 ? (
-          <p className="text-xs text-slate-400">No items yet.</p>
+        {count === 0 ? (
+          <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">
+            No items yet. Click &quot;Add Item&quot; to add one.
+          </p>
         ) : (
           (items ?? []).map((item, idx) => (
             <div key={idx} className="flex items-center gap-2">
@@ -181,9 +189,11 @@ function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceho
               <button
                 type="button"
                 onClick={() => onRemove(idx)}
-                className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
+                title="Remove item"
+                className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
               </button>
             </div>
           ))
@@ -687,14 +697,25 @@ export default function SolutionPageEditor() {
       {/* HERO SECTION */}
       <CollapsibleSection title="Hero Section" defaultOpen={true}>
         <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Title</label>
-            <input
-              value={hero.title ?? ""}
-              onChange={(e) => setHero((p) => ({ ...p, title: e.target.value }))}
-              className={inputClass}
-              placeholder="Intelligent Parking Infrastructure"
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Title</label>
+              <input
+                value={hero.title ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, title: e.target.value }))}
+                className={inputClass}
+                placeholder="Intelligent Parking Experiences"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Title Accent (gradient part)</label>
+              <input
+                value={hero.titleAccent ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, titleAccent: e.target.value }))}
+                className={inputClass}
+                placeholder="Built for the Future"
+              />
+            </div>
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -706,14 +727,25 @@ export default function SolutionPageEditor() {
               placeholder="HalaPark delivers..."
             />
           </div>
-          <div>
-            <label className={labelClass}>CTA Label</label>
-            <input
-              value={hero.ctaLabel ?? ""}
-              onChange={(e) => setHero((p) => ({ ...p, ctaLabel: e.target.value }))}
-              className={inputClass}
-              placeholder="Get In Touch"
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>CTA Label</label>
+              <input
+                value={hero.ctaLabel ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, ctaLabel: e.target.value }))}
+                className={inputClass}
+                placeholder="Get In Touch"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>CTA Link</label>
+              <input
+                value={hero.ctaLink ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, ctaLink: e.target.value }))}
+                className={inputClass}
+                placeholder="/contact"
+              />
+            </div>
           </div>
           <div>
             <label className={labelClass}>Video URL</label>
@@ -853,9 +885,9 @@ export default function SolutionPageEditor() {
                         ...p,
                         cards: p.cards.filter((_, idx) => idx !== i)
                       }))}
-                      className="text-red-600 hover:bg-red-50 p-1 rounded transition"
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>
                   </div>
                   <div className="space-y-3">
@@ -1104,9 +1136,9 @@ export default function SolutionPageEditor() {
                         ...p,
                         cards: p.cards.filter((_, idx) => idx !== i)
                       }))}
-                      className="text-red-600 hover:bg-red-50 p-1 rounded transition"
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>
                   </div>
                   <div className="space-y-3">

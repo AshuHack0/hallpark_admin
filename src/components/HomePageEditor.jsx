@@ -572,12 +572,36 @@ export default function HomePageEditor() {
 
               <div className="grid gap-3">
                 <div>
-                  <label className={labelClass}>Tag (eyebrow / headline)</label>
-                  <input value={slide.tag ?? ""} onChange={(e) => updateSlide(index, "tag", e.target.value)} className={inputClass} placeholder="Tag" />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Tag (eyebrow / headline)</label>
+                    <span className={`text-[10px] font-medium ${(slide.tag ?? "").length > 60 ? "text-red-500" : "text-slate-400"}`}>
+                      {(slide.tag ?? "").length}/60
+                    </span>
+                  </div>
+                  <input
+                    value={slide.tag ?? ""}
+                    onChange={(e) => updateSlide(index, "tag", e.target.value)}
+                    maxLength={60}
+                    className={inputClass}
+                    placeholder="Tag"
+                  />
+                  <p className="mt-1 text-[10px] text-slate-400">Keep it short — long headlines may clip on the slider.</p>
                 </div>
                 <div>
-                  <label className={labelClass}>Title</label>
-                  <textarea value={slide.title ?? ""} onChange={(e) => updateSlide(index, "title", e.target.value)} className={inputClass} rows={2} placeholder="Title" />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Title</label>
+                    <span className={`text-[10px] font-medium ${(slide.title ?? "").length > 160 ? "text-red-500" : "text-slate-400"}`}>
+                      {(slide.title ?? "").length}/160
+                    </span>
+                  </div>
+                  <textarea
+                    value={slide.title ?? ""}
+                    onChange={(e) => updateSlide(index, "title", e.target.value)}
+                    maxLength={160}
+                    className={inputClass}
+                    rows={2}
+                    placeholder="Title"
+                  />
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>

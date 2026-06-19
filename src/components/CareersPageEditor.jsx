@@ -106,9 +106,11 @@ export default function CareersPageEditor() {
     location: "",
     employmentType: "",
     description: "",
+    fullDescription: "",
     applyLabel: "Apply Now",
     applyMode: "form",
     applyLink: "/contact",
+    status: "active",
   });
   const [reasonText, setReasonText] = useState("");
 
@@ -333,6 +335,7 @@ export default function CareersPageEditor() {
       applyLabel: "Apply Now",
       applyMode: "form",
       applyLink: "/contact",
+      status: "active",
     });
     setJobPostModalOpen(true);
   }
@@ -347,11 +350,26 @@ export default function CareersPageEditor() {
       location: item.location ?? "",
       employmentType: item.employmentType ?? "",
       description: item.description ?? "",
+      fullDescription: item.fullDescription ?? "",
       applyLabel: item.applyLabel ?? "Apply Now",
       applyMode: item.applyMode ?? "link",
       applyLink: item.applyLink ?? "/contact",
+      status: item.status === "closed" ? "closed" : "active",
     });
     setJobPostModalOpen(true);
+  }
+
+  // Toggle a job between active and closed (persists immediately).
+  function toggleJobStatus(index) {
+    setContent((prev) => {
+      const posts = (prev.openPositions?.posts ?? []).map((p, i) =>
+        i === index ? { ...p, status: p.status === "closed" ? "active" : "closed" } : p,
+      );
+      const next = { ...prev, openPositions: { ...prev.openPositions, posts } };
+      const nowClosed = posts[index]?.status === "closed";
+      void persistSections(next, nowClosed ? "Job moved to Closed." : "Job reopened.");
+      return next;
+    });
   }
 
   function saveJobPost() {
@@ -361,9 +379,11 @@ export default function CareersPageEditor() {
       location: jobPostForm.location.trim(),
       employmentType: jobPostForm.employmentType.trim(),
       description: jobPostForm.description.trim(),
+      fullDescription: jobPostForm.fullDescription.trim(),
       applyLabel: jobPostForm.applyLabel.trim() || "Apply Now",
       applyMode: jobPostForm.applyMode === "form" ? "form" : "link",
       applyLink: jobPostForm.applyLink.trim() || "/contact",
+      status: jobPostForm.status === "closed" ? "closed" : "active",
     };
 
     setContent((prev) => {
@@ -614,16 +634,23 @@ export default function CareersPageEditor() {
             </p>
           ) : (
             <div className="space-y-3">
-              {content.openPositions.posts.map((post, index) => (
+              {content.openPositions.posts.map((post, index) => {
+                const isClosed = post.status === "closed";
+                return (
                 <div
                   key={`job-${index}-${post.title}`}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
+                  className={`rounded-xl border p-3 sm:p-4 ${isClosed ? "border-slate-200 bg-slate-100 opacity-75" : "border-slate-200 bg-slate-50"}`}
                 >
                   <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
-                        Job {index + 1}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                          Job {index + 1}
+                        </p>
+                        <span className={`rounded-full px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider ${isClosed ? "bg-slate-200 text-slate-500" : "bg-green-100 text-green-700"}`}>
+                          {isClosed ? "Closed" : "Active"}
+                        </span>
+                      </div>
                       <p className="mt-1 font-semibold text-[#050A13]">{post.title}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {post.department ? (
@@ -642,6 +669,14 @@ export default function CareersPageEditor() {
                       ) : null}
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleJobStatus(index)}
+                        className={btnOutline}
+                        title={isClosed ? "Reopen this job" : "Close this job (move to Closed)"}
+                      >
+                        {isClosed ? "Reopen" : "Close"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => openEditJobPost(index)}
@@ -671,7 +706,8 @@ export default function CareersPageEditor() {
                       : `${post.applyLabel ?? "Apply Now"} → ${post.applyLink ?? "/contact"}`}
                   </p>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -1023,14 +1059,38 @@ export default function CareersPageEditor() {
             />
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Description</span>
+            <span className={labelClass}>Status</span>
+            <select
+              value={jobPostForm.status}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, status: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="active">Active (shown on website)</option>
+              <option value="closed">Closed (hidden from website)</option>
+            </select>
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Short description (shown on the card)</span>
             <textarea
               value={jobPostForm.description}
               onChange={(e) => setJobPostForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
-              rows={4}
-              placeholder="Brief job description shown on the careers page"
+              rows={3}
+              placeholder="Brief one- or two-line summary shown on the careers listing"
             />
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Full details (HTML — shown on the job detail view)</span>
+            <textarea
+              value={jobPostForm.fullDescription}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, fullDescription: e.target.value }))}
+              className={`${inputClass} font-mono text-xs`}
+              rows={8}
+              placeholder={"<h3>Responsibilities</h3>\n<ul>\n  <li>Lead the valet team…</li>\n</ul>\n<h3>Requirements</h3>\n<p>…</p>"}
+            />
+            <span className="text-[11px] text-slate-400">
+              Supports HTML: headings, paragraphs, lists, bold, links. Leave blank to use the short description.
+            </span>
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Apply button text</span>

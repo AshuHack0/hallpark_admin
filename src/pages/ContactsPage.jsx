@@ -176,6 +176,7 @@ export default function ContactsPage() {
   const [selected, setSelected] = useState(null);
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(true);
+  const [filter, setFilter]     = useState("active"); // active = all except closed
 
   useEffect(() => {
     document.title = "Contact Submissions — HalaPark Admin";
@@ -210,13 +211,39 @@ export default function ContactsPage() {
     );
   }
 
+  const visibleContacts = contacts.filter((c) => {
+    const status = c.status ?? "new";
+    if (filter === "all") return true;
+    if (filter === "active") return status !== "closed";
+    return status === filter;
+  });
+  const closedCount = contacts.filter((c) => (c.status ?? "new") === "closed").length;
+
   return (
     <div>
       <div>
         <h2 className="text-2xl font-semibold text-[#050A13]">Contact Submissions</h2>
         <p className="mt-1 text-sm text-slate-500">
-          {contacts.length} submission{contacts.length !== 1 ? "s" : ""} · click a row to view & reply
+          {contacts.length} total · {closedCount} closed · click a row to view &amp; reply
         </p>
+      </div>
+
+      {/* Status filter */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {["active", "new", "read", "replied", "closed", "all"].map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition ${
+              filter === f
+                ? "bg-[#0088FF] text-white"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-[#0088FF] hover:text-[#0088FF]"
+            }`}
+          >
+            {f === "active" ? "Active (not closed)" : f}
+          </button>
+        ))}
       </div>
 
       {contacts.length === 0 ? (
@@ -237,7 +264,7 @@ export default function ContactsPage() {
               </tr>
             </thead>
             <tbody>
-              {contacts.map((c) => (
+              {visibleContacts.map((c) => (
                 <tr key={c._id} onClick={() => setSelected(c)}
                   className="cursor-pointer border-b border-slate-100 transition-colors last:border-0 hover:bg-[#F4F8FF]">
                   <td className="px-4 py-3">

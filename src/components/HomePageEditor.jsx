@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
+import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 
 const inputClass =
@@ -110,6 +110,11 @@ const DEFAULT_BLACK_BANNER = {
 };
 
 const DEFAULT_GOOD_LOOKING_SERVICES = {
+  heading: "SERVICES",
+  exploreCtaLabel: "Explore Services",
+  exploreCtaLink: "/services",
+  contactCtaLabel: "Talk to us",
+  contactCtaLink: "/contact",
   parkingIntegrations: [
     { name: "Technical Support", bgcolor: "bg-[#EC4899]", img: "/Group11.svg" },
     { name: "Operations", bgcolor: "bg-[#4A44FE]", img: "/Group66.png" },
@@ -144,6 +149,8 @@ const DEFAULT_CLIENTS_PARTNERS = {
   heading: "Built Together with Our",
   headingBr: true,
   headingEnd: "Clients & Partners",
+  // Uploaded logo images shown in the ticker. Each: { image, alt }.
+  logos: [],
   logoPlaceholders: [
     "Client Logo",
     "Partner Logo",
@@ -475,6 +482,86 @@ export default function HomePageEditor() {
     }
   }
 
+  // ── Home Services cards (goodLookingServices.cards) ────────────────────────
+  function updateServiceCard(i, field, value) {
+    setGoodLookingServices((prev) => ({
+      ...prev,
+      cards: (prev.cards ?? []).map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
+    }));
+  }
+  function addServiceCard() {
+    setGoodLookingServices((prev) => ({
+      ...prev,
+      cards: [...(prev.cards ?? []), { slug: "", name: "New Service", summary: "", mediaType: "image", mediaSrc: "" }],
+    }));
+  }
+  function removeServiceCard(i) {
+    setGoodLookingServices((prev) => ({
+      ...prev,
+      cards: (prev.cards ?? []).filter((_, idx) => idx !== i),
+    }));
+  }
+  async function handleServiceCardMediaUpload(i, file, resourceType) {
+    const key = `glcard-${i}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, resourceType, (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateServiceCard(i, "mediaSrc", url);
+      setSuccess("Media uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
+  // ── Clients & Partners logos ───────────────────────────────────────────────
+  function updateLogo(i, field, value) {
+    setClientsPartners((prev) => ({
+      ...prev,
+      logos: (prev.logos ?? []).map((l, idx) => (idx === i ? { ...l, [field]: value } : l)),
+    }));
+  }
+  function addLogo() {
+    setClientsPartners((prev) => ({
+      ...prev,
+      logos: [...(prev.logos ?? []), { image: "", alt: "" }],
+    }));
+  }
+  function removeLogo(i) {
+    setClientsPartners((prev) => ({
+      ...prev,
+      logos: (prev.logos ?? []).filter((_, idx) => idx !== i),
+    }));
+  }
+  async function handleLogoUpload(i, file) {
+    const key = `logo-${i}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateLogo(i, "image", url);
+      setSuccess("Logo uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSave(e) {
     e.preventDefault();
     setError("");
@@ -660,37 +747,24 @@ export default function HomePageEditor() {
         <CollapsibleSection title="Who We Are Section">
           <div className="grid gap-3">
             <div>
-              <label className={labelClass}>Eyebrow heading (animated)</label>
+              <label className={labelClass}>Heading</label>
               <input
-                value={whoWeAre.eyebrowHeading ?? ""}
-                onChange={(e) => setWhoWeAre((p) => ({ ...p, eyebrowHeading: e.target.value }))}
+                value={whoWeAre.audiences?.business?.heading ?? ""}
+                onChange={(e) => updateWhoAudience("business", "heading", e.target.value)}
                 className={inputClass}
                 placeholder="Who We Are"
               />
             </div>
-
-            {["business", "users"].map((which) => (
-              <div key={which} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  {which === "business" ? "Business tab" : "Users tab"}
-                </p>
-                <div className="grid gap-2">
-                  <input
-                    value={whoWeAre.audiences?.[which]?.heading ?? ""}
-                    onChange={(e) => updateWhoAudience(which, "heading", e.target.value)}
-                    className={inputClass}
-                    placeholder="Heading"
-                  />
-                  <textarea
-                    value={whoWeAre.audiences?.[which]?.body ?? ""}
-                    onChange={(e) => updateWhoAudience(which, "body", e.target.value)}
-                    className={inputClass}
-                    rows={3}
-                    placeholder="Body"
-                  />
-                </div>
-              </div>
-            ))}
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={whoWeAre.audiences?.business?.body ?? ""}
+                onChange={(e) => updateWhoAudience("business", "body", e.target.value)}
+                className={inputClass}
+                rows={4}
+                placeholder="Section description shown on the website"
+              />
+            </div>
 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               Highlights
@@ -1008,6 +1082,137 @@ export default function HomePageEditor() {
         {/* GOOD LOOKING SERVICES */}
         <CollapsibleSection title="Good Looking Services Section">
           <div className="grid gap-3">
+            <div>
+              <label className={labelClass}>Section heading</label>
+              <input
+                value={goodLookingServices.heading ?? ""}
+                onChange={(e) => setGoodLookingServices((p) => ({ ...p, heading: e.target.value }))}
+                className={inputClass}
+                placeholder="SERVICES"
+              />
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Primary button label</label>
+                <input
+                  value={goodLookingServices.exploreCtaLabel ?? ""}
+                  onChange={(e) => setGoodLookingServices((p) => ({ ...p, exploreCtaLabel: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Explore Services"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Primary button link</label>
+                <input
+                  value={goodLookingServices.exploreCtaLink ?? ""}
+                  onChange={(e) => setGoodLookingServices((p) => ({ ...p, exploreCtaLink: e.target.value }))}
+                  className={inputClass}
+                  placeholder="/services"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Secondary button label</label>
+                <input
+                  value={goodLookingServices.contactCtaLabel ?? ""}
+                  onChange={(e) => setGoodLookingServices((p) => ({ ...p, contactCtaLabel: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Talk to us"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Secondary button link</label>
+                <input
+                  value={goodLookingServices.contactCtaLink ?? ""}
+                  onChange={(e) => setGoodLookingServices((p) => ({ ...p, contactCtaLink: e.target.value }))}
+                  className={inputClass}
+                  placeholder="/contact"
+                />
+              </div>
+            </div>
+            <div className="my-1 border-t border-slate-200" />
+
+            {/* Service cards (shown on the home Services section) */}
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Service Cards ({(goodLookingServices.cards ?? []).length})
+              </p>
+              <button
+                type="button"
+                onClick={addServiceCard}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Card
+              </button>
+            </div>
+            {(goodLookingServices.cards ?? []).length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">
+                No service cards yet. Click &quot;Add Card&quot;.
+              </p>
+            ) : (
+              (goodLookingServices.cards ?? []).map((card, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Card {i + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeServiceCard(i)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </button>
+                  </div>
+                  <div className="grid gap-2">
+                    <input
+                      value={card.name ?? ""}
+                      onChange={(e) => updateServiceCard(i, "name", e.target.value)}
+                      className={inputClass}
+                      placeholder="Service name (e.g. Self-Parking)"
+                    />
+                    <textarea
+                      value={card.summary ?? ""}
+                      onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
+                      className={inputClass}
+                      rows={2}
+                      placeholder="Short summary shown on the card"
+                    />
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass}>Slug (link)</label>
+                        <input
+                          value={card.slug ?? ""}
+                          onChange={(e) => updateServiceCard(i, "slug", e.target.value)}
+                          className={inputClass}
+                          placeholder="self-parking"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Media type</label>
+                        <select
+                          value={card.mediaType ?? "image"}
+                          onChange={(e) => updateServiceCard(i, "mediaType", e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="image">Image</option>
+                          <option value="video">Video</option>
+                        </select>
+                      </div>
+                    </div>
+                    <MediaField
+                      label={card.mediaType === "video" ? "Video" : "Image"}
+                      value={card.mediaSrc}
+                      accept={card.mediaType === "video" ? "video/*" : "image/*"}
+                      resourceType={card.mediaType === "video" ? "video" : "image"}
+                      uploading={uploadProgress[`glcard-${i}`] !== undefined}
+                      progress={uploadProgress[`glcard-${i}`] ?? 0}
+                      onChange={(v) => updateServiceCard(i, "mediaSrc", v)}
+                      onUpload={(file, rt) => handleServiceCardMediaUpload(i, file, rt)}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+
+            <div className="my-1 border-t border-slate-200" />
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Parking Integrations</p>
             {(goodLookingServices.parkingIntegrations ?? []).map((integration, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
@@ -1151,6 +1356,65 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
             </div>
+
+            <div className="my-1 border-t border-slate-200" />
+
+            {/* Logos */}
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Logos ({(clientsPartners.logos ?? []).length})
+              </p>
+              <button
+                type="button"
+                onClick={addLogo}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Logo
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400">Upload client/partner logos. Transparent PNG/SVG works best. If none are added, placeholder text is shown.</p>
+            {(clientsPartners.logos ?? []).length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">
+                No logos yet. Click &quot;Add Logo&quot; to upload one.
+              </p>
+            ) : (
+              (clientsPartners.logos ?? []).map((logo, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                  <div className="flex h-12 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    {logo.image ? (
+                      <img src={logo.image} alt={logo.alt || ""} className="max-h-10 max-w-[72px] object-contain" />
+                    ) : (
+                      <ImageIcon className="h-5 w-5 text-slate-300" />
+                    )}
+                  </div>
+                  <div className="grid flex-1 gap-2">
+                    <MediaField
+                      label="Logo image"
+                      value={logo.image}
+                      accept="image/*"
+                      resourceType="image"
+                      uploading={uploadProgress[`logo-${i}`] !== undefined}
+                      progress={uploadProgress[`logo-${i}`] ?? 0}
+                      onChange={(v) => updateLogo(i, "image", v)}
+                      onUpload={(file) => handleLogoUpload(i, file)}
+                    />
+                    <input
+                      value={logo.alt ?? ""}
+                      onChange={(e) => updateLogo(i, "alt", e.target.value)}
+                      className={inputClass}
+                      placeholder="Logo name / alt text (e.g. Concord Tower)"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeLogo(i)}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </CollapsibleSection>
 

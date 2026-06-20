@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -273,7 +274,9 @@ export default function AppPageEditor() {
                 value={sections.hero.title}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, title: e.target.value } })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={sections.hero.title} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -282,7 +285,9 @@ export default function AppPageEditor() {
                 value={sections.hero.subtitle}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, subtitle: e.target.value } })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.subtitle}
               />
+              <CharCount value={sections.hero.subtitle} max={FIELD_LIMITS.subtitle} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -291,7 +296,9 @@ export default function AppPageEditor() {
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, description: e.target.value } })}
                 className={inputClass}
                 rows={3}
+                maxLength={FIELD_LIMITS.description}
               />
+              <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
             </div>
             <div>
               <label className={labelClass}>Hero Image URL</label>
@@ -301,6 +308,7 @@ export default function AppPageEditor() {
                   value={sections.hero.image}
                   onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.link}
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -337,7 +345,9 @@ export default function AppPageEditor() {
                   value={sections.platform.title}
                   onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, title: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.platform.title} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -346,7 +356,9 @@ export default function AppPageEditor() {
                   value={sections.platform.subtitle}
                   onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, subtitle: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={sections.platform.subtitle} max={FIELD_LIMITS.subtitle} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -355,7 +367,9 @@ export default function AppPageEditor() {
                   onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, description: e.target.value } })}
                   className={inputClass}
                   rows={2}
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={sections.platform.description} max={FIELD_LIMITS.description} />
               </div>
             </div>
 
@@ -376,7 +390,9 @@ export default function AppPageEditor() {
                         value={item.title}
                         onChange={(e) => update(i, { title: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.title} max={FIELD_LIMITS.label} />
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
@@ -385,7 +401,9 @@ export default function AppPageEditor() {
                         value={item.description}
                         onChange={(e) => update(i, { description: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.summary}
                       />
+                      <CharCount value={item.description} max={FIELD_LIMITS.summary} />
                     </div>
                   </div>
                 )}
@@ -409,7 +427,9 @@ export default function AppPageEditor() {
                         value={item.title}
                         onChange={(e) => update(i, { title: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.title} max={FIELD_LIMITS.label} />
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
@@ -418,7 +438,9 @@ export default function AppPageEditor() {
                         value={item.description}
                         onChange={(e) => update(i, { description: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.summary}
                       />
+                      <CharCount value={item.description} max={FIELD_LIMITS.summary} />
                     </div>
                   </div>
                 )}
@@ -454,7 +476,9 @@ export default function AppPageEditor() {
                     onChange={(e) => update(i, { key: e.target.value })}
                     className={inputClass}
                     placeholder="e.g., public"
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.key} max={FIELD_LIMITS.label} />
                 </div>
                 <div>
                   <label className={labelClass}>Label (display name)</label>
@@ -463,7 +487,9 @@ export default function AppPageEditor() {
                     value={item.label}
                     onChange={(e) => update(i, { label: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.label} max={FIELD_LIMITS.label} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -472,7 +498,9 @@ export default function AppPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Steps (comma-separated)</label>
@@ -481,7 +509,9 @@ export default function AppPageEditor() {
                     value={Array.isArray(item.steps) ? item.steps.join(", ") : ""}
                     onChange={(e) => update(i, { steps: e.target.value.split(",").map((s) => s.trim()) })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.subtitle}
                   />
+                  <CharCount value={Array.isArray(item.steps) ? item.steps.join(", ") : ""} max={FIELD_LIMITS.subtitle} />
                 </div>
               </div>
             )}
@@ -509,7 +539,9 @@ export default function AppPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -518,7 +550,9 @@ export default function AppPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Screenshot Image URL</label>
@@ -527,7 +561,9 @@ export default function AppPageEditor() {
                     value={item.image}
                     onChange={(e) => update(i, { image: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
                   />
+                  <CharCount value={item.image} max={FIELD_LIMITS.link} />
                 </div>
               </div>
             )}
@@ -549,7 +585,9 @@ export default function AppPageEditor() {
                   value={sections.currency?.title}
                   onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, title: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.currency?.title} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -558,7 +596,9 @@ export default function AppPageEditor() {
                   value={sections.currency?.subtitle}
                   onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, subtitle: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={sections.currency?.subtitle} max={FIELD_LIMITS.subtitle} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -567,7 +607,9 @@ export default function AppPageEditor() {
                   onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, description: e.target.value } })}
                   className={inputClass}
                   rows={2}
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={sections.currency?.description} max={FIELD_LIMITS.description} />
               </div>
             </div>
 
@@ -588,7 +630,9 @@ export default function AppPageEditor() {
                         value={item.title}
                         onChange={(e) => update(i, { title: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.title} max={FIELD_LIMITS.label} />
                     </div>
                     <div>
                       <label className={labelClass}>Subtitle</label>
@@ -597,7 +641,9 @@ export default function AppPageEditor() {
                         value={item.subtitle}
                         onChange={(e) => update(i, { subtitle: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.subtitle} max={FIELD_LIMITS.label} />
                     </div>
                   </div>
                 )}
@@ -627,7 +673,9 @@ export default function AppPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -636,7 +684,9 @@ export default function AppPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Preview Type</label>
@@ -646,7 +696,9 @@ export default function AppPageEditor() {
                     onChange={(e) => update(i, { preview: e.target.value })}
                     className={inputClass}
                     placeholder="e.g., rates, summary, payment"
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.preview} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             )}
@@ -668,7 +720,9 @@ export default function AppPageEditor() {
                   value={sections.halapark?.title}
                   onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, title: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.halapark?.title} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -677,7 +731,9 @@ export default function AppPageEditor() {
                   value={sections.halapark?.subtitle}
                   onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, subtitle: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={sections.halapark?.subtitle} max={FIELD_LIMITS.subtitle} />
               </div>
             </div>
 
@@ -698,7 +754,9 @@ export default function AppPageEditor() {
                         value={item.icon}
                         onChange={(e) => update(i, { icon: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.link}
                       />
+                      <CharCount value={item.icon} max={FIELD_LIMITS.link} />
                     </div>
                     <div>
                       <label className={labelClass}>Alt Text</label>
@@ -707,7 +765,9 @@ export default function AppPageEditor() {
                         value={item.alt}
                         onChange={(e) => update(i, { alt: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.alt} max={FIELD_LIMITS.label} />
                     </div>
                     <div>
                       <label className={labelClass}>Label</label>
@@ -716,7 +776,9 @@ export default function AppPageEditor() {
                         value={item.label}
                         onChange={(e) => update(i, { label: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
                       />
+                      <CharCount value={item.label} max={FIELD_LIMITS.label} />
                     </div>
                   </div>
                 )}

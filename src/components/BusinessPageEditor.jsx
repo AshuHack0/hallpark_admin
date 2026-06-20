@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -459,7 +460,9 @@ export default function BusinessPageEditor() {
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, eyebrow: e.target.value } })}
                 className={inputClass}
                 placeholder="e.g., BUSINESS"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={sections.hero.eyebrow} max={FIELD_LIMITS.label} />
             </div>
             <div>
               <label className={labelClass}>Title</label>
@@ -468,7 +471,9 @@ export default function BusinessPageEditor() {
                 value={sections.hero.title}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, title: e.target.value } })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={sections.hero.title} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -477,7 +482,9 @@ export default function BusinessPageEditor() {
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, description: e.target.value } })}
                 className={inputClass}
                 rows={3}
+                maxLength={FIELD_LIMITS.description}
               />
+              <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
             </div>
             <div>
               <label className={labelClass}>Background Image/Video URL</label>
@@ -488,6 +495,7 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
                   className={inputClass}
                   placeholder="e.g., /image.png or https://..."
+                  maxLength={FIELD_LIMITS.link}
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -523,7 +531,9 @@ export default function BusinessPageEditor() {
                 value={sections.builtForSpace.title}
                 onChange={(e) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, title: e.target.value } })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={sections.builtForSpace.title} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -532,7 +542,9 @@ export default function BusinessPageEditor() {
                 onChange={(e) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, description: e.target.value } })}
                 className={inputClass}
                 rows={3}
+                maxLength={FIELD_LIMITS.description}
               />
+              <CharCount value={sections.builtForSpace.description} max={FIELD_LIMITS.description} />
             </div>
           </div>
         </CollapsibleSection>
@@ -563,7 +575,9 @@ export default function BusinessPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -572,7 +586,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -583,7 +599,9 @@ export default function BusinessPageEditor() {
                       onChange={(e) => update(i, { bgGradient: e.target.value })}
                       className={inputClass}
                       placeholder="e.g., from-[#0088FF] to-[#0066CC]"
+                      maxLength={FIELD_LIMITS.label}
                     />
+                    <CharCount value={item.bgGradient} max={FIELD_LIMITS.label} />
                   </div>
                   <div>
                     <label className={labelClass}>Accent Color Class</label>
@@ -593,7 +611,9 @@ export default function BusinessPageEditor() {
                       onChange={(e) => update(i, { accentColor: e.target.value })}
                       className={inputClass}
                       placeholder="e.g., bg-[#0088FF]"
+                      maxLength={FIELD_LIMITS.label}
                     />
+                    <CharCount value={item.accentColor} max={FIELD_LIMITS.label} />
                   </div>
                 </div>
               </div>
@@ -627,7 +647,9 @@ export default function BusinessPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -636,7 +658,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -647,6 +671,7 @@ export default function BusinessPageEditor() {
                         value={item.image}
                         onChange={(e) => update(i, { image: e.target.value })}
                         className={inputClass}
+                        maxLength={FIELD_LIMITS.link}
                       />
                       <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                         <Upload className="h-3.5 w-3.5" />
@@ -705,7 +730,9 @@ export default function BusinessPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -714,7 +741,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Image URL</label>
@@ -724,6 +753,7 @@ export default function BusinessPageEditor() {
                       value={item.image}
                       onChange={(e) => update(i, { image: e.target.value })}
                       className={inputClass}
+                      maxLength={FIELD_LIMITS.link}
                     />
                     <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                       <Upload className="h-3.5 w-3.5" />
@@ -747,7 +777,9 @@ export default function BusinessPageEditor() {
                     value={Array.isArray(item.benefits) ? item.benefits.join(", ") : ""}
                     onChange={(e) => update(i, { benefits: e.target.value.split(",").map((b) => b.trim()) })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.item}
                   />
+                  <CharCount value={Array.isArray(item.benefits) ? item.benefits.join(", ") : ""} max={FIELD_LIMITS.item} />
                 </div>
               </div>
             )}
@@ -775,7 +807,9 @@ export default function BusinessPageEditor() {
                     value={item.value}
                     onChange={(e) => update(i, { value: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.value} max={FIELD_LIMITS.label} />
                 </div>
                 <div>
                   <label className={labelClass}>Label</label>
@@ -784,7 +818,9 @@ export default function BusinessPageEditor() {
                     value={item.label}
                     onChange={(e) => update(i, { label: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.label} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             )}
@@ -809,7 +845,9 @@ export default function BusinessPageEditor() {
                     value={sections.transformParking.title}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, title: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={sections.transformParking.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -818,7 +856,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: e.target.value } })}
                     className={inputClass}
                     rows={3}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={sections.transformParking.description} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             </div>
@@ -834,7 +874,9 @@ export default function BusinessPageEditor() {
                     value={sections.transformParking.parkingPartnerTitle}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerTitle: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={sections.transformParking.parkingPartnerTitle} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>
@@ -843,7 +885,9 @@ export default function BusinessPageEditor() {
                     value={sections.transformParking.parkingPartnerSubtitle}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerSubtitle: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.subtitle}
                   />
+                  <CharCount value={sections.transformParking.parkingPartnerSubtitle} max={FIELD_LIMITS.subtitle} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -852,7 +896,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: e.target.value } })}
                     className={inputClass}
                     rows={4}
+                    maxLength={FIELD_LIMITS.long}
                   />
+                  <CharCount value={sections.transformParking.parkingPartnerDescription} max={FIELD_LIMITS.long} />
                 </div>
                 <div>
                   <label className={labelClass}>Perks (comma-separated)</label>
@@ -862,7 +908,9 @@ export default function BusinessPageEditor() {
                     className={inputClass}
                     rows={4}
                     placeholder="Smart parking management dashboard, Digital payment integration, ..."
+                    maxLength={FIELD_LIMITS.long}
                   />
+                  <CharCount value={Array.isArray(sections.transformParking.parkingPartnerPerks) ? sections.transformParking.parkingPartnerPerks.join(", ") : ""} max={FIELD_LIMITS.long} />
                 </div>
               </div>
             </div>
@@ -878,7 +926,9 @@ export default function BusinessPageEditor() {
                     value={sections.transformParking.servicePartnerTitle}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerTitle: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={sections.transformParking.servicePartnerTitle} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>
@@ -887,7 +937,9 @@ export default function BusinessPageEditor() {
                     value={sections.transformParking.servicePartnerSubtitle}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerSubtitle: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.subtitle}
                   />
+                  <CharCount value={sections.transformParking.servicePartnerSubtitle} max={FIELD_LIMITS.subtitle} />
                 </div>
                 <div>
                   <label className={labelClass}>Description 1</label>
@@ -896,7 +948,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: e.target.value } })}
                     className={inputClass}
                     rows={3}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={sections.transformParking.servicePartnerDescription1} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Description 2</label>
@@ -905,7 +959,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: e.target.value } })}
                     className={inputClass}
                     rows={3}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={sections.transformParking.servicePartnerDescription2} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Partnership Opportunities (comma-separated)</label>
@@ -915,7 +971,9 @@ export default function BusinessPageEditor() {
                     className={inputClass}
                     rows={4}
                     placeholder="Smart parking hardware, AI & automation systems, ..."
+                    maxLength={FIELD_LIMITS.long}
                   />
+                  <CharCount value={Array.isArray(sections.transformParking.servicePartnerPerks) ? sections.transformParking.servicePartnerPerks.join(", ") : ""} max={FIELD_LIMITS.long} />
                 </div>
               </div>
             </div>
@@ -946,7 +1004,9 @@ export default function BusinessPageEditor() {
                     value={item.title}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -955,7 +1015,9 @@ export default function BusinessPageEditor() {
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             )}
@@ -978,7 +1040,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, heading: e.target.value } })}
                   className={inputClass}
                   placeholder="Helping you to correctly"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.partnersShowcase.heading} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Heading Gradient (highlighted text)</label>
@@ -988,7 +1052,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, headingGradient: e.target.value } })}
                   className={inputClass}
                   placeholder="set-up, build,"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.partnersShowcase.headingGradient} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Subheading</label>
@@ -998,7 +1064,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, subheading: e.target.value } })}
                   className={inputClass}
                   placeholder="and protect your brand and business"
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={sections.partnersShowcase.subheading} max={FIELD_LIMITS.subtitle} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -1008,7 +1076,9 @@ export default function BusinessPageEditor() {
                   className={inputClass}
                   rows={4}
                   placeholder="Description text..."
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={sections.partnersShowcase.description} max={FIELD_LIMITS.description} />
               </div>
             </div>
 
@@ -1032,12 +1102,14 @@ export default function BusinessPageEditor() {
                       onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, value: e.target.value } : s) } })}
                       className={inputClass}
                       placeholder="Value (e.g., 5th, 95%)"
+                      maxLength={FIELD_LIMITS.label}
                     />
                     <input
                       value={stat.label}
                       onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s) } })}
                       className={inputClass}
                       placeholder="Label"
+                      maxLength={FIELD_LIMITS.label}
                     />
                     <button
                       onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
@@ -1059,6 +1131,7 @@ export default function BusinessPageEditor() {
                     value={sections.partnersShowcase.image}
                     onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, image: e.target.value } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
                   />
                   <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                     <Upload className="h-3.5 w-3.5" />
@@ -1083,7 +1156,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaLabel: e.target.value } })}
                   className={inputClass}
                   placeholder="Get Started"
+                  maxLength={FIELD_LIMITS.button}
                 />
+                <CharCount value={sections.partnersShowcase.ctaLabel} max={FIELD_LIMITS.button} />
               </div>
             </div>
 
@@ -1098,7 +1173,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, heading: e.target.value } } })}
                   className={inputClass}
                   placeholder="Trusted by Industry Leaders"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.partnersShowcase.partners?.heading || ""} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Carousel Subheading</label>
@@ -1108,7 +1185,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, subheading: e.target.value } } })}
                   className={inputClass}
                   placeholder="Work with some of the most recognized brands..."
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={sections.partnersShowcase.partners?.subheading || ""} max={FIELD_LIMITS.subtitle} />
               </div>
 
               <div className="bg-slate-50 rounded-lg p-4">
@@ -1125,6 +1204,7 @@ export default function BusinessPageEditor() {
                         }}
                         className={inputClass}
                         placeholder="Company Name"
+                        maxLength={FIELD_LIMITS.label}
                       />
                       <input
                         value={partner.industry}
@@ -1135,6 +1215,7 @@ export default function BusinessPageEditor() {
                         }}
                         className={inputClass}
                         placeholder="Industry"
+                        maxLength={FIELD_LIMITS.label}
                       />
                       <input
                         value={partner.initials}
@@ -1195,6 +1276,7 @@ export default function BusinessPageEditor() {
                         }}
                         className={inputClass}
                         placeholder="Company Name"
+                        maxLength={FIELD_LIMITS.label}
                       />
                       <input
                         value={partner.industry}
@@ -1205,6 +1287,7 @@ export default function BusinessPageEditor() {
                         }}
                         className={inputClass}
                         placeholder="Industry"
+                        maxLength={FIELD_LIMITS.label}
                       />
                       <input
                         value={partner.initials}
@@ -1263,7 +1346,9 @@ export default function BusinessPageEditor() {
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, title: e.target.value } } })}
                   className={inputClass}
                   placeholder="Ready to Partner with HalaPark?"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={sections.partnersShowcase.ctaSection?.title || ""} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>CTA Description</label>
@@ -1273,7 +1358,9 @@ export default function BusinessPageEditor() {
                   className={inputClass}
                   rows={3}
                   placeholder="Join our growing network..."
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={sections.partnersShowcase.ctaSection?.description || ""} max={FIELD_LIMITS.description} />
               </div>
               <div>
                 <label className={labelClass}>CTA Section Image URL</label>
@@ -1283,6 +1370,7 @@ export default function BusinessPageEditor() {
                     value={sections.partnersShowcase.ctaSection?.image || ""}
                     onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, image: e.target.value } } })}
                     className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
                   />
                   <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                     <Upload className="h-3.5 w-3.5" />
@@ -1327,7 +1415,9 @@ export default function BusinessPageEditor() {
                 value={sections.cta.title}
                 onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, title: e.target.value } })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={sections.cta.title} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1336,7 +1426,9 @@ export default function BusinessPageEditor() {
                 onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, description: e.target.value } })}
                 className={inputClass}
                 rows={3}
+                maxLength={FIELD_LIMITS.description}
               />
+              <CharCount value={sections.cta.description} max={FIELD_LIMITS.description} />
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
@@ -1346,6 +1438,7 @@ export default function BusinessPageEditor() {
                   value={sections.cta.image}
                   onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, image: e.target.value } })}
                   className={inputClass}
+                  maxLength={FIELD_LIMITS.link}
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />

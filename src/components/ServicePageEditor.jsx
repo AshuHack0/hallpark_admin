@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -306,7 +307,9 @@ export default function ServicePageEditor() {
               onChange={(e) => updateHero("title", e.target.value)}
               className={inputClass}
               placeholder="Smart Parking. Vehicle Care Partner."
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -316,7 +319,9 @@ export default function ServicePageEditor() {
               className={inputClass}
               rows={2}
               placeholder="Smart parking and vehicle care built for convenience, safety, and innovation."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div>
             <label className={labelClass}>CTA Label</label>
@@ -325,7 +330,9 @@ export default function ServicePageEditor() {
               onChange={(e) => updateHero("ctaLabel", e.target.value)}
               className={inputClass}
               placeholder="Get a Quote"
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
           </div>
         </div>
       </CollapsibleSection>
@@ -355,7 +362,9 @@ export default function ServicePageEditor() {
                     onChange={(e) => updateService(i, "name", e.target.value)}
                     className={inputClass}
                     placeholder="Self-Parking"
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={service.name ?? ""} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Slug</label>
@@ -364,7 +373,9 @@ export default function ServicePageEditor() {
                     onChange={(e) => updateService(i, "slug", e.target.value)}
                     className={inputClass}
                     placeholder="self-parking"
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={service.slug ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
 
@@ -376,7 +387,9 @@ export default function ServicePageEditor() {
                   className={inputClass}
                   rows={3}
                   placeholder="Service description..."
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={service.fullDesc ?? ""} max={FIELD_LIMITS.description} />
               </div>
 
               <div>
@@ -399,7 +412,9 @@ export default function ServicePageEditor() {
                     onChange={(e) => updateService(i, "mediaSrc", e.target.value)}
                     className={inputClass}
                     placeholder="/image.jpg or /path/to/video.mp4"
+                    maxLength={FIELD_LIMITS.link}
                   />
+                  <CharCount value={service.mediaSrc ?? ""} max={FIELD_LIMITS.link} />
                 </div>
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -424,7 +439,9 @@ export default function ServicePageEditor() {
                   onChange={(e) => updateService(i, "includedLabel", e.target.value)}
                   className={inputClass}
                   placeholder="What's Included"
+                  maxLength={FIELD_LIMITS.label}
                 />
+                <CharCount value={service.includedLabel ?? ""} max={FIELD_LIMITS.label} />
               </div>
 
               <ArrayItemEditor
@@ -434,13 +451,17 @@ export default function ServicePageEditor() {
                 onRemove={(j) => removeServiceIncluded(i, j)}
                 onUpdate={(j, val) => updateServiceIncluded(i, j, val)}
                 renderItem={(item, j) => (
-                  <textarea
-                    value={item ?? ""}
-                    onChange={(e) => updateServiceIncluded(i, j, e.target.value)}
-                    className={inputClass}
-                    rows={2}
-                    placeholder="Feature item..."
-                  />
+                  <>
+                    <textarea
+                      value={item ?? ""}
+                      onChange={(e) => updateServiceIncluded(i, j, e.target.value)}
+                      className={inputClass}
+                      rows={2}
+                      placeholder="Feature item..."
+                      maxLength={FIELD_LIMITS.item}
+                    />
+                    <CharCount value={item ?? ""} max={FIELD_LIMITS.item} />
+                  </>
                 )}
               />
 
@@ -453,7 +474,9 @@ export default function ServicePageEditor() {
                       onChange={(e) => updateService(i, "subCategoriesLabel", e.target.value)}
                       className={inputClass}
                       placeholder="Service Categories"
+                      maxLength={FIELD_LIMITS.label}
                     />
+                    <CharCount value={service.subCategoriesLabel ?? ""} max={FIELD_LIMITS.label} />
                   </div>
 
                   <div className="space-y-3">
@@ -466,6 +489,7 @@ export default function ServicePageEditor() {
                             onChange={(e) => updateServiceCategory(i, j, "title", e.target.value)}
                             className={inputClass}
                             placeholder="Category title..."
+                            maxLength={FIELD_LIMITS.heading}
                           />
                           <button
                             type="button"
@@ -481,7 +505,9 @@ export default function ServicePageEditor() {
                           className={inputClass}
                           rows={2}
                           placeholder="Category description..."
+                          maxLength={FIELD_LIMITS.description}
                         />
+                        <CharCount value={cat.description ?? ""} max={FIELD_LIMITS.description} />
                       </div>
                     ))}
                     <button
@@ -520,7 +546,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setPartnersSection((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Clients & Partners"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={partnersSection.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -529,7 +557,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setPartnersSection((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Partners"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={partnersSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -539,7 +569,9 @@ export default function ServicePageEditor() {
               onChange={(e) => setPartnersSection((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               placeholder="Trusted by the UAE's leading brands."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={partnersSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -549,7 +581,9 @@ export default function ServicePageEditor() {
               className={inputClass}
               rows={2}
               placeholder="HalaPark partners with global hotel chains..."
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={partnersSection.description ?? ""} max={FIELD_LIMITS.description} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -559,7 +593,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setPartnersSection((p) => ({ ...p, ctaText: e.target.value }))}
                 className={inputClass}
                 placeholder="Want to become a partner?"
+                maxLength={FIELD_LIMITS.subtitle}
               />
+              <CharCount value={partnersSection.ctaText ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -568,7 +604,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLink: e.target.value }))}
                 className={inputClass}
                 placeholder="/contact"
+                maxLength={FIELD_LIMITS.link}
               />
+              <CharCount value={partnersSection.ctaLink ?? ""} max={FIELD_LIMITS.link} />
             </div>
           </div>
         </div>
@@ -585,7 +623,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setTrustSection((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Trust & Safety"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={trustSection.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -594,7 +634,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setTrustSection((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Safety"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={trustSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -604,7 +646,9 @@ export default function ServicePageEditor() {
               onChange={(e) => setTrustSection((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               placeholder="Your safety is our priority."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={trustSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div className="space-y-3">
             <label className={labelClass}>Trust Items</label>
@@ -619,7 +663,9 @@ export default function ServicePageEditor() {
                     }))}
                     className={inputClass}
                     placeholder="Trust item label..."
+                    maxLength={FIELD_LIMITS.item}
                   />
+                  <CharCount value={item.label ?? ""} max={FIELD_LIMITS.item} />
                 </div>
                 <div className="flex-1">
                   <input
@@ -630,7 +676,9 @@ export default function ServicePageEditor() {
                     }))}
                     className={inputClass}
                     placeholder="Icon name..."
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={item.icon ?? ""} max={FIELD_LIMITS.label} />
                 </div>
                 <button
                   type="button"
@@ -664,7 +712,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setCtaSection((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Looking for Long-Term Parking?"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={ctaSection.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -673,7 +723,9 @@ export default function ServicePageEditor() {
                 onChange={(e) => setCtaSection((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Parking?"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={ctaSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -684,7 +736,9 @@ export default function ServicePageEditor() {
               className={inputClass}
               rows={2}
               placeholder="Secure, flexible, and smart parking solutions..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={ctaSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div>
             <label className={labelClass}>CTA Label</label>
@@ -693,7 +747,9 @@ export default function ServicePageEditor() {
               onChange={(e) => setCtaSection((p) => ({ ...p, ctaLabel: e.target.value }))}
               className={inputClass}
               placeholder="Get a Quote"
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={ctaSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
           </div>
         </div>
       </CollapsibleSection>

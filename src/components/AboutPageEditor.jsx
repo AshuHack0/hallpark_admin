@@ -16,6 +16,7 @@ import {
   Upload,
 } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
 const inputClass =
@@ -219,7 +220,7 @@ export default function AboutPageEditor() {
             )}
           </div>
           <div className="flex flex-1 gap-2">
-            <input value={value ?? ""} onChange={onChange} className={inputClass} placeholder="/your-image.png" />
+            <input value={value ?? ""} onChange={onChange} maxLength={FIELD_LIMITS.link} className={inputClass} placeholder="/your-image.png" />
             <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
               {uploadProgress[uploadKey] !== undefined ? (
                 <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[uploadKey]}%</>
@@ -1026,7 +1027,9 @@ export default function AboutPageEditor() {
               value={heroForm.title}
               onChange={(e) => setHeroForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={heroForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Tagline</span>
@@ -1034,7 +1037,9 @@ export default function AboutPageEditor() {
               value={heroForm.tagline}
               onChange={(e) => setHeroForm((p) => ({ ...p, tagline: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={heroForm.tagline} max={FIELD_LIMITS.subtitle} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1043,7 +1048,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
               rows={5}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
           </label>
           <ImageField
             label="Image path"
@@ -1058,7 +1065,9 @@ export default function AboutPageEditor() {
               value={heroForm.primaryCtaText}
               onChange={(e) => setHeroForm((p) => ({ ...p, primaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={heroForm.primaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1067,7 +1076,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setHeroForm((p) => ({ ...p, primaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={heroForm.primaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button text</span>
@@ -1075,7 +1086,9 @@ export default function AboutPageEditor() {
               value={heroForm.secondaryCtaText}
               onChange={(e) => setHeroForm((p) => ({ ...p, secondaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={heroForm.secondaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1084,7 +1097,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setHeroForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={heroForm.secondaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
         </div>
       </Modal>
@@ -1121,7 +1136,9 @@ export default function AboutPageEditor() {
               value={missionSectionForm.title}
               onChange={(e) => setMissionSectionForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={missionSectionForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1129,7 +1146,9 @@ export default function AboutPageEditor() {
               value={missionSectionForm.subtitle}
               onChange={(e) => setMissionSectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={missionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <ImageField
             label="Image path"
@@ -1173,7 +1192,9 @@ export default function AboutPageEditor() {
               value={visionSectionForm.title}
               onChange={(e) => setVisionSectionForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={visionSectionForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1181,7 +1202,9 @@ export default function AboutPageEditor() {
               value={visionSectionForm.subtitle}
               onChange={(e) => setVisionSectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={visionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <ImageField
             label="Image path"
@@ -1225,7 +1248,9 @@ export default function AboutPageEditor() {
               value={visionCardForm.badge}
               onChange={(e) => setVisionCardForm((p) => ({ ...p, badge: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={visionCardForm.badge} max={FIELD_LIMITS.label} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Card title</span>
@@ -1233,7 +1258,9 @@ export default function AboutPageEditor() {
               value={visionCardForm.title}
               onChange={(e) => setVisionCardForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={visionCardForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Card subtitle</span>
@@ -1242,7 +1269,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setVisionCardForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               rows={3}
+              maxLength={FIELD_LIMITS.summary}
             />
+            <CharCount value={visionCardForm.subtitle} max={FIELD_LIMITS.summary} />
           </label>
         </div>
       </Modal>
@@ -1279,7 +1308,9 @@ export default function AboutPageEditor() {
               value={storySectionForm.title}
               onChange={(e) => setStorySectionForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={storySectionForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1287,7 +1318,9 @@ export default function AboutPageEditor() {
               value={storySectionForm.subtitle}
               onChange={(e) => setStorySectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={storySectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <ImageField
             label="Image path"
@@ -1331,7 +1364,9 @@ export default function AboutPageEditor() {
               value={whatWeDoSectionForm.title}
               onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={whatWeDoSectionForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1341,7 +1376,9 @@ export default function AboutPageEditor() {
                 setWhatWeDoSectionForm((p) => ({ ...p, subtitle: e.target.value }))
               }
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={whatWeDoSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Intro</span>
@@ -1350,7 +1387,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, intro: e.target.value }))}
               className={inputClass}
               rows={4}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={whatWeDoSectionForm.intro} max={FIELD_LIMITS.description} />
           </label>
           <ImageField
             label="Image path"
@@ -1394,7 +1433,9 @@ export default function AboutPageEditor() {
               value={technologyForm.title}
               onChange={(e) => setTechnologyForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={technologyForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1402,7 +1443,9 @@ export default function AboutPageEditor() {
               value={technologyForm.subtitle}
               onChange={(e) => setTechnologyForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={technologyForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Body</span>
@@ -1411,7 +1454,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setTechnologyForm((p) => ({ ...p, body: e.target.value }))}
               className={inputClass}
               rows={6}
+              maxLength={FIELD_LIMITS.long}
             />
+            <CharCount value={technologyForm.body} max={FIELD_LIMITS.long} />
           </label>
           <ImageField
             label="Image path"
@@ -1427,7 +1472,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setTechnologyForm((p) => ({ ...p, imageBadge: e.target.value }))}
               className={inputClass}
               placeholder="AI-Powered Platform"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={technologyForm.imageBadge} max={FIELD_LIMITS.label} />
           </label>
         </div>
       </Modal>
@@ -1464,7 +1511,9 @@ export default function AboutPageEditor() {
               value={ctaForm.title}
               onChange={(e) => setCtaForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={ctaForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1473,7 +1522,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
               rows={3}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
           </label>
           <ImageField
             label="Image path"
@@ -1488,7 +1539,9 @@ export default function AboutPageEditor() {
               value={ctaForm.primaryCtaText}
               onChange={(e) => setCtaForm((p) => ({ ...p, primaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1497,7 +1550,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, primaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={ctaForm.primaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button text</span>
@@ -1505,7 +1560,9 @@ export default function AboutPageEditor() {
               value={ctaForm.secondaryCtaText}
               onChange={(e) => setCtaForm((p) => ({ ...p, secondaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1514,7 +1571,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={ctaForm.secondaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
         </div>
       </Modal>
@@ -1554,7 +1613,9 @@ export default function AboutPageEditor() {
           className={inputClass}
           rows={5}
           placeholder="Paragraph text"
+          maxLength={FIELD_LIMITS.description}
         />
+        <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
       </Modal>
 
       {/* Highlight modal */}
@@ -1590,7 +1651,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setHighlightForm((p) => ({ ...p, line1: e.target.value }))}
               className={inputClass}
               placeholder="AI-Driven"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={highlightForm.line1} max={FIELD_LIMITS.label} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Line 2</span>
@@ -1599,7 +1662,9 @@ export default function AboutPageEditor() {
               onChange={(e) => setHighlightForm((p) => ({ ...p, line2: e.target.value }))}
               className={inputClass}
               placeholder="Operations"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={highlightForm.line2} max={FIELD_LIMITS.label} />
           </label>
         </div>
       </Modal>
@@ -1634,7 +1699,9 @@ export default function AboutPageEditor() {
           onChange={(e) => setEcosystemText(e.target.value)}
           className={inputClass}
           placeholder="Ecosystem item label"
+          maxLength={FIELD_LIMITS.item}
         />
+        <CharCount value={ecosystemText} max={FIELD_LIMITS.item} />
       </Modal>
 
       {/* Delete confirm */}

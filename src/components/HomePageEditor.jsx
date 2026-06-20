@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -220,6 +221,7 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
         <input
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
+          maxLength={FIELD_LIMITS.link}
           className={inputClass}
           placeholder={`${label} URL or /path`}
         />
@@ -692,11 +694,13 @@ export default function HomePageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>
-                  <textarea value={slide.subtitle ?? ""} onChange={(e) => updateSlide(index, "subtitle", e.target.value)} className={inputClass} rows={2} placeholder="Subtitle" />
+                  <textarea value={slide.subtitle ?? ""} onChange={(e) => updateSlide(index, "subtitle", e.target.value)} maxLength={FIELD_LIMITS.subtitle} className={inputClass} rows={2} placeholder="Subtitle" />
+                  <CharCount value={slide.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea value={slide.description ?? ""} onChange={(e) => updateSlide(index, "description", e.target.value)} className={inputClass} rows={2} placeholder="Description" />
+                  <textarea value={slide.description ?? ""} onChange={(e) => updateSlide(index, "description", e.target.value)} maxLength={FIELD_LIMITS.description} className={inputClass} rows={2} placeholder="Description" />
+                  <CharCount value={slide.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
 
                 <MediaField
@@ -751,19 +755,23 @@ export default function HomePageEditor() {
               <input
                 value={whoWeAre.audiences?.business?.heading ?? ""}
                 onChange={(e) => updateWhoAudience("business", "heading", e.target.value)}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
                 placeholder="Who We Are"
               />
+              <CharCount value={whoWeAre.audiences?.business?.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
               <textarea
                 value={whoWeAre.audiences?.business?.body ?? ""}
                 onChange={(e) => updateWhoAudience("business", "body", e.target.value)}
+                maxLength={FIELD_LIMITS.description}
                 className={inputClass}
                 rows={4}
                 placeholder="Section description shown on the website"
               />
+              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={FIELD_LIMITS.description} />
             </div>
 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -784,16 +792,20 @@ export default function HomePageEditor() {
                   <input
                     value={h.title ?? ""}
                     onChange={(e) => updateWhoHighlight(i, "title", e.target.value)}
+                    maxLength={FIELD_LIMITS.heading}
                     className={inputClass}
                     placeholder="Title"
                   />
+                  <CharCount value={h.title ?? ""} max={FIELD_LIMITS.heading} />
                   <textarea
                     value={h.description ?? ""}
                     onChange={(e) => updateWhoHighlight(i, "description", e.target.value)}
+                    maxLength={FIELD_LIMITS.description}
                     className={inputClass}
                     rows={2}
                     placeholder="Description"
                   />
+                  <CharCount value={h.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             ))}
@@ -808,18 +820,22 @@ export default function HomePageEditor() {
               <input
                 value={whyHalapark.heading ?? ""}
                 onChange={(e) => setWhyHalapark((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
                 placeholder="Why Halapark"
               />
+              <CharCount value={whyHalapark.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <input
                 value={whyHalapark.subtitle ?? ""}
                 onChange={(e) => setWhyHalapark((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
                 placeholder="Subtitle"
               />
+              <CharCount value={whyHalapark.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -843,6 +859,7 @@ export default function HomePageEditor() {
                     <input
                       value={it.title ?? ""}
                       onChange={(e) => updateWhyItem(i, "title", e.target.value)}
+                      maxLength={FIELD_LIMITS.heading}
                       className={inputClass}
                       placeholder="Title"
                     />
@@ -850,14 +867,17 @@ export default function HomePageEditor() {
                   <textarea
                     value={it.subtitle ?? ""}
                     onChange={(e) => updateWhyItem(i, "subtitle", e.target.value)}
+                    maxLength={FIELD_LIMITS.subtitle}
                     className={inputClass}
                     rows={2}
                     placeholder="Subtitle"
                   />
+                  <CharCount value={it.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
                   <div className="flex items-center gap-2">
                     <input
                       value={it.image ?? ""}
                       onChange={(e) => updateWhyItem(i, "image", e.target.value)}
+                      maxLength={FIELD_LIMITS.link}
                       className={inputClass}
                       placeholder="Image URL or /path"
                     />
@@ -923,34 +943,44 @@ export default function HomePageEditor() {
                   <input
                     value={card.title ?? ""}
                     onChange={(e) => updateAiCard(i, "title", e.target.value)}
+                    maxLength={FIELD_LIMITS.heading}
                     className={inputClass}
                     placeholder="Title"
                   />
+                  <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
                   <input
                     value={card.audienceTag ?? ""}
                     onChange={(e) => updateAiCard(i, "audienceTag", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Audience Tag"
                   />
+                  <CharCount value={card.audienceTag ?? ""} max={FIELD_LIMITS.label} />
                   <textarea
                     value={card.description ?? ""}
                     onChange={(e) => updateAiCard(i, "description", e.target.value)}
+                    maxLength={FIELD_LIMITS.description}
                     className={inputClass}
                     rows={2}
                     placeholder="Description"
                   />
+                  <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
                   <input
                     value={card.ctaLabel ?? ""}
                     onChange={(e) => updateAiCard(i, "ctaLabel", e.target.value)}
+                    maxLength={FIELD_LIMITS.button}
                     className={inputClass}
                     placeholder="CTA Label"
                   />
+                  <CharCount value={card.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
                   <input
                     value={card.href ?? ""}
                     onChange={(e) => updateAiCard(i, "href", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
                     className={inputClass}
                     placeholder="Link href"
                   />
+                  <CharCount value={card.href ?? ""} max={FIELD_LIMITS.link} />
                 </div>
               </div>
             ))}
@@ -965,49 +995,61 @@ export default function HomePageEditor() {
               <input
                 value={howItWorks.heading ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={howItWorks.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
               <input
                 value={howItWorks.headingGradient ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, headingGradient: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={howItWorks.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <textarea
                 value={howItWorks.subtitle ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
                 rows={2}
               />
+              <CharCount value={howItWorks.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
             <div>
               <label className={labelClass}>Video URL</label>
               <input
                 value={howItWorks.videoUrl ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, videoUrl: e.target.value }))}
+                maxLength={FIELD_LIMITS.link}
                 className={inputClass}
               />
+              <CharCount value={howItWorks.videoUrl ?? ""} max={FIELD_LIMITS.link} />
             </div>
             <div>
               <label className={labelClass}>CTA Label</label>
               <input
                 value={howItWorks.ctaLabel ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, ctaLabel: e.target.value }))}
+                maxLength={FIELD_LIMITS.button}
                 className={inputClass}
               />
+              <CharCount value={howItWorks.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             </div>
             <div>
               <label className={labelClass}>CTA Href</label>
               <input
                 value={howItWorks.ctaHref ?? ""}
                 onChange={(e) => setHowItWorks((p) => ({ ...p, ctaHref: e.target.value }))}
+                maxLength={FIELD_LIMITS.link}
                 className={inputClass}
               />
+              <CharCount value={howItWorks.ctaHref ?? ""} max={FIELD_LIMITS.link} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Steps</p>
@@ -1018,16 +1060,20 @@ export default function HomePageEditor() {
                   <input
                     value={step.title ?? ""}
                     onChange={(e) => updateHowStep(i, "title", e.target.value)}
+                    maxLength={FIELD_LIMITS.heading}
                     className={inputClass}
                     placeholder="Title"
                   />
+                  <CharCount value={step.title ?? ""} max={FIELD_LIMITS.heading} />
                   <textarea
                     value={step.description ?? ""}
                     onChange={(e) => updateHowStep(i, "description", e.target.value)}
+                    maxLength={FIELD_LIMITS.description}
                     className={inputClass}
                     rows={2}
                     placeholder="Description"
                   />
+                  <CharCount value={step.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             ))}
@@ -1042,18 +1088,22 @@ export default function HomePageEditor() {
               <textarea
                 value={blackBanner.title ?? ""}
                 onChange={(e) => setBlackBanner((p) => ({ ...p, title: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
                 rows={2}
               />
+              <CharCount value={blackBanner.title ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
               <textarea
                 value={blackBanner.description ?? ""}
                 onChange={(e) => setBlackBanner((p) => ({ ...p, description: e.target.value }))}
+                maxLength={FIELD_LIMITS.description}
                 className={inputClass}
                 rows={3}
               />
+              <CharCount value={blackBanner.description ?? ""} max={FIELD_LIMITS.description} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">CTAs</p>
@@ -1064,15 +1114,19 @@ export default function HomePageEditor() {
                   <input
                     value={cta.label ?? ""}
                     onChange={(e) => updateBlackBannerCta(i, "label", e.target.value)}
+                    maxLength={FIELD_LIMITS.button}
                     className={inputClass}
                     placeholder="Label"
                   />
+                  <CharCount value={cta.label ?? ""} max={FIELD_LIMITS.button} />
                   <input
                     value={cta.href ?? ""}
                     onChange={(e) => updateBlackBannerCta(i, "href", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
                     className={inputClass}
                     placeholder="Href"
                   />
+                  <CharCount value={cta.href ?? ""} max={FIELD_LIMITS.link} />
                 </div>
               </div>
             ))}
@@ -1087,9 +1141,11 @@ export default function HomePageEditor() {
               <input
                 value={goodLookingServices.heading ?? ""}
                 onChange={(e) => setGoodLookingServices((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
                 placeholder="SERVICES"
               />
+              <CharCount value={goodLookingServices.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
@@ -1097,36 +1153,44 @@ export default function HomePageEditor() {
                 <input
                   value={goodLookingServices.exploreCtaLabel ?? ""}
                   onChange={(e) => setGoodLookingServices((p) => ({ ...p, exploreCtaLabel: e.target.value }))}
+                  maxLength={FIELD_LIMITS.button}
                   className={inputClass}
                   placeholder="Explore Services"
                 />
+                <CharCount value={goodLookingServices.exploreCtaLabel ?? ""} max={FIELD_LIMITS.button} />
               </div>
               <div>
                 <label className={labelClass}>Primary button link</label>
                 <input
                   value={goodLookingServices.exploreCtaLink ?? ""}
                   onChange={(e) => setGoodLookingServices((p) => ({ ...p, exploreCtaLink: e.target.value }))}
+                  maxLength={FIELD_LIMITS.link}
                   className={inputClass}
                   placeholder="/services"
                 />
+                <CharCount value={goodLookingServices.exploreCtaLink ?? ""} max={FIELD_LIMITS.link} />
               </div>
               <div>
                 <label className={labelClass}>Secondary button label</label>
                 <input
                   value={goodLookingServices.contactCtaLabel ?? ""}
                   onChange={(e) => setGoodLookingServices((p) => ({ ...p, contactCtaLabel: e.target.value }))}
+                  maxLength={FIELD_LIMITS.button}
                   className={inputClass}
                   placeholder="Talk to us"
                 />
+                <CharCount value={goodLookingServices.contactCtaLabel ?? ""} max={FIELD_LIMITS.button} />
               </div>
               <div>
                 <label className={labelClass}>Secondary button link</label>
                 <input
                   value={goodLookingServices.contactCtaLink ?? ""}
                   onChange={(e) => setGoodLookingServices((p) => ({ ...p, contactCtaLink: e.target.value }))}
+                  maxLength={FIELD_LIMITS.link}
                   className={inputClass}
                   placeholder="/contact"
                 />
+                <CharCount value={goodLookingServices.contactCtaLink ?? ""} max={FIELD_LIMITS.link} />
               </div>
             </div>
             <div className="my-1 border-t border-slate-200" />
@@ -1165,25 +1229,31 @@ export default function HomePageEditor() {
                     <input
                       value={card.name ?? ""}
                       onChange={(e) => updateServiceCard(i, "name", e.target.value)}
+                      maxLength={FIELD_LIMITS.label}
                       className={inputClass}
                       placeholder="Service name (e.g. Self-Parking)"
                     />
+                    <CharCount value={card.name ?? ""} max={FIELD_LIMITS.label} />
                     <textarea
                       value={card.summary ?? ""}
                       onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
+                      maxLength={FIELD_LIMITS.summary}
                       className={inputClass}
                       rows={2}
                       placeholder="Short summary shown on the card"
                     />
+                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.summary} />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>
                         <input
                           value={card.slug ?? ""}
                           onChange={(e) => updateServiceCard(i, "slug", e.target.value)}
+                          maxLength={FIELD_LIMITS.link}
                           className={inputClass}
                           placeholder="self-parking"
                         />
+                        <CharCount value={card.slug ?? ""} max={FIELD_LIMITS.link} />
                       </div>
                       <div>
                         <label className={labelClass}>Media type</label>
@@ -1221,21 +1291,27 @@ export default function HomePageEditor() {
                   <input
                     value={integration.name ?? ""}
                     onChange={(e) => updateGoodServiceIntegration(i, "name", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Name"
                   />
+                  <CharCount value={integration.name ?? ""} max={FIELD_LIMITS.label} />
                   <input
                     value={integration.bgcolor ?? ""}
                     onChange={(e) => updateGoodServiceIntegration(i, "bgcolor", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Background color class (e.g., bg-[#EC4899])"
                   />
+                  <CharCount value={integration.bgcolor ?? ""} max={FIELD_LIMITS.label} />
                   <input
                     value={integration.img ?? ""}
                     onChange={(e) => updateGoodServiceIntegration(i, "img", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
                     className={inputClass}
                     placeholder="Image path"
                   />
+                  <CharCount value={integration.img ?? ""} max={FIELD_LIMITS.link} />
                 </div>
               </div>
             ))}
@@ -1250,25 +1326,31 @@ export default function HomePageEditor() {
               <input
                 value={solutionIntegration.heading ?? ""}
                 onChange={(e) => setSolutionIntegration((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={solutionIntegration.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
               <input
                 value={solutionIntegration.headingGradient ?? ""}
                 onChange={(e) => setSolutionIntegration((p) => ({ ...p, headingGradient: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={solutionIntegration.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <textarea
                 value={solutionIntegration.subtitle ?? ""}
                 onChange={(e) => setSolutionIntegration((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
                 rows={2}
               />
+              <CharCount value={solutionIntegration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Solution Cards</p>
@@ -1279,16 +1361,20 @@ export default function HomePageEditor() {
                   <input
                     value={card.title ?? ""}
                     onChange={(e) => updateSolutionCard(i, "title", e.target.value)}
+                    maxLength={FIELD_LIMITS.heading}
                     className={inputClass}
                     placeholder="Title"
                   />
+                  <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
                   <textarea
                     value={card.description ?? ""}
                     onChange={(e) => updateSolutionCard(i, "description", e.target.value)}
+                    maxLength={FIELD_LIMITS.description}
                     className={inputClass}
                     rows={2}
                     placeholder="Description"
                   />
+                  <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             ))}
@@ -1303,25 +1389,31 @@ export default function HomePageEditor() {
               <input
                 value={technologySection.heading ?? ""}
                 onChange={(e) => setTechnologySection((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={technologySection.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
               <input
                 value={technologySection.headingGradient ?? ""}
                 onChange={(e) => setTechnologySection((p) => ({ ...p, headingGradient: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={technologySection.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <textarea
                 value={technologySection.subtitle ?? ""}
                 onChange={(e) => setTechnologySection((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
                 rows={2}
               />
+              <CharCount value={technologySection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
           </div>
         </CollapsibleSection>
@@ -1334,8 +1426,10 @@ export default function HomePageEditor() {
               <input
                 value={clientsPartners.heading ?? ""}
                 onChange={(e) => setClientsPartners((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={clientsPartners.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-slate-700">
@@ -1353,8 +1447,10 @@ export default function HomePageEditor() {
               <input
                 value={clientsPartners.headingEnd ?? ""}
                 onChange={(e) => setClientsPartners((p) => ({ ...p, headingEnd: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={clientsPartners.headingEnd ?? ""} max={FIELD_LIMITS.heading} />
             </div>
 
             <div className="my-1 border-t border-slate-200" />
@@ -1401,9 +1497,11 @@ export default function HomePageEditor() {
                     <input
                       value={logo.alt ?? ""}
                       onChange={(e) => updateLogo(i, "alt", e.target.value)}
+                      maxLength={FIELD_LIMITS.label}
                       className={inputClass}
                       placeholder="Logo name / alt text (e.g. Concord Tower)"
                     />
+                    <CharCount value={logo.alt ?? ""} max={FIELD_LIMITS.label} />
                   </div>
                   <button
                     type="button"
@@ -1426,16 +1524,20 @@ export default function HomePageEditor() {
               <input
                 value={globalMobility.heading ?? ""}
                 onChange={(e) => setGlobalMobility((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={globalMobility.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <input
                 value={globalMobility.subtitle ?? ""}
                 onChange={(e) => setGlobalMobility((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
               />
+              <CharCount value={globalMobility.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capabilities</p>
@@ -1446,16 +1548,20 @@ export default function HomePageEditor() {
                   <input
                     value={cap.title ?? ""}
                     onChange={(e) => updateCapability(i, "title", e.target.value)}
+                    maxLength={FIELD_LIMITS.heading}
                     className={inputClass}
                     placeholder="Title"
                   />
+                  <CharCount value={cap.title ?? ""} max={FIELD_LIMITS.heading} />
                   <textarea
                     value={cap.description ?? ""}
                     onChange={(e) => updateCapability(i, "description", e.target.value)}
+                    maxLength={FIELD_LIMITS.description}
                     className={inputClass}
                     rows={2}
                     placeholder="Description"
                   />
+                  <CharCount value={cap.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               </div>
             ))}
@@ -1468,15 +1574,19 @@ export default function HomePageEditor() {
                   <input
                     value={stat.value ?? ""}
                     onChange={(e) => updateImpactStat(i, "value", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Value (e.g., 10K+)"
                   />
+                  <CharCount value={stat.value ?? ""} max={FIELD_LIMITS.label} />
                   <input
                     value={stat.label ?? ""}
                     onChange={(e) => updateImpactStat(i, "label", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Label"
                   />
+                  <CharCount value={stat.label ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             ))}
@@ -1491,16 +1601,20 @@ export default function HomePageEditor() {
               <input
                 value={halaParkInAction.heading ?? ""}
                 onChange={(e) => setHalaParkInAction((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
               />
+              <CharCount value={halaParkInAction.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
               <input
                 value={halaParkInAction.subtitle ?? ""}
                 onChange={(e) => setHalaParkInAction((p) => ({ ...p, subtitle: e.target.value }))}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
               />
+              <CharCount value={halaParkInAction.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links</p>
@@ -1511,21 +1625,27 @@ export default function HomePageEditor() {
                   <input
                     value={link.icon ?? ""}
                     onChange={(e) => updateStoreLink(i, "icon", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
                     className={inputClass}
                     placeholder="Icon path"
                   />
+                  <CharCount value={link.icon ?? ""} max={FIELD_LIMITS.link} />
                   <input
                     value={link.alt ?? ""}
                     onChange={(e) => updateStoreLink(i, "alt", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Alt text"
                   />
+                  <CharCount value={link.alt ?? ""} max={FIELD_LIMITS.label} />
                   <input
                     value={link.label ?? ""}
                     onChange={(e) => updateStoreLink(i, "label", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
                     className={inputClass}
                     placeholder="Store label (e.g., App Store)"
                   />
+                  <CharCount value={link.label ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             ))}

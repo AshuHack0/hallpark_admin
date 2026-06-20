@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
@@ -157,7 +158,9 @@ function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceho
           onChange={(e) => onHeadingChange(e.target.value)}
           className={inputClass}
           placeholder={headingPlaceholder}
+          maxLength={FIELD_LIMITS.heading}
         />
+        <CharCount value={headingValue} max={FIELD_LIMITS.heading} />
       </div>
 
       <div className="mb-2 flex items-center justify-between">
@@ -185,6 +188,7 @@ function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceho
                 onChange={(e) => onItemChange(idx, e.target.value)}
                 className={inputClass}
                 placeholder={`${label} item ${idx + 1}`}
+                maxLength={FIELD_LIMITS.item}
               />
               <button
                 type="button"
@@ -289,6 +293,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                   onChange={(e) => setField("slug", e.target.value)}
                   className={inputClass}
                   placeholder="seamless-integrations"
+                  maxLength={FIELD_LIMITS.link}
                 />
                 <button
                   type="button"
@@ -307,7 +312,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 onChange={(e) => setField("eyebrow", e.target.value)}
                 className={inputClass}
                 placeholder="Seamless Integrations"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={draft.eyebrow ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
 
@@ -319,7 +326,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               onChange={(e) => setField("title", e.target.value)}
               className={inputClass}
               placeholder="End-to-End Connected Infrastructure for Smart Parking"
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={draft.title ?? ""} max={FIELD_LIMITS.heading} />
           </div>
 
           {/* Intro */}
@@ -331,7 +340,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               className={inputClass}
               rows={3}
               placeholder="HalaPark connects with existing infrastructure to..."
+              maxLength={FIELD_LIMITS.long}
             />
+            <CharCount value={draft.intro ?? ""} max={FIELD_LIMITS.long} />
           </div>
 
           {/* Image */}
@@ -353,7 +364,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                   onChange={(e) => setField("image", e.target.value)}
                   className={inputClass}
                   placeholder="Image URL"
+                  maxLength={FIELD_LIMITS.link}
                 />
+                <CharCount value={draft.image ?? ""} max={FIELD_LIMITS.link} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploading ? (
                     <>
@@ -391,7 +404,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               className={inputClass}
               rows={2}
               placeholder="Vehicles are identified and validated automatically through AI cameras, QR codes..."
+              maxLength={FIELD_LIMITS.long}
             />
+            <CharCount value={draft.howItOperates ?? ""} max={FIELD_LIMITS.long} />
           </div>
 
           {/* System Components / Integrated Systems */}
@@ -427,7 +442,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 onChange={(e) => setField("problemHeading", e.target.value)}
                 className={inputClass}
                 placeholder="Problem We Solve"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={draft.problemHeading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Problem Body</label>
@@ -437,7 +454,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 className={inputClass}
                 rows={3}
                 placeholder="Parking and facility systems are often disconnected..."
+                maxLength={FIELD_LIMITS.long}
               />
+              <CharCount value={draft.problemBody ?? ""} max={FIELD_LIMITS.long} />
             </div>
           </div>
 
@@ -450,7 +469,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 onChange={(e) => setField("ctaLabel", e.target.value)}
                 className={inputClass}
                 placeholder="Talk to Our Team"
+                maxLength={FIELD_LIMITS.button}
               />
+              <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -459,7 +480,9 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 onChange={(e) => setField("ctaLink", e.target.value)}
                 className={inputClass}
                 placeholder="/contact"
+                maxLength={FIELD_LIMITS.link}
               />
+              <CharCount value={draft.ctaLink ?? ""} max={FIELD_LIMITS.link} />
             </div>
           </div>
         </div>
@@ -705,7 +728,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setHero((p) => ({ ...p, title: e.target.value }))}
                 className={inputClass}
                 placeholder="Intelligent Parking Experiences"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Title Accent (gradient part)</label>
@@ -714,7 +739,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setHero((p) => ({ ...p, titleAccent: e.target.value }))}
                 className={inputClass}
                 placeholder="Built for the Future"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={hero.titleAccent ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -725,7 +752,9 @@ export default function SolutionPageEditor() {
               className={inputClass}
               rows={2}
               placeholder="HalaPark delivers..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -735,7 +764,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setHero((p) => ({ ...p, ctaLabel: e.target.value }))}
                 className={inputClass}
                 placeholder="Get In Touch"
+                maxLength={FIELD_LIMITS.button}
               />
+              <CharCount value={hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -744,7 +775,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setHero((p) => ({ ...p, ctaLink: e.target.value }))}
                 className={inputClass}
                 placeholder="/contact"
+                maxLength={FIELD_LIMITS.link}
               />
+              <CharCount value={hero.ctaLink ?? ""} max={FIELD_LIMITS.link} />
             </div>
           </div>
           <div>
@@ -755,6 +788,7 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setHero((p) => ({ ...p, videoUrl: e.target.value }))}
                 className={inputClass}
                 placeholder="/path/to/video.mp4"
+                maxLength={FIELD_LIMITS.link}
               />
               <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                 <Upload className="h-3.5 w-3.5" />
@@ -786,7 +820,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setChallenges((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Parking Challenges"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={challenges.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -795,7 +831,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setChallenges((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Challenges"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={challenges.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -805,7 +843,9 @@ export default function SolutionPageEditor() {
               onChange={(e) => setChallenges((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               placeholder="Solving Parking Inefficiencies..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={challenges.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -815,7 +855,9 @@ export default function SolutionPageEditor() {
               className={inputClass}
               rows={3}
               placeholder="Traditional parking systems..."
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={challenges.description ?? ""} max={FIELD_LIMITS.description} />
           </div>
         </div>
       </CollapsibleSection>
@@ -833,7 +875,9 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setSolutions((p) => ({ ...p, heading: e.target.value }))}
                     className={inputClass}
                     placeholder="Our Solutions"
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={solutions.heading ?? ""} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -842,7 +886,9 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setSolutions((p) => ({ ...p, headingGradient: e.target.value }))}
                     className={inputClass}
                     placeholder="Solutions"
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={solutions.headingGradient ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
               <div>
@@ -852,7 +898,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setSolutions((p) => ({ ...p, subtitle: e.target.value }))}
                   className={inputClass}
                   placeholder="Intelligent parking systems..."
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={solutions.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
               </div>
             </div>
           </div>
@@ -899,7 +947,9 @@ export default function SolutionPageEditor() {
                       }))}
                       className={inputClass}
                       placeholder="Card Title"
+                      maxLength={FIELD_LIMITS.heading}
                     />
+                    <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
                     <textarea
                       value={card.description ?? ""}
                       onChange={(e) => setSolutions((p) => ({
@@ -909,7 +959,9 @@ export default function SolutionPageEditor() {
                       className={inputClass}
                       rows={2}
                       placeholder="Card Description"
+                      maxLength={FIELD_LIMITS.summary}
                     />
+                    <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
                     <div className="flex gap-2">
                       <input
                         value={card.image ?? ""}
@@ -919,6 +971,7 @@ export default function SolutionPageEditor() {
                         }))}
                         className={inputClass}
                         placeholder="Image URL"
+                        maxLength={FIELD_LIMITS.link}
                       />
                       <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                         {uploadProgress[`solutions-${i}`] ? (
@@ -957,6 +1010,7 @@ export default function SolutionPageEditor() {
                         }))}
                         className={inputClass}
                         placeholder={slugify(card.title) || "slug"}
+                        maxLength={FIELD_LIMITS.link}
                       />
                       <button
                         type="button"
@@ -1027,7 +1081,9 @@ export default function SolutionPageEditor() {
                 }))}
                 className={inputClass}
                 placeholder="Advantages of Our Solutions"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={solutions.advantages?.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
 
             <div className="space-y-3">
@@ -1053,7 +1109,9 @@ export default function SolutionPageEditor() {
                     }))}
                     className={`${inputClass} mb-2`}
                     placeholder="Advantage title"
+                    maxLength={FIELD_LIMITS.item}
                   />
+                  <CharCount value={adv.title ?? ""} max={FIELD_LIMITS.item} />
                   <textarea
                     value={adv.description ?? ""}
                     onChange={(e) => setSolutions((p) => ({
@@ -1063,7 +1121,9 @@ export default function SolutionPageEditor() {
                     className={inputClass}
                     rows={2}
                     placeholder="Advantage description"
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={adv.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               ))}
               {(solutions.advantages?.items ?? []).length === 0 && (
@@ -1087,7 +1147,9 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setIntegration((p) => ({ ...p, heading: e.target.value }))}
                     className={inputClass}
                     placeholder="Solution Integration"
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={integration.heading ?? ""} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -1096,7 +1158,9 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setIntegration((p) => ({ ...p, headingGradient: e.target.value }))}
                     className={inputClass}
                     placeholder="Integration"
+                    maxLength={FIELD_LIMITS.label}
                   />
+                  <CharCount value={integration.headingGradient ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
               <div>
@@ -1106,7 +1170,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setIntegration((p) => ({ ...p, subtitle: e.target.value }))}
                   className={inputClass}
                   placeholder="End-to-End Integrated Parking Solution"
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={integration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
               </div>
             </div>
           </div>
@@ -1150,7 +1216,9 @@ export default function SolutionPageEditor() {
                       }))}
                       className={inputClass}
                       placeholder="Card Title"
+                      maxLength={FIELD_LIMITS.heading}
                     />
+                    <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
                     <textarea
                       value={card.description ?? ""}
                       onChange={(e) => setIntegration((p) => ({
@@ -1160,7 +1228,9 @@ export default function SolutionPageEditor() {
                       className={inputClass}
                       rows={2}
                       placeholder="Card Description"
+                      maxLength={FIELD_LIMITS.summary}
                     />
+                    <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
                     <div className="flex gap-2">
                       <input
                         value={card.image ?? ""}
@@ -1170,6 +1240,7 @@ export default function SolutionPageEditor() {
                         }))}
                         className={inputClass}
                         placeholder="Image URL"
+                        maxLength={FIELD_LIMITS.link}
                       />
                       <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                         {uploadProgress[`integration-${i}`] ? (
@@ -1204,7 +1275,9 @@ export default function SolutionPageEditor() {
                       }))}
                       className={inputClass}
                       placeholder="Gradient (e.g., from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20)"
+                      maxLength={FIELD_LIMITS.subtitle}
                     />
+                    <CharCount value={card.gradient ?? ""} max={FIELD_LIMITS.subtitle} />
                     <textarea
                       value={Array.isArray(card.points) ? card.points.join("\n") : ""}
                       onChange={(e) => setIntegration((p) => ({
@@ -1214,7 +1287,9 @@ export default function SolutionPageEditor() {
                       className={inputClass}
                       rows={3}
                       placeholder="Points (one per line)"
+                      maxLength={FIELD_LIMITS.description}
                     />
+                    <CharCount value={Array.isArray(card.points) ? card.points.join("\n") : ""} max={FIELD_LIMITS.description} />
                   </div>
                 </div>
               ))}
@@ -1234,7 +1309,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setTrust((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Built for Smart Cities"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={trust.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1243,7 +1320,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setTrust((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Smart Cities"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={trust.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -1254,7 +1333,9 @@ export default function SolutionPageEditor() {
               className={inputClass}
               rows={2}
               placeholder="HalaPark extends beyond parking..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={trust.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
         </div>
       </CollapsibleSection>
@@ -1270,7 +1351,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setFeatures((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Built for High-Demand Environments"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={features.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1279,7 +1362,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setFeatures((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Environments"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={features.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -1289,7 +1374,9 @@ export default function SolutionPageEditor() {
               onChange={(e) => setFeatures((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               placeholder="From airports to smart cities..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={features.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
 
           {/* Background image */}
@@ -1311,7 +1398,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setFeatures((p) => ({ ...p, image: e.target.value }))}
                   className={inputClass}
                   placeholder="Image URL (leave blank for default)"
+                  maxLength={FIELD_LIMITS.link}
                 />
+                <CharCount value={features.image ?? ""} max={FIELD_LIMITS.link} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploadProgress["features-0"] !== undefined ? (
                     <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["features-0"]}%</>
@@ -1351,6 +1440,7 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, label: e.target.value } : x) }))}
                     className={inputClass}
                     placeholder="Environment label (e.g. Airports)"
+                    maxLength={FIELD_LIMITS.item}
                   />
                   <button
                     onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) }))}
@@ -1376,7 +1466,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setDeployment((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Deployment"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={deployment.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1385,7 +1477,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setDeployment((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Journey"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={deployment.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
           <div>
@@ -1396,7 +1490,9 @@ export default function SolutionPageEditor() {
               className={inputClass}
               rows={2}
               placeholder="We ensure a smooth rollout by understanding your environment..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={deployment.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
 
           {/* Steps */}
@@ -1428,12 +1524,14 @@ export default function SolutionPageEditor() {
                       onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, step: e.target.value } : x) }))}
                       className={`${inputClass} w-20 shrink-0`}
                       placeholder="01"
+                      maxLength={FIELD_LIMITS.label}
                     />
                     <input
                       value={st.title ?? ""}
                       onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, title: e.target.value } : x) }))}
                       className={inputClass}
                       placeholder="Step title"
+                      maxLength={FIELD_LIMITS.heading}
                     />
                   </div>
                   <textarea
@@ -1442,7 +1540,9 @@ export default function SolutionPageEditor() {
                     className={`${inputClass} mt-2`}
                     rows={2}
                     placeholder="Step description"
+                    maxLength={FIELD_LIMITS.description}
                   />
+                  <CharCount value={st.description ?? ""} max={FIELD_LIMITS.description} />
                 </div>
               ))}
             </div>
@@ -1459,7 +1559,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setDeployment((p) => ({ ...p, panelTitle: e.target.value }))}
                   className={inputClass}
                   placeholder="Go live in days,"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={deployment.panelTitle ?? ""} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Panel Title (accent)</label>
@@ -1468,7 +1570,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setDeployment((p) => ({ ...p, panelTitleAccent: e.target.value }))}
                   className={inputClass}
                   placeholder="not months."
+                  maxLength={FIELD_LIMITS.label}
                 />
+                <CharCount value={deployment.panelTitleAccent ?? ""} max={FIELD_LIMITS.label} />
               </div>
             </div>
             <div className="mt-3">
@@ -1489,7 +1593,9 @@ export default function SolutionPageEditor() {
                     onChange={(e) => setDeployment((p) => ({ ...p, image: e.target.value }))}
                     className={inputClass}
                     placeholder="Image URL (leave blank for default)"
+                    maxLength={FIELD_LIMITS.link}
                   />
+                  <CharCount value={deployment.image ?? ""} max={FIELD_LIMITS.link} />
                   <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                     {uploadProgress["deployment-0"] !== undefined ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["deployment-0"]}%</>
@@ -1517,7 +1623,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setWhy((p) => ({ ...p, heading: e.target.value }))}
                 className={inputClass}
                 placeholder="Why Leading Developments Choose Halapark?"
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={why.heading ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1526,7 +1634,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setWhy((p) => ({ ...p, headingGradient: e.target.value }))}
                 className={inputClass}
                 placeholder="Choose Halapark?"
+                maxLength={FIELD_LIMITS.label}
               />
+              <CharCount value={why.headingGradient ?? ""} max={FIELD_LIMITS.label} />
             </div>
           </div>
         </div>
@@ -1542,7 +1652,9 @@ export default function SolutionPageEditor() {
               onChange={(e) => setCtA((p) => ({ ...p, heading: e.target.value }))}
               className={inputClass}
               placeholder="Transform Parking Into a Fully Connected Mobility Infrastructure"
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={cta.heading ?? ""} max={FIELD_LIMITS.heading} />
           </div>
           <div>
             <label className={labelClass}>Heading Gradient</label>
@@ -1551,7 +1663,9 @@ export default function SolutionPageEditor() {
               onChange={(e) => setCtA((p) => ({ ...p, headingGradient: e.target.value }))}
               className={inputClass}
               placeholder="Mobility Infrastructure"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={cta.headingGradient ?? ""} max={FIELD_LIMITS.label} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -1561,7 +1675,9 @@ export default function SolutionPageEditor() {
               className={inputClass}
               rows={3}
               placeholder="Halapark replaces fragmented parking systems..."
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={cta.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -1571,7 +1687,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setCtA((p) => ({ ...p, ctaLabel: e.target.value }))}
                 className={inputClass}
                 placeholder="Request Demo"
+                maxLength={FIELD_LIMITS.button}
               />
+              <CharCount value={cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             </div>
             <div>
               <label className={labelClass}>Secondary CTA Label</label>
@@ -1580,7 +1698,9 @@ export default function SolutionPageEditor() {
                 onChange={(e) => setCtA((p) => ({ ...p, ctaSecondaryLabel: e.target.value }))}
                 className={inputClass}
                 placeholder="Talk to Our Team"
+                maxLength={FIELD_LIMITS.button}
               />
+              <CharCount value={cta.ctaSecondaryLabel ?? ""} max={FIELD_LIMITS.button} />
             </div>
           </div>
 
@@ -1603,7 +1723,9 @@ export default function SolutionPageEditor() {
                   onChange={(e) => setCtA((p) => ({ ...p, image: e.target.value }))}
                   className={inputClass}
                   placeholder="Image URL (leave blank to use the default skyline)"
+                  maxLength={FIELD_LIMITS.link}
                 />
+                <CharCount value={cta.image ?? ""} max={FIELD_LIMITS.link} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploadProgress["cta-0"] !== undefined ? (
                     <>

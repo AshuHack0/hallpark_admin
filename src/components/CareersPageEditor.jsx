@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { DEFAULT_CAREERS_SECTIONS, mergeCareersSections } from "../constants/careersDefaults.js";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -833,7 +834,9 @@ export default function CareersPageEditor() {
               value={heroForm.title}
               onChange={(e) => setHeroForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={heroForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -842,7 +845,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
               rows={5}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Background image path</span>
@@ -852,6 +857,7 @@ export default function CareersPageEditor() {
                 onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
                 className={inputClass}
                 placeholder="/your-image.png"
+                maxLength={FIELD_LIMITS.link}
               />
               <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                 <Upload className="h-3.5 w-3.5" />
@@ -911,7 +917,9 @@ export default function CareersPageEditor() {
             onChange={(e) => setBuildingForm((p) => ({ ...p, title: e.target.value }))}
             className={inputClass}
             rows={3}
+            maxLength={FIELD_LIMITS.heading}
           />
+          <CharCount value={buildingForm.title} max={FIELD_LIMITS.heading} />
         </label>
       </Modal>
 
@@ -946,7 +954,9 @@ export default function CareersPageEditor() {
           className={inputClass}
           rows={5}
           placeholder="Paragraph text"
+          maxLength={FIELD_LIMITS.description}
         />
+        <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
       </Modal>
 
       {/* Open positions section modal */}
@@ -982,7 +992,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setOpenPositionsForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
               placeholder="Open Positions"
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={openPositionsForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -991,7 +1003,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setOpenPositionsForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
               placeholder="Explore our current job openings"
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={openPositionsForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
         </div>
       </Modal>
@@ -1029,7 +1043,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setJobPostForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
               placeholder="e.g. Senior Valet Supervisor"
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={jobPostForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Department</span>
@@ -1038,7 +1054,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setJobPostForm((p) => ({ ...p, department: e.target.value }))}
               className={inputClass}
               placeholder="e.g. Operations"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={jobPostForm.department} max={FIELD_LIMITS.label} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Location</span>
@@ -1047,7 +1065,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setJobPostForm((p) => ({ ...p, location: e.target.value }))}
               className={inputClass}
               placeholder="e.g. Dubai, UAE"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={jobPostForm.location} max={FIELD_LIMITS.label} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Employment type</span>
@@ -1056,7 +1076,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setJobPostForm((p) => ({ ...p, employmentType: e.target.value }))}
               className={inputClass}
               placeholder="e.g. Full-Time"
+              maxLength={FIELD_LIMITS.label}
             />
+            <CharCount value={jobPostForm.employmentType} max={FIELD_LIMITS.label} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Status</span>
@@ -1077,7 +1099,9 @@ export default function CareersPageEditor() {
               className={inputClass}
               rows={3}
               placeholder="Brief one- or two-line summary shown on the careers listing"
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={jobPostForm.description} max={FIELD_LIMITS.description} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Full details (HTML — shown on the job detail view)</span>
@@ -1087,7 +1111,9 @@ export default function CareersPageEditor() {
               className={`${inputClass} font-mono text-xs`}
               rows={8}
               placeholder={"<h3>Responsibilities</h3>\n<ul>\n  <li>Lead the valet team…</li>\n</ul>\n<h3>Requirements</h3>\n<p>…</p>"}
+              maxLength={FIELD_LIMITS.long}
             />
+            <CharCount value={jobPostForm.fullDescription} max={FIELD_LIMITS.long} />
             <span className="text-[11px] text-slate-400">
               Supports HTML: headings, paragraphs, lists, bold, links. Leave blank to use the short description.
             </span>
@@ -1099,7 +1125,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setJobPostForm((p) => ({ ...p, applyLabel: e.target.value }))}
               className={inputClass}
               placeholder="Apply Now"
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={jobPostForm.applyLabel} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Apply action</span>
@@ -1120,7 +1148,9 @@ export default function CareersPageEditor() {
                 onChange={(e) => setJobPostForm((p) => ({ ...p, applyLink: e.target.value }))}
                 className={inputClass}
                 placeholder="/contact or https://..."
+                maxLength={FIELD_LIMITS.link}
               />
+              <CharCount value={jobPostForm.applyLink} max={FIELD_LIMITS.link} />
             </label>
           ) : null}
         </div>
@@ -1158,7 +1188,9 @@ export default function CareersPageEditor() {
               value={whyJoinForm.title}
               onChange={(e) => setWhyJoinForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={whyJoinForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1166,7 +1198,9 @@ export default function CareersPageEditor() {
               value={whyJoinForm.subtitle}
               onChange={(e) => setWhyJoinForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={whyJoinForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Team card paragraph</span>
@@ -1175,7 +1209,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setWhyJoinForm((p) => ({ ...p, bodyParagraph: e.target.value }))}
               className={inputClass}
               rows={4}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={whyJoinForm.bodyParagraph} max={FIELD_LIMITS.description} />
           </label>
         </div>
       </Modal>
@@ -1211,7 +1247,9 @@ export default function CareersPageEditor() {
           className={inputClass}
           rows={4}
           placeholder="Why candidates should join"
+          maxLength={FIELD_LIMITS.item}
         />
+        <CharCount value={reasonText} max={FIELD_LIMITS.item} />
       </Modal>
 
       {/* CTA modal */}
@@ -1246,7 +1284,9 @@ export default function CareersPageEditor() {
               value={ctaForm.title}
               onChange={(e) => setCtaForm((p) => ({ ...p, title: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
             />
+            <CharCount value={ctaForm.title} max={FIELD_LIMITS.heading} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1254,7 +1294,9 @@ export default function CareersPageEditor() {
               value={ctaForm.subtitle}
               onChange={(e) => setCtaForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.subtitle}
             />
+            <CharCount value={ctaForm.subtitle} max={FIELD_LIMITS.subtitle} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1263,7 +1305,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
               rows={3}
+              maxLength={FIELD_LIMITS.description}
             />
+            <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
@@ -1271,7 +1315,9 @@ export default function CareersPageEditor() {
               value={ctaForm.primaryCtaText}
               onChange={(e) => setCtaForm((p) => ({ ...p, primaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1280,7 +1326,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, primaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={ctaForm.primaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button text</span>
@@ -1288,7 +1336,9 @@ export default function CareersPageEditor() {
               value={ctaForm.secondaryCtaText}
               onChange={(e) => setCtaForm((p) => ({ ...p, secondaryCtaText: e.target.value }))}
               className={inputClass}
+              maxLength={FIELD_LIMITS.button}
             />
+            <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1297,7 +1347,9 @@ export default function CareersPageEditor() {
               onChange={(e) => setCtaForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
               className={inputClass}
               placeholder="#open-positions"
+              maxLength={FIELD_LIMITS.link}
             />
+            <CharCount value={ctaForm.secondaryCtaLink} max={FIELD_LIMITS.link} />
           </label>
         </div>
       </Modal>

@@ -24,6 +24,7 @@ import {
   Truck,
 } from "lucide-react";
 import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/api";
+import { FIELD_LIMITS, CharCount } from "./CappedField";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -474,7 +475,9 @@ export default function FAQPageEditor() {
                 value={hero.title}
                 onChange={(e) => setHero({ ...hero, title: e.target.value })}
                 className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
               />
+              <CharCount value={hero.title} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -483,7 +486,9 @@ export default function FAQPageEditor() {
                 onChange={(e) => setHero({ ...hero, description: e.target.value })}
                 className={inputClass}
                 rows={3}
+                maxLength={FIELD_LIMITS.description}
               />
+              <CharCount value={hero.description} max={FIELD_LIMITS.description} />
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
@@ -494,6 +499,7 @@ export default function FAQPageEditor() {
                   onChange={(e) => setHero({ ...hero, image: e.target.value })}
                   className={inputClass}
                   placeholder="e.g., /image.png or https://..."
+                  maxLength={FIELD_LIMITS.link}
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -569,7 +575,9 @@ export default function FAQPageEditor() {
                     onChange={(e) => updateCategory(categoryIndex, "title", e.target.value)}
                     className={inputClass}
                     placeholder="Category Title"
+                    maxLength={FIELD_LIMITS.heading}
                   />
+                  <CharCount value={category.title ?? ""} max={FIELD_LIMITS.heading} />
                   <select
                     value={category.icon ?? "Building2"}
                     onChange={(e) => updateCategory(categoryIndex, "icon", e.target.value)}
@@ -655,7 +663,9 @@ export default function FAQPageEditor() {
                   onChange={(e) => setNewCategoryForm({ ...newCategoryForm, title: e.target.value })}
                   className={inputClass}
                   placeholder="Category title"
+                  maxLength={FIELD_LIMITS.heading}
                 />
+                <CharCount value={newCategoryForm.title} max={FIELD_LIMITS.heading} />
               </div>
               <div>
                 <label className={labelClass}>Icon</label>
@@ -710,7 +720,9 @@ export default function FAQPageEditor() {
                   onChange={(e) => setNewQuestionForm({ ...newQuestionForm, question: e.target.value })}
                   className={inputClass}
                   placeholder="Enter question"
+                  maxLength={FIELD_LIMITS.subtitle}
                 />
+                <CharCount value={newQuestionForm.question} max={FIELD_LIMITS.subtitle} />
               </div>
               <div>
                 <label className={labelClass}>Answer</label>
@@ -720,7 +732,9 @@ export default function FAQPageEditor() {
                   className={inputClass}
                   rows={4}
                   placeholder="Enter answer"
+                  maxLength={FIELD_LIMITS.description}
                 />
+                <CharCount value={newQuestionForm.answer} max={FIELD_LIMITS.description} />
               </div>
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between mb-3">
@@ -753,6 +767,7 @@ export default function FAQPageEditor() {
                           }
                           className={inputClass}
                           placeholder="YouTube/Vimeo/Cloudinary URL"
+                          maxLength={FIELD_LIMITS.link}
                         />
                         <label className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
                           uploading

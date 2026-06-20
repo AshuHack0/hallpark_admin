@@ -399,8 +399,14 @@ export default function HomePageEditor() {
   function updateHowStep(i, field, value) {
     setHowItWorks((prev) => ({
       ...prev,
-      steps: prev.steps.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)),
+      steps: (prev.steps ?? []).map((s, idx) => (idx === i ? { ...s, [field]: value } : s)),
     }));
+  }
+  function addHowStep() {
+    setHowItWorks((prev) => ({ ...prev, steps: [...(prev.steps ?? []), { title: "", description: "" }] }));
+  }
+  function removeHowStep(i) {
+    setHowItWorks((prev) => ({ ...prev, steps: (prev.steps ?? []).filter((_, idx) => idx !== i) }));
   }
 
   function updateBlackBannerCta(i, field, value) {
@@ -427,8 +433,14 @@ export default function HomePageEditor() {
   function updateCapability(i, field, value) {
     setGlobalMobility((prev) => ({
       ...prev,
-      capabilities: prev.capabilities.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
+      capabilities: (prev.capabilities ?? []).map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
     }));
+  }
+  function addCapability() {
+    setGlobalMobility((prev) => ({ ...prev, capabilities: [...(prev.capabilities ?? []), { title: "", description: "" }] }));
+  }
+  function removeCapability(i) {
+    setGlobalMobility((prev) => ({ ...prev, capabilities: (prev.capabilities ?? []).filter((_, idx) => idx !== i) }));
   }
 
   function updateImpactStat(i, field, value) {
@@ -441,8 +453,14 @@ export default function HomePageEditor() {
   function updateStoreLink(i, field, value) {
     setHalaParkInAction((prev) => ({
       ...prev,
-      storeLinks: prev.storeLinks.map((l, idx) => (idx === i ? { ...l, [field]: value } : l)),
+      storeLinks: (prev.storeLinks ?? []).map((l, idx) => (idx === i ? { ...l, [field]: value } : l)),
     }));
+  }
+  function addStoreLink() {
+    setHalaParkInAction((prev) => ({ ...prev, storeLinks: [...(prev.storeLinks ?? []), { icon: "", alt: "", eyebrow: "Download Now On", label: "" }] }));
+  }
+  function removeStoreLink(i) {
+    setHalaParkInAction((prev) => ({ ...prev, storeLinks: (prev.storeLinks ?? []).filter((_, idx) => idx !== i) }));
   }
 
   async function handleWhyImageUpload(i, file) {
@@ -1128,10 +1146,28 @@ export default function HomePageEditor() {
               <CharCount value={howItWorks.ctaHref ?? ""} max={FIELD_LIMITS.link} />
             </div>
 
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Steps</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Steps ({(howItWorks.steps ?? []).length})</p>
+              <button
+                type="button"
+                onClick={addHowStep}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Step
+              </button>
+            </div>
             {(howItWorks.steps ?? []).map((step, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Step {i + 1}</p>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Step {i + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeHowStep(i)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={step.title ?? ""}
@@ -1616,10 +1652,28 @@ export default function HomePageEditor() {
               <CharCount value={globalMobility.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capabilities</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capabilities ({(globalMobility.capabilities ?? []).length})</p>
+              <button
+                type="button"
+                onClick={addCapability}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Capability
+              </button>
+            </div>
             {(globalMobility.capabilities ?? []).map((cap, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capability {i + 1}</p>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capability {i + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeCapability(i)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={cap.title ?? ""}
@@ -1693,10 +1747,28 @@ export default function HomePageEditor() {
               <CharCount value={halaParkInAction.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             </div>
 
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>
+              <button
+                type="button"
+                onClick={addStoreLink}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Store
+              </button>
+            </div>
             {(halaParkInAction.storeLinks ?? []).map((link, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store {i + 1}</p>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store {i + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeStoreLink(i)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={link.icon ?? ""}

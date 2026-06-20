@@ -627,6 +627,57 @@ export default function BusinessPageEditor() {
           isOpen={openSections.solutions}
           onToggle={() => toggleSection("solutions")}
         >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
+            <div>
+              <label className={labelClass}>Heading (first part)</label>
+              <input
+                type="text"
+                value={sections.solutionsHeader?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Our Business"
+              />
+              <CharCount value={sections.solutionsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Accent (gradient part)</label>
+              <input
+                type="text"
+                value={sections.solutionsHeader?.headingAccent ?? ""}
+                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, headingAccent: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Solutions"
+              />
+              <CharCount value={sections.solutionsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.solutionsHeader?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+                placeholder="Intelligent parking systems built for every business type…"
+              />
+              <CharCount value={sections.solutionsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+            <div>
+              <label className={labelClass}>Description (second, smaller)</label>
+              <textarea
+                value={sections.solutionsHeader?.description2 ?? ""}
+                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description2: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+                placeholder="We make it possible to invest in parking infrastructure…"
+              />
+              <CharCount value={sections.solutionsHeader?.description2 ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
           <ArrayItemEditor
             items={sections.solutions}
             onItemsChange={(items) => setSections({ ...sections, solutions: items })}
@@ -1401,6 +1452,215 @@ export default function BusinessPageEditor() {
           </div>
         </CollapsibleSection>
 
+        {/* 8.6 Value Props */}
+        <CollapsibleSection
+          title="8.6. ValueProps"
+          isOpen={openSections.valueProps}
+          onToggle={() => toggleSection("valueProps")}
+        >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div>
+              <label className={labelClass}>Eyebrow (small label)</label>
+              <input
+                type="text"
+                value={sections.valueProps?.eyebrow ?? ""}
+                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, eyebrow: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+                placeholder="How It Works"
+              />
+              <CharCount value={sections.valueProps?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                type="text"
+                value={sections.valueProps?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Why Businesses Choose HalaPark"
+              />
+              <CharCount value={sections.valueProps?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.valueProps?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, description: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+              />
+              <CharCount value={sections.valueProps?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
+          <ArrayItemEditor
+            items={sections.valueProps?.items ?? []}
+            onItemsChange={(items) => setSections({ ...sections, valueProps: { ...sections.valueProps, items } })}
+            title="Value Card"
+            addButtonText="Add Card"
+            defaultItem={{ title: "New Card", description: "" }}
+            renderItem={(item, i, update) => (
+              <div className="space-y-3">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={item.title ?? ""}
+                    onChange={(e) => update(i, { title: e.target.value })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <textarea
+                    value={item.description ?? ""}
+                    onChange={(e) => update(i, { description: e.target.value })}
+                    className={inputClass}
+                    rows={2}
+                    maxLength={FIELD_LIMITS.description}
+                  />
+                  <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
+                </div>
+              </div>
+            )}
+          />
+        </CollapsibleSection>
+
+        {/* 8.7 Who It's For */}
+        <CollapsibleSection
+          title="8.7. WhoItsFor"
+          isOpen={openSections.whoItsFor}
+          onToggle={() => toggleSection("whoItsFor")}
+        >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                type="text"
+                value={sections.whoItsFor?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Who It's For"
+              />
+              <CharCount value={sections.whoItsFor?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.whoItsFor?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, description: e.target.value } })}
+                className={inputClass}
+                rows={3}
+                maxLength={FIELD_LIMITS.description}
+              />
+              <CharCount value={sections.whoItsFor?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
+          <ArrayItemEditor
+            items={sections.whoItsFor?.items ?? []}
+            onItemsChange={(items) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, items } })}
+            title="Segment"
+            addButtonText="Add Segment"
+            defaultItem={{ title: "New Segment" }}
+            renderItem={(item, i, update) => (
+              <div>
+                <label className={labelClass}>Title</label>
+                <input
+                  type="text"
+                  value={item.title ?? ""}
+                  onChange={(e) => update(i, { title: e.target.value })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.item}
+                />
+                <CharCount value={item.title ?? ""} max={FIELD_LIMITS.item} />
+              </div>
+            )}
+          />
+        </CollapsibleSection>
+
+        {/* 8.8 How To Get Started */}
+        <CollapsibleSection
+          title="8.8. HowToGetStarted"
+          isOpen={openSections.howToGetStarted}
+          onToggle={() => toggleSection("howToGetStarted")}
+        >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div>
+              <label className={labelClass}>Eyebrow (small label)</label>
+              <input
+                type="text"
+                value={sections.howToGetStarted?.eyebrow ?? ""}
+                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, eyebrow: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+                placeholder="How It Works"
+              />
+              <CharCount value={sections.howToGetStarted?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                type="text"
+                value={sections.howToGetStarted?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="How to Get Started"
+              />
+              <CharCount value={sections.howToGetStarted?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.howToGetStarted?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, description: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+              />
+              <CharCount value={sections.howToGetStarted?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
+          <ArrayItemEditor
+            items={sections.howToGetStarted?.steps ?? []}
+            onItemsChange={(steps) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, steps } })}
+            title="Step"
+            addButtonText="Add Step"
+            defaultItem={{ title: "New Step", description: "" }}
+            renderItem={(item, i, update) => (
+              <div className="space-y-3">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={item.title ?? ""}
+                    onChange={(e) => update(i, { title: e.target.value })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description (optional)</label>
+                  <textarea
+                    value={item.description ?? ""}
+                    onChange={(e) => update(i, { description: e.target.value })}
+                    className={inputClass}
+                    rows={2}
+                    maxLength={FIELD_LIMITS.description}
+                  />
+                  <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
+                </div>
+              </div>
+            )}
+          />
+        </CollapsibleSection>
+
         {/* 9. Business CTA */}
         <CollapsibleSection
           title="9. BusinessCTA"
@@ -1409,15 +1669,28 @@ export default function BusinessPageEditor() {
         >
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Title</label>
+              <label className={labelClass}>Heading (first part)</label>
               <input
                 type="text"
-                value={sections.cta.title}
-                onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, title: e.target.value } })}
+                value={sections.cta.heading ?? sections.cta.title ?? ""}
+                onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, heading: e.target.value } })}
                 className={inputClass}
                 maxLength={FIELD_LIMITS.heading}
+                placeholder="Start a Smart Parking Business with"
               />
-              <CharCount value={sections.cta.title} max={FIELD_LIMITS.heading} />
+              <CharCount value={sections.cta.heading ?? sections.cta.title ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Accent (gradient part)</label>
+              <input
+                type="text"
+                value={sections.cta.headingAccent ?? ""}
+                onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, headingAccent: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="No Upfront Investment"
+              />
+              <CharCount value={sections.cta.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1429,6 +1702,32 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.cta.description} max={FIELD_LIMITS.description} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Button Label</label>
+                <input
+                  type="text"
+                  value={sections.cta.ctaLabel ?? ""}
+                  onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, ctaLabel: e.target.value } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.button}
+                  placeholder="Book a Free Consultation"
+                />
+                <CharCount value={sections.cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              </div>
+              <div>
+                <label className={labelClass}>Button Link</label>
+                <input
+                  type="text"
+                  value={sections.cta.ctaLink ?? ""}
+                  onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, ctaLink: e.target.value } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.link}
+                  placeholder="/contact"
+                />
+                <CharCount value={sections.cta.ctaLink ?? ""} max={FIELD_LIMITS.link} />
+              </div>
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>

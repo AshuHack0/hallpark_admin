@@ -215,6 +215,26 @@ export default function AppPageEditor() {
     }
   }
 
+  // Upload an image for an item inside an ArrayItemEditor list. `update`/`i` come
+  // from the list's renderItem; `field` is the image key on the item (e.g. "image").
+  async function handleArrayImageUpload(key, update, i, field, file) {
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      update(i, { [field]: url });
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -524,6 +544,57 @@ export default function AppPageEditor() {
           isOpen={openSections.screenshots}
           onToggle={() => toggleSection("screenshots")}
         >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
+            <div>
+              <label className={labelClass}>Eyebrow (small badge)</label>
+              <input
+                type="text"
+                value={sections.screenshotsHeader?.eyebrow ?? ""}
+                onChange={(e) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, eyebrow: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.subtitle}
+                placeholder="Built for a cleaner parking flow"
+              />
+              <CharCount value={sections.screenshotsHeader?.eyebrow ?? ""} max={FIELD_LIMITS.subtitle} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading (first line)</label>
+              <input
+                type="text"
+                value={sections.screenshotsHeader?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Parking made simple."
+              />
+              <CharCount value={sections.screenshotsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Accent (second line, blue)</label>
+              <input
+                type="text"
+                value={sections.screenshotsHeader?.headingAccent ?? ""}
+                onChange={(e) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, headingAccent: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="From start to finish."
+              />
+              <CharCount value={sections.screenshotsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.screenshotsHeader?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, description: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+                placeholder="Find your spot, book in seconds, pay securely…"
+              />
+              <CharCount value={sections.screenshotsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
           <ArrayItemEditor
             items={sections.screenshots || []}
             onItemsChange={(items) => setSections({ ...sections, screenshots: items })}
@@ -556,13 +627,32 @@ export default function AppPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Screenshot Image URL</label>
-                  <input
-                    type="text"
-                    value={item.image}
-                    onChange={(e) => update(i, { image: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.link}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.image}
+                      onChange={(e) => update(i, { image: e.target.value })}
+                      className={inputClass}
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`screenshot-${i}-image`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`screenshot-${i}-image`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleArrayImageUpload(`screenshot-${i}-image`, update, i, "image", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
                   <CharCount value={item.image} max={FIELD_LIMITS.link} />
                 </div>
               </div>
@@ -658,6 +748,45 @@ export default function AppPageEditor() {
           isOpen={openSections.featureCards}
           onToggle={() => toggleSection("featureCards")}
         >
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
+            <div>
+              <label className={labelClass}>Heading (first part)</label>
+              <input
+                type="text"
+                value={sections.featureCardsHeader?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Parking Made"
+              />
+              <CharCount value={sections.featureCardsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Accent (blue part)</label>
+              <input
+                type="text"
+                value={sections.featureCardsHeader?.headingAccent ?? ""}
+                onChange={(e) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, headingAccent: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Simple, Smart & Reliable"
+              />
+              <CharCount value={sections.featureCardsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={sections.featureCardsHeader?.description ?? ""}
+                onChange={(e) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, description: e.target.value } })}
+                className={inputClass}
+                rows={2}
+                maxLength={FIELD_LIMITS.description}
+                placeholder="Powerful features designed to save you time, money, and effort."
+              />
+              <CharCount value={sections.featureCardsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+          </div>
           <ArrayItemEditor
             items={sections.featureCards || []}
             onItemsChange={(items) => setSections({ ...sections, featureCards: items })}
@@ -749,13 +878,32 @@ export default function AppPageEditor() {
                   <div className="space-y-4">
                     <div>
                       <label className={labelClass}>Icon Image URL</label>
-                      <input
-                        type="text"
-                        value={item.icon}
-                        onChange={(e) => update(i, { icon: e.target.value })}
-                        className={inputClass}
-                        maxLength={FIELD_LIMITS.link}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.icon}
+                          onChange={(e) => update(i, { icon: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`storeicon-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`storeicon-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`storeicon-${i}-icon`, update, i, "icon", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
                       <CharCount value={item.icon} max={FIELD_LIMITS.link} />
                     </div>
                     <div>

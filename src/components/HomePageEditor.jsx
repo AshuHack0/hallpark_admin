@@ -375,6 +375,27 @@ export default function HomePageEditor() {
     }));
   }
 
+  async function handleAiCardImageUpload(i, file) {
+    const key = `aicard-${i}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateAiCard(i, "imageSrc", url);
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   function updateHowStep(i, field, value) {
     setHowItWorks((prev) => ({
       ...prev,
@@ -936,6 +957,43 @@ export default function HomePageEditor() {
         {/* AI POWERED PARKING SERVICE */}
         <CollapsibleSection title="AI Powered Parking Service Section">
           <div className="grid gap-3">
+            <div>
+              <label className={labelClass}>Heading (first part)</label>
+              <input
+                value={aiPoweredParking.heading ?? ""}
+                onChange={(e) => setAiPoweredParking((p) => ({ ...p, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
+                className={inputClass}
+                placeholder="AI-POWERED PARKING"
+              />
+              <CharCount value={aiPoweredParking.heading ?? ""} max={FIELD_LIMITS.heading} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient (second part)</label>
+              <input
+                value={aiPoweredParking.headingGradient ?? ""}
+                onChange={(e) => setAiPoweredParking((p) => ({ ...p, headingGradient: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="SERVICE"
+              />
+              <CharCount value={aiPoweredParking.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={aiPoweredParking.description ?? ""}
+                onChange={(e) => setAiPoweredParking((p) => ({ ...p, description: e.target.value }))}
+                maxLength={FIELD_LIMITS.description}
+                className={inputClass}
+                rows={3}
+                placeholder="Section description"
+              />
+              <CharCount value={aiPoweredParking.description ?? ""} max={FIELD_LIMITS.description} />
+            </div>
+
+            <div className="my-1 border-t border-slate-200" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Cards</p>
             {(aiPoweredParking.cards ?? []).map((card, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Card {i + 1}</p>
@@ -981,6 +1039,24 @@ export default function HomePageEditor() {
                     placeholder="Link href"
                   />
                   <CharCount value={card.href ?? ""} max={FIELD_LIMITS.link} />
+                  <MediaField
+                    label="Card image"
+                    value={card.imageSrc}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`aicard-${i}`] !== undefined}
+                    progress={uploadProgress[`aicard-${i}`] ?? 0}
+                    onChange={(v) => updateAiCard(i, "imageSrc", v)}
+                    onUpload={(file) => handleAiCardImageUpload(i, file)}
+                  />
+                  <input
+                    value={card.imageAlt ?? ""}
+                    onChange={(e) => updateAiCard(i, "imageAlt", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
+                    className={inputClass}
+                    placeholder="Image alt text"
+                  />
+                  <CharCount value={card.imageAlt ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             ))}

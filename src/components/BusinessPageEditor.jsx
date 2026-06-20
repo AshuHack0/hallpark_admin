@@ -453,18 +453,6 @@ export default function BusinessPageEditor() {
         >
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Eyebrow</label>
-              <input
-                type="text"
-                value={sections.hero.eyebrow}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, eyebrow: e.target.value } })}
-                className={inputClass}
-                placeholder="e.g., BUSINESS"
-                maxLength={FIELD_LIMITS.label}
-              />
-              <CharCount value={sections.hero.eyebrow} max={FIELD_LIMITS.label} />
-            </div>
-            <div>
               <label className={labelClass}>Title</label>
               <input
                 type="text"
@@ -485,34 +473,6 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
-            </div>
-            <div>
-              <label className={labelClass}>Background Image/Video URL</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={sections.hero.image}
-                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
-                  className={inputClass}
-                  placeholder="e.g., /image.png or https://..."
-                  maxLength={FIELD_LIMITS.link}
-                />
-                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
-                  <Upload className="h-3.5 w-3.5" />
-                  Upload
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload("hero", "image", file);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">Upload images (PNG, JPG) or use a PNG from your uploads</p>
             </div>
           </div>
         </CollapsibleSection>
@@ -837,47 +797,6 @@ export default function BusinessPageEditor() {
           />
         </CollapsibleSection>
 
-        {/* 6. Partners Showcase Stats */}
-        <CollapsibleSection
-          title="6. PartnersShowcase (Stats)"
-          isOpen={openSections.partnersStats}
-          onToggle={() => toggleSection("partnersStats")}
-        >
-          <ArrayItemEditor
-            items={sections.partnersStats}
-            onItemsChange={(items) => setSections({ ...sections, partnersStats: items })}
-            title="Stat"
-            addButtonText="Add Stat"
-            defaultItem={{ value: "0", label: "Statistic Label" }}
-            renderItem={(item, i, update) => (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Value</label>
-                  <input
-                    type="text"
-                    value={item.value}
-                    onChange={(e) => update(i, { value: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.label}
-                  />
-                  <CharCount value={item.value} max={FIELD_LIMITS.label} />
-                </div>
-                <div>
-                  <label className={labelClass}>Label</label>
-                  <input
-                    type="text"
-                    value={item.label}
-                    onChange={(e) => update(i, { label: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.label}
-                  />
-                  <CharCount value={item.label} max={FIELD_LIMITS.label} />
-                </div>
-              </div>
-            )}
-          />
-        </CollapsibleSection>
-
         {/* 7. Transform Parking */}
         <CollapsibleSection
           title="7. TransformParking"
@@ -899,6 +818,18 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={sections.transformParking.title} max={FIELD_LIMITS.heading} />
+                </div>
+                <div>
+                  <label className={labelClass}>Title Accent (gradient part — must be the end of the title)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.titleAccent ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, titleAccent: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                    placeholder="Parking Business?"
+                  />
+                  <CharCount value={sections.transformParking.titleAccent ?? ""} max={FIELD_LIMITS.label} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -952,16 +883,36 @@ export default function BusinessPageEditor() {
                   <CharCount value={sections.transformParking.parkingPartnerDescription} max={FIELD_LIMITS.long} />
                 </div>
                 <div>
-                  <label className={labelClass}>Perks (comma-separated)</label>
-                  <textarea
-                    value={Array.isArray(sections.transformParking.parkingPartnerPerks) ? sections.transformParking.parkingPartnerPerks.join(", ") : ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: e.target.value.split(",").map((p) => p.trim()) } })}
-                    className={inputClass}
-                    rows={4}
-                    placeholder="Smart parking management dashboard, Digital payment integration, ..."
-                    maxLength={FIELD_LIMITS.long}
-                  />
-                  <CharCount value={Array.isArray(sections.transformParking.parkingPartnerPerks) ? sections.transformParking.parkingPartnerPerks.join(", ") : ""} max={FIELD_LIMITS.long} />
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className={labelClass}>Perks (points)</label>
+                    <button
+                      type="button"
+                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: [...(sections.transformParking.parkingPartnerPerks ?? []), ""] } })}
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Perk
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(sections.transformParking.parkingPartnerPerks ?? []).map((perk, pi) => (
+                      <div key={pi} className="flex gap-2">
+                        <input
+                          value={perk ?? ""}
+                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
+                          className={inputClass}
+                          placeholder={`Perk ${pi + 1}`}
+                          maxLength={FIELD_LIMITS.item}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1015,16 +966,36 @@ export default function BusinessPageEditor() {
                   <CharCount value={sections.transformParking.servicePartnerDescription2} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
-                  <label className={labelClass}>Partnership Opportunities (comma-separated)</label>
-                  <textarea
-                    value={Array.isArray(sections.transformParking.servicePartnerPerks) ? sections.transformParking.servicePartnerPerks.join(", ") : ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: e.target.value.split(",").map((p) => p.trim()) } })}
-                    className={inputClass}
-                    rows={4}
-                    placeholder="Smart parking hardware, AI & automation systems, ..."
-                    maxLength={FIELD_LIMITS.long}
-                  />
-                  <CharCount value={Array.isArray(sections.transformParking.servicePartnerPerks) ? sections.transformParking.servicePartnerPerks.join(", ") : ""} max={FIELD_LIMITS.long} />
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className={labelClass}>Partnership Opportunities (points)</label>
+                    <button
+                      type="button"
+                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: [...(sections.transformParking.servicePartnerPerks ?? []), ""] } })}
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Item
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(sections.transformParking.servicePartnerPerks ?? []).map((perk, pi) => (
+                      <div key={pi} className="flex gap-2">
+                        <input
+                          value={perk ?? ""}
+                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
+                          className={inputClass}
+                          placeholder={`Item ${pi + 1}`}
+                          maxLength={FIELD_LIMITS.item}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

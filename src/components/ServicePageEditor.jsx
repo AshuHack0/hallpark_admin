@@ -360,17 +360,6 @@ export default function ServicePageEditor() {
             />
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
           </div>
-          <div>
-            <label className={labelClass}>CTA Label</label>
-            <input
-              value={hero.ctaLabel ?? ""}
-              onChange={(e) => updateHero("ctaLabel", e.target.value)}
-              className={inputClass}
-              placeholder="Get a Quote"
-              maxLength={FIELD_LIMITS.button}
-            />
-            <CharCount value={hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-          </div>
         </div>
       </CollapsibleSection>
 
@@ -622,30 +611,6 @@ export default function ServicePageEditor() {
             />
             <CharCount value={partnersSection.description ?? ""} max={FIELD_LIMITS.description} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>CTA Text</label>
-              <input
-                value={partnersSection.ctaText ?? ""}
-                onChange={(e) => setPartnersSection((p) => ({ ...p, ctaText: e.target.value }))}
-                className={inputClass}
-                placeholder="Want to become a partner?"
-                maxLength={FIELD_LIMITS.subtitle}
-              />
-              <CharCount value={partnersSection.ctaText ?? ""} max={FIELD_LIMITS.subtitle} />
-            </div>
-            <div>
-              <label className={labelClass}>CTA Link</label>
-              <input
-                value={partnersSection.ctaLink ?? ""}
-                onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLink: e.target.value }))}
-                className={inputClass}
-                placeholder="/contact"
-                maxLength={FIELD_LIMITS.link}
-              />
-              <CharCount value={partnersSection.ctaLink ?? ""} max={FIELD_LIMITS.link} />
-            </div>
-          </div>
 
           {/* Partner logos */}
           <div className="mt-2 border-t border-slate-200 pt-3">
@@ -778,54 +743,6 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={trustSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-          </div>
-          <div className="space-y-3">
-            <label className={labelClass}>Trust Items</label>
-            {trustSection.items?.map((item, j) => (
-              <div key={j} className="flex gap-2">
-                <div className="flex-1">
-                  <input
-                    value={item.label ?? ""}
-                    onChange={(e) => setTrustSection((p) => ({
-                      ...p,
-                      items: p.items.map((it, idx) => idx === j ? { ...it, label: e.target.value } : it)
-                    }))}
-                    className={inputClass}
-                    placeholder="Trust item label..."
-                    maxLength={FIELD_LIMITS.item}
-                  />
-                  <CharCount value={item.label ?? ""} max={FIELD_LIMITS.item} />
-                </div>
-                <div className="flex-1">
-                  <input
-                    value={item.icon ?? ""}
-                    onChange={(e) => setTrustSection((p) => ({
-                      ...p,
-                      items: p.items.map((it, idx) => idx === j ? { ...it, icon: e.target.value } : it)
-                    }))}
-                    className={inputClass}
-                    placeholder="Icon name..."
-                    maxLength={FIELD_LIMITS.label}
-                  />
-                  <CharCount value={item.icon ?? ""} max={FIELD_LIMITS.label} />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setTrustSection((p) => ({ ...p, items: p.items.filter((_, idx) => idx !== j) }))}
-                  className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setTrustSection((p) => ({ ...p, items: [...(p.items || []), { label: "", icon: "" }] }))}
-              className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Item
-            </button>
           </div>
         </div>
       </CollapsibleSection>

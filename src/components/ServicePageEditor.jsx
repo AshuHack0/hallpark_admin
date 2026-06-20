@@ -259,6 +259,43 @@ export default function ServicePageEditor() {
     }
   }
 
+  // ── Partner logos (partnersSection.partners) ──────────────────────────────
+  function updatePartner(i, field, value) {
+    setPartnersSection((prev) => ({
+      ...prev,
+      partners: (prev.partners ?? []).map((p, idx) => (idx === i ? { ...p, [field]: value } : p)),
+    }));
+  }
+  function addPartner() {
+    setPartnersSection((prev) => ({
+      ...prev,
+      partners: [...(prev.partners ?? []), { name: "", industry: "", logo: "", initials: "", color: "#0088FF" }],
+    }));
+  }
+  function removePartner(i) {
+    setPartnersSection((prev) => ({
+      ...prev,
+      partners: (prev.partners ?? []).filter((_, idx) => idx !== i),
+    }));
+  }
+  async function handlePartnerLogoUpload(i, file) {
+    const key = `partner-${i}-logo`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      updatePartner(i, "logo", url);
+      setSuccess("Logo uploaded. Remember to Save.");
+    } catch (err) {
+      setError("Logo upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   if (loading) {
     return <div className="p-6 text-center">Loading...</div>;
   }
@@ -608,6 +645,98 @@ export default function ServicePageEditor() {
               />
               <CharCount value={partnersSection.ctaLink ?? ""} max={FIELD_LIMITS.link} />
             </div>
+          </div>
+
+          {/* Partner logos */}
+          <div className="mt-2 border-t border-slate-200 pt-3">
+            <div className="mb-2 flex items-center justify-between">
+              <label className={labelClass}>Partner Logos ({(partnersSection.partners ?? []).length})</label>
+              <button
+                type="button"
+                onClick={addPartner}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Partner
+              </button>
+            </div>
+            <p className="mb-3 text-[11px] text-slate-400">
+              Upload a logo for each partner (transparent PNG/SVG works best). If no logo is uploaded, the partner&apos;s colored initials are shown instead.
+            </p>
+            {(partnersSection.partners ?? []).length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">
+                No partners yet — the default brand list is shown on the site. Click &quot;Add Partner&quot; to manage your own.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {(partnersSection.partners ?? []).map((partner, i) => (
+                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Partner {i + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => removePartner(i)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {partner.logo ? (
+                          <img src={partner.logo} alt={partner.name || ""} className="max-h-10 max-w-[44px] object-contain" />
+                        ) : (
+                          <span className="text-[11px] font-bold text-slate-400">{partner.initials || "—"}</span>
+                        )}
+                      </div>
+                      <div className="grid flex-1 gap-2">
+                        <div className="flex gap-2">
+                          <input
+                            value={partner.logo ?? ""}
+                            onChange={(e) => updatePartner(i, "logo", e.target.value)}
+                            className={inputClass}
+                            placeholder="Logo image URL"
+                            maxLength={FIELD_LIMITS.link}
+                          />
+                          <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                            {uploadProgress[`partner-${i}-logo`] !== undefined ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`partner-${i}-logo`]}%</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" />Upload</>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handlePartnerLogoUpload(i, file);
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            value={partner.name ?? ""}
+                            onChange={(e) => updatePartner(i, "name", e.target.value)}
+                            className={inputClass}
+                            placeholder="Partner name"
+                            maxLength={FIELD_LIMITS.label}
+                          />
+                          <input
+                            value={partner.industry ?? ""}
+                            onChange={(e) => updatePartner(i, "industry", e.target.value)}
+                            className={inputClass}
+                            placeholder="Industry"
+                            maxLength={FIELD_LIMITS.label}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleSection>

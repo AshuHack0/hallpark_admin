@@ -665,6 +665,8 @@ export default function SolutionPageEditor() {
         }));
       } else if (section === "cta") {
         setCtA((p) => ({ ...p, image: url }));
+      } else if (section === "why") {
+        setWhy((p) => ({ ...p, image: url }));
       } else if (section === "features") {
         setFeatures((p) => ({ ...p, image: url }));
       } else if (section === "deployment") {
@@ -858,6 +860,65 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={challenges.description ?? ""} max={FIELD_LIMITS.description} />
+          </div>
+
+          {/* Points list */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className={labelClass}>Points (bullet list)</label>
+              <button
+                type="button"
+                onClick={() => setChallenges((p) => ({ ...p, items: [...(p.items ?? []), ""] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Point
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(challenges.items ?? []).map((item, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    value={item ?? ""}
+                    onChange={(e) => setChallenges((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? e.target.value : it)) }))}
+                    className={inputClass}
+                    placeholder={`Point ${i + 1}`}
+                    maxLength={FIELD_LIMITS.item}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setChallenges((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                    className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Button Label</label>
+              <input
+                value={challenges.ctaLabel ?? ""}
+                onChange={(e) => setChallenges((p) => ({ ...p, ctaLabel: e.target.value }))}
+                className={inputClass}
+                placeholder="View App Features"
+                maxLength={FIELD_LIMITS.button}
+              />
+              <CharCount value={challenges.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+            </div>
+            <div>
+              <label className={labelClass}>Button Link</label>
+              <input
+                value={challenges.ctaLink ?? ""}
+                onChange={(e) => setChallenges((p) => ({ ...p, ctaLink: e.target.value }))}
+                className={inputClass}
+                placeholder="/app"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <CharCount value={challenges.ctaLink ?? ""} max={FIELD_LIMITS.link} />
+            </div>
           </div>
         </div>
       </CollapsibleSection>
@@ -1637,6 +1698,127 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={why.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            </div>
+          </div>
+
+          {/* Points list */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className={labelClass}>Points / Reasons</label>
+              <button
+                type="button"
+                onClick={() => setWhy((p) => ({ ...p, points: [...(p.points ?? []), ""] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Point
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(why.points ?? []).map((point, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    value={point ?? ""}
+                    onChange={(e) => setWhy((p) => ({ ...p, points: (p.points ?? []).map((pt, idx) => (idx === i ? e.target.value : pt)) }))}
+                    className={inputClass}
+                    placeholder={`Point ${i + 1}`}
+                    maxLength={FIELD_LIMITS.item}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setWhy((p) => ({ ...p, points: (p.points ?? []).filter((_, idx) => idx !== i) }))}
+                    className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right panel: badge + caption */}
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className={labelClass}>Panel Badge</label>
+              <input
+                value={why.badge ?? ""}
+                onChange={(e) => setWhy((p) => ({ ...p, badge: e.target.value }))}
+                className={inputClass}
+                placeholder="Live Operations"
+                maxLength={FIELD_LIMITS.label}
+              />
+              <CharCount value={why.badge ?? ""} max={FIELD_LIMITS.label} />
+            </div>
+            <div>
+              <label className={labelClass}>Panel Caption</label>
+              <input
+                value={why.panelTitle ?? ""}
+                onChange={(e) => setWhy((p) => ({ ...p, panelTitle: e.target.value }))}
+                className={inputClass}
+                placeholder="Control room visibility"
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <CharCount value={why.panelTitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            </div>
+            <div>
+              <label className={labelClass}>Caption Accent</label>
+              <input
+                value={why.panelTitleAccent ?? ""}
+                onChange={(e) => setWhy((p) => ({ ...p, panelTitleAccent: e.target.value }))}
+                className={inputClass}
+                placeholder="across every site."
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <CharCount value={why.panelTitleAccent ?? ""} max={FIELD_LIMITS.subtitle} />
+            </div>
+          </div>
+
+          {/* Right panel image */}
+          <div>
+            <label className={labelClass}>Panel Image</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                {why.image ? (
+                  <img src={why.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={why.image ?? ""}
+                  onChange={(e) => setWhy((p) => ({ ...p, image: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Image URL (leave blank for the default)"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <CharCount value={why.image ?? ""} max={FIELD_LIMITS.link} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["why-0"] !== undefined ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {uploadProgress["why-0"]}%
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5" />
+                      Upload image
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadProgress["why-0"] !== undefined}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("why", 0, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>

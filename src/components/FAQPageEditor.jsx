@@ -24,7 +24,8 @@ import {
   Truck,
 } from "lucide-react";
 import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/api";
-import { FIELD_LIMITS, CharCount } from "./CappedField";
+import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -163,6 +164,8 @@ export default function FAQPageEditor() {
   }
 
   async function handleImageUpload(field, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `hero-${field}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -183,6 +186,8 @@ export default function FAQPageEditor() {
 
   async function handleVideoUpload(categoryIndex, itemIndex, videoIndex, file) {
     if (!file) return;
+    const err = validateVideoFile(file);
+    if (err) { setError(err); return; }
     const key = `${categoryIndex}-${itemIndex}-${videoIndex}`;
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
@@ -268,6 +273,7 @@ export default function FAQPageEditor() {
     const question = newQuestionForm.question.trim() || "New question";
     const answer = newQuestionForm.answer.trim() || "New answer";
     const videos = Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [];
+    const ar = newQuestionForm.ar; // Arabic translations ride along with the item.
     const id = toSlug(question) || `q-${Date.now()}`;
     setFaqCategories((prev) =>
       prev.map((category, index) =>
@@ -276,10 +282,10 @@ export default function FAQPageEditor() {
               ...category,
               items:
                 editQuestionIndex === null
-                  ? [...(category.items ?? []), { id, question, answer, videos }]
+                  ? [...(category.items ?? []), { id, question, answer, videos, ar }]
                   : (category.items ?? []).map((item, i) =>
                       i === editQuestionIndex
-                        ? { ...item, id: item.id || id, question, answer, videos }
+                        ? { ...item, id: item.id || id, question, answer, videos, ar }
                         : item,
                     ),
             }
@@ -346,6 +352,7 @@ export default function FAQPageEditor() {
     setNewQuestionForm({
       question: item.question ?? "",
       answer: item.answer ?? "",
+      ar: item.ar ?? {},
       videoUrl: "",
       videos: Array.isArray(item.videos) ? item.videos : [],
     });
@@ -478,6 +485,7 @@ export default function FAQPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={hero.title} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), title: v } })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -489,6 +497,7 @@ export default function FAQPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={hero.description} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={hero.ar?.description} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), description: v } })} />
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
@@ -516,6 +525,7 @@ export default function FAQPageEditor() {
                   />
                 </label>
               </div>
+              <FieldError error={validateUrl(hero.image)} />
             </div>
           </div>
         </CollapsibleSection>
@@ -578,6 +588,7 @@ export default function FAQPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={category.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={category.ar?.title} onChange={(v) => updateCategory(categoryIndex, "ar", { ...(category.ar ?? {}), title: v })} />
                   <select
                     value={category.icon ?? "Building2"}
                     onChange={(e) => updateCategory(categoryIndex, "icon", e.target.value)}
@@ -723,6 +734,7 @@ export default function FAQPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={newQuestionForm.question} max={FIELD_LIMITS.subtitle} />
+                <ArInput kind="subtitle" multiline value={newQuestionForm.ar?.question} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), question: v } })} />
               </div>
               <div>
                 <label className={labelClass}>Answer</label>
@@ -735,6 +747,7 @@ export default function FAQPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={newQuestionForm.answer} max={FIELD_LIMITS.description} />
+                <ArInput kind="description" multiline value={newQuestionForm.ar?.answer} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} />
               </div>
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between mb-3">
@@ -754,7 +767,8 @@ export default function FAQPageEditor() {
                     const progress = uploadProgress[uploadKey];
                     const uploading = progress !== undefined;
                     return (
-                      <div key={videoIndex} className="flex gap-2">
+                      <div key={videoIndex}>
+                      <div className="flex gap-2">
                         <input
                           value={video ?? ""}
                           onChange={(e) =>
@@ -809,6 +823,8 @@ export default function FAQPageEditor() {
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
+                      </div>
+                      <FieldError error={validateUrl(video)} />
                       </div>
                     );
                   })}

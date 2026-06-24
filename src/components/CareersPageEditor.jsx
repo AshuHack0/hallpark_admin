@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { DEFAULT_CAREERS_SECTIONS, mergeCareersSections } from "../constants/careersDefaults.js";
-import { FIELD_LIMITS, CharCount } from "./CappedField";
+import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import { validateUrl, validateImageFile } from "../lib/validators";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -167,6 +168,8 @@ export default function CareersPageEditor() {
   }
 
   async function handleImageUpload(field, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `image-${field}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -252,6 +255,7 @@ export default function CareersPageEditor() {
       title: heroForm.title,
       description: heroForm.description,
       image: heroForm.image,
+      ar: heroForm.ar,
     };
     const next = { ...content, hero };
     setContent(next);
@@ -269,6 +273,30 @@ export default function CareersPageEditor() {
     setContent(next);
     void persistSections(next, "Section title updated.");
     setBuildingModalOpen(false);
+  }
+
+  // ── Opportunities (the cards in "Opportunities with HalaPark") ─────────────
+  function updateOpportunity(i, field, value) {
+    setContent((prev) => ({
+      ...prev,
+      opportunities: (prev.opportunities ?? []).map((o, idx) => (idx === i ? { ...o, [field]: value } : o)),
+    }));
+  }
+  function addOpportunity() {
+    setContent((prev) => ({
+      ...prev,
+      opportunities: [...(prev.opportunities ?? []), { icon: "Briefcase", title: "", description: "", badge: "" }],
+    }));
+  }
+  function removeOpportunity(i) {
+    setContent((prev) => {
+      const next = { ...prev, opportunities: (prev.opportunities ?? []).filter((_, idx) => idx !== i) };
+      void persistSections(next, "Opportunity removed.");
+      return next;
+    });
+  }
+  function saveOpportunities() {
+    void persistSections(content, "Opportunities saved.");
   }
 
   function openAddParagraph() {
@@ -307,6 +335,7 @@ export default function CareersPageEditor() {
     setOpenPositionsForm({
       title: content.openPositions?.title ?? "",
       subtitle: content.openPositions?.subtitle ?? "",
+      ar: content.openPositions?.ar ?? {},
     });
     setOpenPositionsModalOpen(true);
   }
@@ -318,6 +347,7 @@ export default function CareersPageEditor() {
         ...content.openPositions,
         title: openPositionsForm.title.trim() || "Open Positions",
         subtitle: openPositionsForm.subtitle.trim(),
+        ar: openPositionsForm.ar,
       },
     };
     setContent(next);
@@ -337,6 +367,7 @@ export default function CareersPageEditor() {
       applyMode: "form",
       applyLink: "/contact",
       status: "active",
+      ar: {},
     });
     setJobPostModalOpen(true);
   }
@@ -356,6 +387,7 @@ export default function CareersPageEditor() {
       applyMode: item.applyMode ?? "link",
       applyLink: item.applyLink ?? "/contact",
       status: item.status === "closed" ? "closed" : "active",
+      ar: item.ar ?? {},
     });
     setJobPostModalOpen(true);
   }
@@ -385,6 +417,7 @@ export default function CareersPageEditor() {
       applyMode: jobPostForm.applyMode === "form" ? "form" : "link",
       applyLink: jobPostForm.applyLink.trim() || "/contact",
       status: jobPostForm.status === "closed" ? "closed" : "active",
+      ar: jobPostForm.ar,
     };
 
     setContent((prev) => {
@@ -412,6 +445,7 @@ export default function CareersPageEditor() {
       subtitle: content.whyJoin.subtitle,
       bodyParagraph: content.whyJoin.bodyParagraph,
       reasons: content.whyJoin.reasons,
+      ar: content.whyJoin.ar ?? {},
     });
     setWhyJoinModalOpen(true);
   }
@@ -424,6 +458,7 @@ export default function CareersPageEditor() {
         title: whyJoinForm.title,
         subtitle: whyJoinForm.subtitle,
         bodyParagraph: whyJoinForm.bodyParagraph,
+        ar: whyJoinForm.ar,
       },
     };
     setContent(next);
@@ -601,6 +636,68 @@ export default function CareersPageEditor() {
                 <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">{paragraph}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Opportunities */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF6FF]">
+                <Sparkles className="h-4 w-4 text-[#0088FF]" />
+              </div>
+              <p className="text-sm font-semibold text-[#050A13]">Opportunities ({(content.opportunities ?? []).length})</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={addOpportunity} className={btnPrimary}>
+                <Plus className="h-3.5 w-3.5" /> Add
+              </button>
+              <button type="button" onClick={saveOpportunities} disabled={saving} className={btnOutline}>
+                <Save className="h-3.5 w-3.5" /> Save
+              </button>
+            </div>
+          </div>
+          <p className="mb-3 text-[11px] text-slate-400">Icon options: Briefcase, Headset, Building2. Click Save after editing.</p>
+          <div className="space-y-3">
+            {(content.opportunities ?? []).map((item, i) => (
+              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Opportunity {i + 1}</p>
+                  <button type="button" onClick={() => removeOpportunity(i)} className={btnDanger}>
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+                <div className="grid gap-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>Badge</label>
+                      <input value={item.badge ?? ""} onChange={(e) => updateOpportunity(i, "badge", e.target.value)} className={inputClass} placeholder="Full-Time" maxLength={FIELD_LIMITS.label} />
+                      <CharCount value={item.badge ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput kind="label" value={item.ar?.badge} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), badge: v })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon name</label>
+                      <input value={item.icon ?? ""} onChange={(e) => updateOpportunity(i, "icon", e.target.value)} className={inputClass} placeholder="Briefcase" maxLength={FIELD_LIMITS.label} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Title</label>
+                    <input value={item.title ?? ""} onChange={(e) => updateOpportunity(i, "title", e.target.value)} className={inputClass} placeholder="Full-Time Valet Roles" maxLength={FIELD_LIMITS.heading} />
+                    <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
+                    <ArInput kind="heading" value={item.ar?.title} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), title: v })} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <textarea value={item.description ?? ""} onChange={(e) => updateOpportunity(i, "description", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.description} />
+                    <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
+                    <ArInput kind="description" multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(content.opportunities ?? []).length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">No opportunities yet. Click &quot;Add&quot;.</p>
+            ) : null}
           </div>
         </div>
 
@@ -837,6 +934,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={heroForm.title} max={FIELD_LIMITS.heading} />
+            <ArInput
+              kind="heading"
+              value={heroForm.ar?.title}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -848,6 +950,12 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
+            <ArInput
+              kind="description"
+              multiline
+              value={heroForm.ar?.description}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Background image path</span>
@@ -881,6 +989,7 @@ export default function CareersPageEditor() {
                 />
               </label>
             </div>
+            <FieldError error={validateUrl(heroForm.image)} />
           </label>
         </div>
       </Modal>
@@ -920,6 +1029,11 @@ export default function CareersPageEditor() {
             maxLength={FIELD_LIMITS.heading}
           />
           <CharCount value={buildingForm.title} max={FIELD_LIMITS.heading} />
+          <ArInput
+            kind="heading"
+            value={buildingForm.ar?.title}
+            onChange={(v) => setBuildingForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+          />
         </label>
       </Modal>
 
@@ -995,6 +1109,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={openPositionsForm.title} max={FIELD_LIMITS.heading} />
+            <ArInput
+              kind="heading"
+              value={openPositionsForm.ar?.title}
+              onChange={(v) => setOpenPositionsForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1006,6 +1125,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={openPositionsForm.subtitle} max={FIELD_LIMITS.subtitle} />
+            <ArInput
+              kind="subtitle"
+              value={openPositionsForm.ar?.subtitle}
+              onChange={(v) => setOpenPositionsForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
+            />
           </label>
         </div>
       </Modal>
@@ -1046,6 +1170,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={jobPostForm.title} max={FIELD_LIMITS.heading} />
+            <ArInput
+              kind="heading"
+              value={jobPostForm.ar?.title}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Department</span>
@@ -1057,6 +1186,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.department} max={FIELD_LIMITS.label} />
+            <ArInput
+              kind="label"
+              value={jobPostForm.ar?.department}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), department: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Location</span>
@@ -1068,6 +1202,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.location} max={FIELD_LIMITS.label} />
+            <ArInput
+              kind="label"
+              value={jobPostForm.ar?.location}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), location: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Employment type</span>
@@ -1079,6 +1218,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.employmentType} max={FIELD_LIMITS.label} />
+            <ArInput
+              kind="label"
+              value={jobPostForm.ar?.employmentType}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), employmentType: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Status</span>
@@ -1102,6 +1246,12 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={jobPostForm.description} max={FIELD_LIMITS.description} />
+            <ArInput
+              kind="description"
+              multiline
+              value={jobPostForm.ar?.description}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Full details (HTML — shown on the job detail view)</span>
@@ -1114,6 +1264,12 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={jobPostForm.fullDescription} max={FIELD_LIMITS.long} />
+            <ArInput
+              kind="long"
+              multiline
+              value={jobPostForm.ar?.fullDescription}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), fullDescription: v } }))}
+            />
             <span className="text-[11px] text-slate-400">
               Supports HTML: headings, paragraphs, lists, bold, links. Leave blank to use the short description.
             </span>
@@ -1128,6 +1284,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={jobPostForm.applyLabel} max={FIELD_LIMITS.button} />
+            <ArInput
+              kind="button"
+              value={jobPostForm.ar?.applyLabel}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), applyLabel: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Apply action</span>
@@ -1151,6 +1312,7 @@ export default function CareersPageEditor() {
                 maxLength={FIELD_LIMITS.link}
               />
               <CharCount value={jobPostForm.applyLink} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(jobPostForm.applyLink)} />
             </label>
           ) : null}
         </div>
@@ -1191,6 +1353,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={whyJoinForm.title} max={FIELD_LIMITS.heading} />
+            <ArInput
+              kind="heading"
+              value={whyJoinForm.ar?.title}
+              onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1201,6 +1368,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={whyJoinForm.subtitle} max={FIELD_LIMITS.subtitle} />
+            <ArInput
+              kind="subtitle"
+              value={whyJoinForm.ar?.subtitle}
+              onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Team card paragraph</span>
@@ -1212,6 +1384,12 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={whyJoinForm.bodyParagraph} max={FIELD_LIMITS.description} />
+            <ArInput
+              kind="description"
+              multiline
+              value={whyJoinForm.ar?.bodyParagraph}
+              onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), bodyParagraph: v } }))}
+            />
           </label>
         </div>
       </Modal>
@@ -1287,6 +1465,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={ctaForm.title} max={FIELD_LIMITS.heading} />
+            <ArInput
+              kind="heading"
+              value={ctaForm.ar?.title}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1297,6 +1480,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={ctaForm.subtitle} max={FIELD_LIMITS.subtitle} />
+            <ArInput
+              kind="subtitle"
+              value={ctaForm.ar?.subtitle}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1308,6 +1496,12 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
+            <ArInput
+              kind="description"
+              multiline
+              value={ctaForm.ar?.description}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
@@ -1318,6 +1512,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
+            <ArInput
+              kind="button"
+              value={ctaForm.ar?.primaryCtaText}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1329,6 +1528,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.link}
             />
             <CharCount value={ctaForm.primaryCtaLink} max={FIELD_LIMITS.link} />
+            <FieldError error={validateUrl(ctaForm.primaryCtaLink)} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button text</span>
@@ -1339,6 +1539,11 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
+            <ArInput
+              kind="button"
+              value={ctaForm.ar?.secondaryCtaText}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))}
+            />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1350,6 +1555,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.link}
             />
             <CharCount value={ctaForm.secondaryCtaLink} max={FIELD_LIMITS.link} />
+            <FieldError error={validateUrl(ctaForm.secondaryCtaLink)} />
           </label>
         </div>
       </Modal>

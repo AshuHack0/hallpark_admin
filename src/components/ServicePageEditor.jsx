@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
-import { FIELD_LIMITS, CharCount } from "./CappedField";
+import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -242,6 +243,8 @@ export default function ServicePageEditor() {
   }
 
   async function handleServiceImageUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `service-${i}-image`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -279,6 +282,8 @@ export default function ServicePageEditor() {
     }));
   }
   async function handlePartnerLogoUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `partner-${i}-logo`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -347,6 +352,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), title: v })} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -359,6 +365,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), subtitle: v })} />
           </div>
         </div>
       </CollapsibleSection>
@@ -391,6 +398,7 @@ export default function ServicePageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={service.name ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={service.ar?.name} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), name: v })} />
                 </div>
                 <div>
                   <label className={labelClass}>Slug</label>
@@ -416,6 +424,7 @@ export default function ServicePageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={service.fullDesc ?? ""} max={FIELD_LIMITS.description} />
+                <ArInput kind="description" multiline value={service.ar?.fullDesc} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), fullDesc: v })} />
               </div>
 
               <div>
@@ -441,6 +450,7 @@ export default function ServicePageEditor() {
                     maxLength={FIELD_LIMITS.link}
                   />
                   <CharCount value={service.mediaSrc ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(service.mediaSrc)} />
                 </div>
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                   <Upload className="h-3.5 w-3.5" />
@@ -468,6 +478,7 @@ export default function ServicePageEditor() {
                   maxLength={FIELD_LIMITS.label}
                 />
                 <CharCount value={service.includedLabel ?? ""} max={FIELD_LIMITS.label} />
+                <ArInput kind="label" value={service.ar?.includedLabel} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), includedLabel: v })} />
               </div>
 
               <ArrayItemEditor
@@ -575,6 +586,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={partnersSection.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={partnersSection.ar?.heading} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -586,6 +598,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={partnersSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={partnersSection.ar?.headingGradient} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -598,6 +611,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={partnersSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={partnersSection.ar?.subtitle} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -610,6 +624,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={partnersSection.description ?? ""} max={FIELD_LIMITS.description} />
+            <ArInput kind="description" multiline value={partnersSection.ar?.description} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
 
           {/* Partner logos */}
@@ -680,21 +695,28 @@ export default function ServicePageEditor() {
                             />
                           </label>
                         </div>
+                        <FieldError error={validateUrl(partner.logo)} />
                         <div className="grid grid-cols-2 gap-2">
-                          <input
-                            value={partner.name ?? ""}
-                            onChange={(e) => updatePartner(i, "name", e.target.value)}
-                            className={inputClass}
-                            placeholder="Partner name"
-                            maxLength={FIELD_LIMITS.label}
-                          />
-                          <input
-                            value={partner.industry ?? ""}
-                            onChange={(e) => updatePartner(i, "industry", e.target.value)}
-                            className={inputClass}
-                            placeholder="Industry"
-                            maxLength={FIELD_LIMITS.label}
-                          />
+                          <div>
+                            <input
+                              value={partner.name ?? ""}
+                              onChange={(e) => updatePartner(i, "name", e.target.value)}
+                              className={inputClass}
+                              placeholder="Partner name"
+                              maxLength={FIELD_LIMITS.label}
+                            />
+                            <ArInput kind="label" value={partner.ar?.name} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), name: v })} />
+                          </div>
+                          <div>
+                            <input
+                              value={partner.industry ?? ""}
+                              onChange={(e) => updatePartner(i, "industry", e.target.value)}
+                              className={inputClass}
+                              placeholder="Industry"
+                              maxLength={FIELD_LIMITS.label}
+                            />
+                            <ArInput kind="label" value={partner.ar?.industry} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), industry: v })} />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -720,6 +742,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={trustSection.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={trustSection.ar?.heading} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -731,6 +754,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={trustSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={trustSection.ar?.headingGradient} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -743,6 +767,62 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={trustSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={trustSection.ar?.subtitle} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+          </div>
+
+          {/* Trust items */}
+          <div className="mt-2 border-t border-slate-200 pt-3">
+            <div className="mb-2 flex items-center justify-between">
+              <label className={labelClass}>Trust Items ({(trustSection.items ?? []).length})</label>
+              <button
+                type="button"
+                onClick={() => setTrustSection((p) => ({ ...p, items: [...(p.items ?? []), { label: "", icon: "Shield" }] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Item
+              </button>
+            </div>
+            <p className="mb-2 text-[11px] text-slate-400">Icon options: Camera, Shield, BadgeCheck, CreditCard, Lock</p>
+            <div className="space-y-3">
+              {(trustSection.items ?? []).map((item, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Item {i + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => setTrustSection((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </button>
+                  </div>
+                  <div className="grid gap-2">
+                    <div>
+                      <label className={labelClass}>Label</label>
+                      <input
+                        value={item.label ?? ""}
+                        onChange={(e) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, label: e.target.value } : it)) }))}
+                        className={inputClass}
+                        placeholder="24/7 Surveillance"
+                        maxLength={FIELD_LIMITS.item}
+                      />
+                      <CharCount value={item.label ?? ""} max={FIELD_LIMITS.item} />
+                      <ArInput kind="item" value={item.ar?.label} onChange={(v) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, ar: { ...(it.ar ?? {}), label: v } } : it)) }))} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon name</label>
+                      <input
+                        value={item.icon ?? ""}
+                        onChange={(e) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, icon: e.target.value } : it)) }))}
+                        className={inputClass}
+                        placeholder="Shield"
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </CollapsibleSection>
@@ -761,6 +841,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={ctaSection.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={ctaSection.ar?.heading} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -772,6 +853,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={ctaSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={ctaSection.ar?.headingGradient} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -785,6 +867,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={ctaSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={ctaSection.ar?.subtitle} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>CTA Label</label>
@@ -796,6 +879,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+            <ArInput kind="button" value={ctaSection.ar?.ctaLabel} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
           </div>
         </div>
       </CollapsibleSection>

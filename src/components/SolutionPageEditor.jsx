@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
-import { FIELD_LIMITS, CharCount } from "./CappedField";
+import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
@@ -225,6 +226,8 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
     setDraft((d) => ({ ...d, [field]: (d[field] ?? []).filter((_, i) => i !== idx) }));
 
   async function handleUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setErr(err); return; }
     setErr("");
     setUploading(true);
     setUploadPct(0);
@@ -315,6 +318,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={draft.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={draft.ar?.eyebrow} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), eyebrow: v })} />
             </div>
           </div>
 
@@ -329,6 +333,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={draft.title ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.title} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), title: v })} />
           </div>
 
           {/* Intro */}
@@ -343,6 +348,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={draft.intro ?? ""} max={FIELD_LIMITS.long} />
+            <ArInput kind="long" multiline value={draft.ar?.intro} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), intro: v })} />
           </div>
 
           {/* Image */}
@@ -367,6 +373,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                   maxLength={FIELD_LIMITS.link}
                 />
                 <CharCount value={draft.image ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploading ? (
                     <>
@@ -407,6 +414,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={draft.howItOperates ?? ""} max={FIELD_LIMITS.long} />
+            <ArInput kind="long" multiline value={draft.ar?.howItOperates} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItOperates: v })} />
           </div>
 
           {/* System Components / Integrated Systems */}
@@ -420,6 +428,10 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
             onAdd={() => addListItem("systemComponents")}
             onRemove={(idx) => removeListItem("systemComponents", idx)}
           />
+          <div className="-mt-1">
+            <label className={labelClass}>System Components Heading — العربية</label>
+            <ArInput kind="heading" value={draft.ar?.systemComponentsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), systemComponentsHeading: v })} />
+          </div>
 
           {/* Key Benefit */}
           <DetailStringList
@@ -432,6 +444,10 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
             onAdd={() => addListItem("benefits")}
             onRemove={(idx) => removeListItem("benefits", idx)}
           />
+          <div className="-mt-1">
+            <label className={labelClass}>Key Benefit Heading — العربية</label>
+            <ArInput kind="heading" value={draft.ar?.benefitsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), benefitsHeading: v })} />
+          </div>
 
           {/* Problem We Solve */}
           <div className="grid gap-3">
@@ -445,6 +461,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={draft.problemHeading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
             </div>
             <div>
               <label className={labelClass}>Problem Body</label>
@@ -457,6 +474,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.long}
               />
               <CharCount value={draft.problemBody ?? ""} max={FIELD_LIMITS.long} />
+              <ArInput kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
             </div>
           </div>
 
@@ -472,6 +490,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -483,6 +502,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.link}
               />
               <CharCount value={draft.ctaLink ?? ""} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(draft.ctaLink ?? "")} />
             </div>
           </div>
         </div>
@@ -627,6 +647,8 @@ export default function SolutionPageEditor() {
   }
 
   async function handleVideoUpload(file) {
+    const err = validateVideoFile(file);
+    if (err) { setError(err); return; }
     const key = "hero-video";
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -646,6 +668,8 @@ export default function SolutionPageEditor() {
   }
 
   async function handleImageUpload(section, cardIndex, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `${section}-${cardIndex}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -733,6 +757,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Title Accent (gradient part)</label>
@@ -744,6 +769,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={hero.titleAccent ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={hero.ar?.titleAccent} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleAccent: v } }))} />
             </div>
           </div>
           <div>
@@ -757,6 +783,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -769,6 +796,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={hero.ar?.ctaLabel} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -780,6 +808,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.link}
               />
               <CharCount value={hero.ctaLink ?? ""} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(hero.ctaLink ?? "")} />
             </div>
           </div>
           <div>
@@ -807,6 +836,7 @@ export default function SolutionPageEditor() {
                 />
               </label>
             </div>
+            <FieldError error={validateUrl(hero.videoUrl ?? "")} />
           </div>
         </div>
       </CollapsibleSection>
@@ -825,6 +855,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={challenges.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={challenges.ar?.heading} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -836,6 +867,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={challenges.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={challenges.ar?.headingGradient} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -848,6 +880,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={challenges.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={challenges.ar?.subtitle} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -860,6 +893,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={challenges.description ?? ""} max={FIELD_LIMITS.description} />
+            <ArInput kind="description" multiline value={challenges.ar?.description} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
 
           {/* Points list */}
@@ -907,6 +941,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={challenges.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={challenges.ar?.ctaLabel} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Button Link</label>
@@ -918,6 +953,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.link}
               />
               <CharCount value={challenges.ctaLink ?? ""} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(challenges.ctaLink ?? "")} />
             </div>
           </div>
         </div>
@@ -939,6 +975,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={solutions.heading ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={solutions.ar?.heading} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -950,6 +987,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={solutions.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={solutions.ar?.headingGradient} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
                 </div>
               </div>
               <div>
@@ -962,6 +1000,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={solutions.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+                <ArInput kind="subtitle" value={solutions.ar?.subtitle} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
             </div>
           </div>
@@ -1011,6 +1050,10 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                     <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
+                    <ArInput kind="heading" value={card.ar?.title} onChange={(v) => setSolutions((p) => ({
+                      ...p,
+                      cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), title: v } } : c)
+                    }))} />
                     <textarea
                       value={card.description ?? ""}
                       onChange={(e) => setSolutions((p) => ({
@@ -1023,6 +1066,10 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.summary}
                     />
                     <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
+                    <ArInput kind="summary" multiline value={card.ar?.description} onChange={(v) => setSolutions((p) => ({
+                      ...p,
+                      cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
+                    }))} />
                     <div className="flex gap-2">
                       <input
                         value={card.image ?? ""}
@@ -1059,6 +1106,7 @@ export default function SolutionPageEditor() {
                         />
                       </label>
                     </div>
+                    <FieldError error={validateUrl(card.image ?? "")} />
 
                     {/* Slug — links the card to its detail page */}
                     <div className="flex items-center gap-2">
@@ -1145,6 +1193,10 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={solutions.advantages?.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={solutions.advantages?.ar?.heading} onChange={(v) => setSolutions((p) => ({
+                ...p,
+                advantages: { ...(p.advantages ?? { items: [] }), ar: { ...(p.advantages?.ar ?? {}), heading: v } },
+              }))} />
             </div>
 
             <div className="space-y-3">
@@ -1173,6 +1225,10 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.item}
                   />
                   <CharCount value={adv.title ?? ""} max={FIELD_LIMITS.item} />
+                  <ArInput kind="item" value={adv.ar?.title} onChange={(v) => setSolutions((p) => ({
+                    ...p,
+                    advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), title: v } } : a) },
+                  }))} />
                   <textarea
                     value={adv.description ?? ""}
                     onChange={(e) => setSolutions((p) => ({
@@ -1185,6 +1241,10 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={adv.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={adv.ar?.description} onChange={(v) => setSolutions((p) => ({
+                    ...p,
+                    advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), description: v } } : a) },
+                  }))} />
                 </div>
               ))}
               {(solutions.advantages?.items ?? []).length === 0 && (
@@ -1211,6 +1271,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={integration.heading ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={integration.ar?.heading} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -1222,6 +1283,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={integration.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={integration.ar?.headingGradient} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
                 </div>
               </div>
               <div>
@@ -1234,6 +1296,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={integration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+                <ArInput kind="subtitle" value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
             </div>
           </div>
@@ -1280,6 +1343,10 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                     <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
+                    <ArInput kind="heading" value={card.ar?.title} onChange={(v) => setIntegration((p) => ({
+                      ...p,
+                      cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), title: v } } : c)
+                    }))} />
                     <textarea
                       value={card.description ?? ""}
                       onChange={(e) => setIntegration((p) => ({
@@ -1292,6 +1359,10 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.summary}
                     />
                     <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
+                    <ArInput kind="summary" multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
+                      ...p,
+                      cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
+                    }))} />
                     <div className="flex gap-2">
                       <input
                         value={card.image ?? ""}
@@ -1328,6 +1399,7 @@ export default function SolutionPageEditor() {
                         />
                       </label>
                     </div>
+                    <FieldError error={validateUrl(card.image ?? "")} />
                     <input
                       value={card.gradient ?? ""}
                       onChange={(e) => setIntegration((p) => ({
@@ -1373,6 +1445,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={trust.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={trust.ar?.heading} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1384,6 +1457,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={trust.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={trust.ar?.headingGradient} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1397,6 +1471,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={trust.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={trust.ar?.subtitle} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
         </div>
       </CollapsibleSection>
@@ -1415,6 +1490,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={features.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={features.ar?.heading} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1426,6 +1502,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={features.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={features.ar?.headingGradient} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1438,6 +1515,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={features.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={features.ar?.subtitle} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
 
           {/* Background image */}
@@ -1462,6 +1540,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.link}
                 />
                 <CharCount value={features.image ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(features.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploadProgress["features-0"] !== undefined ? (
                     <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["features-0"]}%</>
@@ -1488,27 +1567,30 @@ export default function SolutionPageEditor() {
             </div>
             <div className="space-y-2">
               {(features.industries ?? []).map((ind, ii) => (
-                <div key={ii} className="flex items-center gap-2">
-                  <select
-                    value={ind.icon ?? "Building2"}
-                    onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, icon: e.target.value } : x) }))}
-                    className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
-                  >
-                    {INDUSTRY_ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
-                  </select>
-                  <input
-                    value={ind.label ?? ""}
-                    onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, label: e.target.value } : x) }))}
-                    className={inputClass}
-                    placeholder="Environment label (e.g. Airports)"
-                    maxLength={FIELD_LIMITS.item}
-                  />
-                  <button
-                    onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) }))}
-                    className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <div key={ii}>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={ind.icon ?? "Building2"}
+                      onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, icon: e.target.value } : x) }))}
+                      className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
+                    >
+                      {INDUSTRY_ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                    <input
+                      value={ind.label ?? ""}
+                      onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, label: e.target.value } : x) }))}
+                      className={inputClass}
+                      placeholder="Environment label (e.g. Airports)"
+                      maxLength={FIELD_LIMITS.item}
+                    />
+                    <button
+                      onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) }))}
+                      className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <ArInput kind="item" value={ind.ar?.label} onChange={(v) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, ar: { ...(x.ar ?? {}), label: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -1530,6 +1612,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={deployment.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={deployment.ar?.heading} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1541,6 +1624,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={deployment.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={deployment.ar?.headingGradient} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1554,6 +1638,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={deployment.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={deployment.ar?.subtitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
 
           {/* Steps */}
@@ -1595,6 +1680,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                   </div>
+                  <ArInput kind="heading" value={st.ar?.title} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
                   <textarea
                     value={st.description ?? ""}
                     onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: e.target.value } : x) }))}
@@ -1604,6 +1690,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={st.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -1623,6 +1710,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={deployment.panelTitle ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput kind="heading" value={deployment.ar?.panelTitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
               </div>
               <div>
                 <label className={labelClass}>Panel Title (accent)</label>
@@ -1634,6 +1722,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.label}
                 />
                 <CharCount value={deployment.panelTitleAccent ?? ""} max={FIELD_LIMITS.label} />
+                <ArInput kind="label" value={deployment.ar?.panelTitleAccent} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
               </div>
             </div>
             <div className="mt-3">
@@ -1657,6 +1746,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.link}
                   />
                   <CharCount value={deployment.image ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(deployment.image ?? "")} />
                   <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                     {uploadProgress["deployment-0"] !== undefined ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["deployment-0"]}%</>
@@ -1687,6 +1777,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={why.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={why.ar?.heading} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1698,6 +1789,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={why.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={why.ar?.headingGradient} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
 
@@ -1747,6 +1839,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={why.badge ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={why.ar?.badge} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Panel Caption</label>
@@ -1758,6 +1851,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.subtitle}
               />
               <CharCount value={why.panelTitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" value={why.ar?.panelTitle} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Caption Accent</label>
@@ -1769,6 +1863,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.subtitle}
               />
               <CharCount value={why.panelTitleAccent ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" value={why.ar?.panelTitleAccent} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
             </div>
           </div>
 
@@ -1794,6 +1889,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.link}
                 />
                 <CharCount value={why.image ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(why.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploadProgress["why-0"] !== undefined ? (
                     <>
@@ -1837,6 +1933,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={cta.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={cta.ar?.heading} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Heading Gradient</label>
@@ -1848,6 +1945,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={cta.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput kind="label" value={cta.ar?.headingGradient} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -1860,6 +1958,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={cta.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" multiline value={cta.ar?.subtitle} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -1872,6 +1971,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={cta.ar?.ctaLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Secondary CTA Label</label>
@@ -1883,6 +1983,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={cta.ctaSecondaryLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={cta.ar?.ctaSecondaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaSecondaryLabel: v } }))} />
             </div>
           </div>
 
@@ -1908,6 +2009,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.link}
                 />
                 <CharCount value={cta.image ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(cta.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploadProgress["cta-0"] !== undefined ? (
                     <>

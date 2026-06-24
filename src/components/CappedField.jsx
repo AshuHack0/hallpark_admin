@@ -52,6 +52,69 @@ function Counter({ value, max }) {
   return <CharCount value={value} max={max} />;
 }
 
+/**
+ * Inline validation message shown under a field. Pass `error` (a string from a
+ * validator in @/lib/validators — "" when valid). Renders nothing when valid.
+ * Non-blocking: it warns the editor but does not prevent saving.
+ */
+export function FieldError({ error }) {
+  if (!error) return null;
+  return (
+    <p className="mt-1 flex items-start gap-1 text-[11px] font-medium text-amber-600">
+      <span aria-hidden>⚠</span>
+      <span>{error}</span>
+    </p>
+  );
+}
+
+/**
+ * Arabic translation input, paired under an English field. The Arabic text is
+ * stored in an `ar` sibling object on the section (Shape A): section.ar[arKey].
+ *
+ * Usage:
+ *   <ArInput
+ *     value={section.ar?.heading}
+ *     onChange={(v) => setSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))}
+ *     kind="heading"
+ *   />
+ *
+ * Renders RTL, right-aligned, with the same cap/counter as the English field.
+ * Leave blank to fall back to English on the site.
+ */
+export function ArInput({ kind = "subtitle", limit, value, onChange, rows, multiline = false }) {
+  const max = resolveLimit(kind, limit);
+  const arClass =
+    "w-full rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-300/30";
+  return (
+    <div className="mt-1.5">
+      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+        العربية (Arabic)
+      </label>
+      {multiline ? (
+        <textarea
+          dir="rtl"
+          rows={rows ?? 2}
+          value={value ?? ""}
+          maxLength={max}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${arClass} text-right`}
+          placeholder="اتركه فارغًا لاستخدام النص الإنجليزي"
+        />
+      ) : (
+        <input
+          dir="rtl"
+          value={value ?? ""}
+          maxLength={max}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${arClass} text-right`}
+          placeholder="اتركه فارغًا لاستخدام النص الإنجليزي"
+        />
+      )}
+      <CharCount value={value} max={max} />
+    </div>
+  );
+}
+
 /** Single-line capped input. */
 export function CappedInput({ kind = "subtitle", limit, value, onChange, className, showCount = true, ...rest }) {
   const max = resolveLimit(kind, limit);

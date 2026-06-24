@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
-import { FIELD_LIMITS, CharCount } from "./CappedField";
+import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -257,6 +258,7 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
           />
         </label>
       </div>
+      <FieldError error={validateUrl(value)} />
     </div>
   );
 }
@@ -376,6 +378,8 @@ export default function HomePageEditor() {
   }
 
   async function handleAiCardImageUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `aicard-${i}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -464,6 +468,8 @@ export default function HomePageEditor() {
   }
 
   async function handleWhyImageUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `why-${i}-image`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -503,6 +509,8 @@ export default function HomePageEditor() {
   }
 
   async function handleUpload(index, field, file, resourceType) {
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `${index}-${field}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -543,6 +551,8 @@ export default function HomePageEditor() {
     }));
   }
   async function handleServiceCardMediaUpload(i, file, resourceType) {
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `glcard-${i}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -583,6 +593,8 @@ export default function HomePageEditor() {
     }));
   }
   async function handleLogoUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
     const key = `logo-${i}`;
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
@@ -713,6 +725,7 @@ export default function HomePageEditor() {
                     className={inputClass}
                     placeholder="Tag"
                   />
+                  <ArInput kind="label" limit={60} value={slide.ar?.tag} onChange={(v) => updateSlide(index, "ar", { ...(slide.ar ?? {}), tag: v })} />
                   <p className="mt-1 text-[10px] text-slate-400">Keep it short — long headlines may clip on the slider.</p>
                 </div>
                 <div>
@@ -730,16 +743,7 @@ export default function HomePageEditor() {
                     rows={2}
                     placeholder="Title"
                   />
-                </div>
-                <div>
-                  <label className={labelClass}>Subtitle</label>
-                  <textarea value={slide.subtitle ?? ""} onChange={(e) => updateSlide(index, "subtitle", e.target.value)} maxLength={FIELD_LIMITS.subtitle} className={inputClass} rows={2} placeholder="Subtitle" />
-                  <CharCount value={slide.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <textarea value={slide.description ?? ""} onChange={(e) => updateSlide(index, "description", e.target.value)} maxLength={FIELD_LIMITS.description} className={inputClass} rows={2} placeholder="Description" />
-                  <CharCount value={slide.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="subtitle" limit={160} multiline value={slide.ar?.title} onChange={(v) => updateSlide(index, "ar", { ...(slide.ar ?? {}), title: v })} />
                 </div>
 
                 <MediaField
@@ -799,6 +803,7 @@ export default function HomePageEditor() {
                 placeholder="Who We Are"
               />
               <CharCount value={whoWeAre.audiences?.business?.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={whoWeAre.audiences?.business?.ar?.heading} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), heading: v })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -811,6 +816,7 @@ export default function HomePageEditor() {
                 placeholder="Section description shown on the website"
               />
               <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
             </div>
 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -836,6 +842,7 @@ export default function HomePageEditor() {
                     placeholder="Title"
                   />
                   <CharCount value={h.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={h.ar?.title} onChange={(v) => updateWhoHighlight(i, "ar", { ...(h.ar ?? {}), title: v })} />
                   <textarea
                     value={h.description ?? ""}
                     onChange={(e) => updateWhoHighlight(i, "description", e.target.value)}
@@ -845,6 +852,7 @@ export default function HomePageEditor() {
                     placeholder="Description"
                   />
                   <CharCount value={h.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={h.ar?.description} onChange={(v) => updateWhoHighlight(i, "ar", { ...(h.ar ?? {}), description: v })} />
                 </div>
               </div>
             ))}
@@ -864,6 +872,7 @@ export default function HomePageEditor() {
                 placeholder="Why Halapark"
               />
               <CharCount value={whyHalapark.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={whyHalapark.ar?.heading} onChange={(v) => setWhyHalapark((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -875,6 +884,7 @@ export default function HomePageEditor() {
                 placeholder="Subtitle"
               />
               <CharCount value={whyHalapark.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" value={whyHalapark.ar?.subtitle} onChange={(v) => setWhyHalapark((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -903,6 +913,7 @@ export default function HomePageEditor() {
                       placeholder="Title"
                     />
                   </div>
+                  <ArInput kind="heading" value={it.ar?.title} onChange={(v) => updateWhyItem(i, "ar", { ...(it.ar ?? {}), title: v })} />
                   <textarea
                     value={it.subtitle ?? ""}
                     onChange={(e) => updateWhyItem(i, "subtitle", e.target.value)}
@@ -912,6 +923,8 @@ export default function HomePageEditor() {
                     placeholder="Subtitle"
                   />
                   <CharCount value={it.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+                  <ArInput kind="subtitle" multiline value={it.ar?.subtitle} onChange={(v) => updateWhyItem(i, "ar", { ...(it.ar ?? {}), subtitle: v })} />
+                  <FieldError error={validateUrl(it.image ?? "")} />
                   <div className="flex items-center gap-2">
                     <input
                       value={it.image ?? ""}
@@ -985,6 +998,7 @@ export default function HomePageEditor() {
                 placeholder="AI-POWERED PARKING"
               />
               <CharCount value={aiPoweredParking.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={aiPoweredParking.ar?.heading} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
@@ -996,6 +1010,7 @@ export default function HomePageEditor() {
                 placeholder="SERVICE"
               />
               <CharCount value={aiPoweredParking.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={aiPoweredParking.ar?.headingGradient} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1008,6 +1023,7 @@ export default function HomePageEditor() {
                 placeholder="Section description"
               />
               <CharCount value={aiPoweredParking.description ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={aiPoweredParking.ar?.description} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
 
             <div className="my-1 border-t border-slate-200" />
@@ -1024,6 +1040,7 @@ export default function HomePageEditor() {
                     placeholder="Title"
                   />
                   <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={card.ar?.title} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), title: v })} />
                   <input
                     value={card.audienceTag ?? ""}
                     onChange={(e) => updateAiCard(i, "audienceTag", e.target.value)}
@@ -1032,6 +1049,7 @@ export default function HomePageEditor() {
                     placeholder="Audience Tag"
                   />
                   <CharCount value={card.audienceTag ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={card.ar?.audienceTag} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), audienceTag: v })} />
                   <textarea
                     value={card.description ?? ""}
                     onChange={(e) => updateAiCard(i, "description", e.target.value)}
@@ -1041,6 +1059,7 @@ export default function HomePageEditor() {
                     placeholder="Description"
                   />
                   <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={card.ar?.description} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), description: v })} />
                   <input
                     value={card.ctaLabel ?? ""}
                     onChange={(e) => updateAiCard(i, "ctaLabel", e.target.value)}
@@ -1049,6 +1068,7 @@ export default function HomePageEditor() {
                     placeholder="CTA Label"
                   />
                   <CharCount value={card.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput kind="button" value={card.ar?.ctaLabel} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), ctaLabel: v })} />
                   <input
                     value={card.href ?? ""}
                     onChange={(e) => updateAiCard(i, "href", e.target.value)}
@@ -1057,6 +1077,7 @@ export default function HomePageEditor() {
                     placeholder="Link href"
                   />
                   <CharCount value={card.href ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(card.href ?? "")} />
                   <MediaField
                     label="Card image"
                     value={card.imageSrc}
@@ -1093,6 +1114,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={howItWorks.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={howItWorks.ar?.heading} onChange={(v) => setHowItWorks((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
@@ -1103,6 +1125,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={howItWorks.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={howItWorks.ar?.headingGradient} onChange={(v) => setHowItWorks((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -1114,6 +1137,7 @@ export default function HomePageEditor() {
                 rows={2}
               />
               <CharCount value={howItWorks.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" multiline value={howItWorks.ar?.subtitle} onChange={(v) => setHowItWorks((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Video URL</label>
@@ -1124,6 +1148,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={howItWorks.videoUrl ?? ""} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(howItWorks.videoUrl ?? "")} />
             </div>
             <div>
               <label className={labelClass}>CTA Label</label>
@@ -1134,6 +1159,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={howItWorks.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={howItWorks.ar?.ctaLabel} onChange={(v) => setHowItWorks((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>CTA Href</label>
@@ -1144,6 +1170,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={howItWorks.ctaHref ?? ""} max={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(howItWorks.ctaHref ?? "")} />
             </div>
 
             <div className="mt-2 flex items-center justify-between">
@@ -1177,6 +1204,7 @@ export default function HomePageEditor() {
                     placeholder="Title"
                   />
                   <CharCount value={step.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={step.ar?.title} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), title: v })} />
                   <textarea
                     value={step.description ?? ""}
                     onChange={(e) => updateHowStep(i, "description", e.target.value)}
@@ -1186,6 +1214,7 @@ export default function HomePageEditor() {
                     placeholder="Description"
                   />
                   <CharCount value={step.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={step.ar?.description} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), description: v })} />
                 </div>
               </div>
             ))}
@@ -1205,6 +1234,7 @@ export default function HomePageEditor() {
                 rows={2}
               />
               <CharCount value={blackBanner.title ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" multiline value={blackBanner.ar?.title} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1216,6 +1246,7 @@ export default function HomePageEditor() {
                 rows={3}
               />
               <CharCount value={blackBanner.description ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={blackBanner.ar?.description} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">CTAs</p>
@@ -1231,6 +1262,7 @@ export default function HomePageEditor() {
                     placeholder="Label"
                   />
                   <CharCount value={cta.label ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput kind="button" value={cta.ar?.label} onChange={(v) => updateBlackBannerCta(i, "ar", { ...(cta.ar ?? {}), label: v })} />
                   <input
                     value={cta.href ?? ""}
                     onChange={(e) => updateBlackBannerCta(i, "href", e.target.value)}
@@ -1239,6 +1271,7 @@ export default function HomePageEditor() {
                     placeholder="Href"
                   />
                   <CharCount value={cta.href ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(cta.href ?? "")} />
                 </div>
               </div>
             ))}
@@ -1258,6 +1291,7 @@ export default function HomePageEditor() {
                 placeholder="SERVICES"
               />
               <CharCount value={goodLookingServices.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={goodLookingServices.ar?.heading} onChange={(v) => setGoodLookingServices((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
@@ -1270,6 +1304,7 @@ export default function HomePageEditor() {
                   placeholder="Explore Services"
                 />
                 <CharCount value={goodLookingServices.exploreCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                <ArInput kind="button" value={goodLookingServices.ar?.exploreCtaLabel} onChange={(v) => setGoodLookingServices((p) => ({ ...p, ar: { ...(p.ar ?? {}), exploreCtaLabel: v } }))} />
               </div>
               <div>
                 <label className={labelClass}>Primary button link</label>
@@ -1281,6 +1316,7 @@ export default function HomePageEditor() {
                   placeholder="/services"
                 />
                 <CharCount value={goodLookingServices.exploreCtaLink ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(goodLookingServices.exploreCtaLink ?? "")} />
               </div>
               <div>
                 <label className={labelClass}>Secondary button label</label>
@@ -1292,6 +1328,7 @@ export default function HomePageEditor() {
                   placeholder="Talk to us"
                 />
                 <CharCount value={goodLookingServices.contactCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                <ArInput kind="button" value={goodLookingServices.ar?.contactCtaLabel} onChange={(v) => setGoodLookingServices((p) => ({ ...p, ar: { ...(p.ar ?? {}), contactCtaLabel: v } }))} />
               </div>
               <div>
                 <label className={labelClass}>Secondary button link</label>
@@ -1303,6 +1340,7 @@ export default function HomePageEditor() {
                   placeholder="/contact"
                 />
                 <CharCount value={goodLookingServices.contactCtaLink ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(goodLookingServices.contactCtaLink ?? "")} />
               </div>
             </div>
             <div className="my-1 border-t border-slate-200" />
@@ -1346,6 +1384,7 @@ export default function HomePageEditor() {
                       placeholder="Service name (e.g. Self-Parking)"
                     />
                     <CharCount value={card.name ?? ""} max={FIELD_LIMITS.label} />
+                    <ArInput kind="label" value={card.ar?.name} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), name: v })} />
                     <textarea
                       value={card.summary ?? ""}
                       onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
@@ -1355,6 +1394,7 @@ export default function HomePageEditor() {
                       placeholder="Short summary shown on the card"
                     />
                     <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.summary} />
+                    <ArInput kind="summary" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>
@@ -1408,6 +1448,7 @@ export default function HomePageEditor() {
                     placeholder="Name"
                   />
                   <CharCount value={integration.name ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={integration.ar?.name} onChange={(v) => updateGoodServiceIntegration(i, "ar", { ...(integration.ar ?? {}), name: v })} />
                   <input
                     value={integration.bgcolor ?? ""}
                     onChange={(e) => updateGoodServiceIntegration(i, "bgcolor", e.target.value)}
@@ -1424,6 +1465,7 @@ export default function HomePageEditor() {
                     placeholder="Image path"
                   />
                   <CharCount value={integration.img ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(integration.img ?? "")} />
                 </div>
               </div>
             ))}
@@ -1442,6 +1484,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={solutionIntegration.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={solutionIntegration.ar?.heading} onChange={(v) => setSolutionIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
@@ -1452,6 +1495,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={solutionIntegration.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={solutionIntegration.ar?.headingGradient} onChange={(v) => setSolutionIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -1463,6 +1507,7 @@ export default function HomePageEditor() {
                 rows={2}
               />
               <CharCount value={solutionIntegration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" multiline value={solutionIntegration.ar?.subtitle} onChange={(v) => setSolutionIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Solution Cards</p>
@@ -1478,6 +1523,7 @@ export default function HomePageEditor() {
                     placeholder="Title"
                   />
                   <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={card.ar?.title} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), title: v })} />
                   <textarea
                     value={card.description ?? ""}
                     onChange={(e) => updateSolutionCard(i, "description", e.target.value)}
@@ -1487,6 +1533,7 @@ export default function HomePageEditor() {
                     placeholder="Description"
                   />
                   <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={card.ar?.description} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), description: v })} />
                 </div>
               </div>
             ))}
@@ -1505,6 +1552,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={technologySection.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={technologySection.ar?.heading} onChange={(v) => setTechnologySection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (second part)</label>
@@ -1515,6 +1563,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={technologySection.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={technologySection.ar?.headingGradient} onChange={(v) => setTechnologySection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -1526,6 +1575,7 @@ export default function HomePageEditor() {
                 rows={2}
               />
               <CharCount value={technologySection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" multiline value={technologySection.ar?.subtitle} onChange={(v) => setTechnologySection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
           </div>
         </CollapsibleSection>
@@ -1542,6 +1592,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={clientsPartners.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={clientsPartners.ar?.heading} onChange={(v) => setClientsPartners((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-slate-700">
@@ -1563,6 +1614,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={clientsPartners.headingEnd ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={clientsPartners.ar?.headingEnd} onChange={(v) => setClientsPartners((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingEnd: v } }))} />
             </div>
 
             <div className="my-1 border-t border-slate-200" />
@@ -1640,6 +1692,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={globalMobility.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={globalMobility.ar?.heading} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -1650,6 +1703,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={globalMobility.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" value={globalMobility.ar?.subtitle} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
 
             <div className="mt-2 flex items-center justify-between">
@@ -1683,6 +1737,7 @@ export default function HomePageEditor() {
                     placeholder="Title"
                   />
                   <CharCount value={cap.title ?? ""} max={FIELD_LIMITS.heading} />
+                  <ArInput kind="heading" value={cap.ar?.title} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), title: v })} />
                   <textarea
                     value={cap.description ?? ""}
                     onChange={(e) => updateCapability(i, "description", e.target.value)}
@@ -1692,6 +1747,7 @@ export default function HomePageEditor() {
                     placeholder="Description"
                   />
                   <CharCount value={cap.description ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={cap.ar?.description} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), description: v })} />
                 </div>
               </div>
             ))}
@@ -1717,6 +1773,7 @@ export default function HomePageEditor() {
                     placeholder="Label"
                   />
                   <CharCount value={stat.label ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={stat.ar?.label} onChange={(v) => updateImpactStat(i, "ar", { ...(stat.ar ?? {}), label: v })} />
                 </div>
               </div>
             ))}
@@ -1735,6 +1792,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={halaParkInAction.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={halaParkInAction.ar?.heading} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -1745,6 +1803,7 @@ export default function HomePageEditor() {
                 className={inputClass}
               />
               <CharCount value={halaParkInAction.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput kind="subtitle" value={halaParkInAction.ar?.subtitle} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
 
             <div className="mt-2 flex items-center justify-between">
@@ -1778,6 +1837,7 @@ export default function HomePageEditor() {
                     placeholder="Icon path"
                   />
                   <CharCount value={link.icon ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(link.icon ?? "")} />
                   <input
                     value={link.alt ?? ""}
                     onChange={(e) => updateStoreLink(i, "alt", e.target.value)}
@@ -1794,6 +1854,7 @@ export default function HomePageEditor() {
                     placeholder="Store label (e.g., App Store)"
                   />
                   <CharCount value={link.label ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={link.ar?.label} onChange={(v) => updateStoreLink(i, "ar", { ...(link.ar ?? {}), label: v })} />
                 </div>
               </div>
             ))}

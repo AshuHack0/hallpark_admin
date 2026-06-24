@@ -573,6 +573,16 @@ export default function SolutionPageEditor() {
   // matching detail by slug, or seeds a new one from the card's own fields.
   function openDetailForCard(card) {
     const cardSlug = card.slug || slugify(card.title);
+    // Backfill the slug onto the card itself — the navbar/grid filter cards by
+    // slug, so a card with an empty slug silently disappears from the menu.
+    if (cardSlug && card.slug !== cardSlug) {
+      setSolutions((p) => ({
+        ...p,
+        cards: (p.cards ?? []).map((c) =>
+          c === card || (c.title === card.title && !c.slug) ? { ...c, slug: cardSlug } : c
+        ),
+      }));
+    }
     const existing = details.find((d) => d.slug === cardSlug);
     if (existing) {
       setEditingDetail({ slug: cardSlug, draft: { ...existing }, isNew: false });

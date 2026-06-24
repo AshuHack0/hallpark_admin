@@ -578,10 +578,98 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.subtitle}
                   />
                   <CharCount value={Array.isArray(item.steps) ? item.steps.join(", ") : ""} max={FIELD_LIMITS.subtitle} />
+                  <label className={labelClass} style={{ marginTop: 6 }}>Steps — Arabic (comma-separated, same order)</label>
+                  <input
+                    type="text"
+                    dir="rtl"
+                    value={Array.isArray(item.ar?.steps) ? item.ar.steps.join("، ") : ""}
+                    onChange={(e) => update(i, { ar: { ...(item.ar ?? {}), steps: e.target.value.split(/،|,/).map((s) => s.trim()) } })}
+                    className={inputClass}
+                    style={{ borderColor: "#16a34a" }}
+                    maxLength={FIELD_LIMITS.subtitle}
+                    placeholder="بحث، حجز، دفع"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Card Kicker (small badge)</label>
+                  <input
+                    type="text"
+                    value={item.cardKicker ?? ""}
+                    onChange={(e) => update(i, { cardKicker: e.target.value })}
+                    className={inputClass}
+                    placeholder="Live inventory"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={item.cardKicker ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={item.ar?.cardKicker} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cardKicker: v } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Pill CTA (small outlined button)</label>
+                  <input
+                    type="text"
+                    value={item.cta ?? ""}
+                    onChange={(e) => update(i, { cta: e.target.value })}
+                    className={inputClass}
+                    placeholder="Start parking now"
+                    maxLength={FIELD_LIMITS.button}
+                  />
+                  <CharCount value={item.cta ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput kind="button" value={item.ar?.cta} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cta: v } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>&quot;Built for&quot; sentence (under the title)</label>
+                  <textarea
+                    value={item.builtFor ?? ""}
+                    onChange={(e) => update(i, { builtFor: e.target.value })}
+                    className={inputClass}
+                    rows={2}
+                    placeholder="City Access Pass is built for fast entry, helping users move from Search to Pay with fewer taps."
+                    maxLength={FIELD_LIMITS.description}
+                  />
+                  <CharCount value={item.builtFor ?? ""} max={FIELD_LIMITS.description} />
+                  <ArInput kind="description" multiline value={item.ar?.builtFor} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), builtFor: v } })} />
                 </div>
               </div>
             )}
           />
+          {/* Section-level: feature chips + main CTA button */}
+          <div className="mt-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Shared (all tabs)</p>
+            <div>
+              <label className={labelClass}>Feature Chips (comma-separated)</label>
+              <input
+                type="text"
+                value={Array.isArray(sections.serviceTabs?.featureChips) ? sections.serviceTabs.featureChips.join(", ") : ""}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, featureChips: e.target.value.split(",").map((s) => s.trim()) } })}
+                className={inputClass}
+                placeholder="Real-time updates, Seamless checkout, Mobile-first flow"
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <label className={labelClass} style={{ marginTop: 6 }}>Feature Chips — Arabic (comma-separated)</label>
+              <input
+                type="text"
+                dir="rtl"
+                value={Array.isArray(sections.serviceTabs?.ar?.featureChips) ? sections.serviceTabs.ar.featureChips.join("، ") : ""}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), featureChips: e.target.value.split(/،|,/).map((s) => s.trim()) } } })}
+                className={inputClass}
+                style={{ borderColor: "#16a34a" }}
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Main CTA Button</label>
+              <input
+                type="text"
+                value={sections.serviceTabs?.ctaLabel ?? ""}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ctaLabel: e.target.value } })}
+                className={inputClass}
+                placeholder="Find My Parking"
+                maxLength={FIELD_LIMITS.button}
+              />
+              <CharCount value={sections.serviceTabs?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={sections.serviceTabs?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), ctaLabel: v } } })} />
+            </div>
+          </div>
         </CollapsibleSection>
 
         {/* 4. Screenshots */}
@@ -643,6 +731,44 @@ export default function AppPageEditor() {
               />
               <CharCount value={sections.screenshotsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput kind="description" value={sections.screenshotsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+            </div>
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Process Steps (Find → Explore → Book → Pay → Confirm)</p>
+              <ArrayItemEditor
+                items={sections.screenshotsHeader?.processSteps || []}
+                onItemsChange={(items) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, processSteps: items } })}
+                title="Step"
+                addButtonText="Add Step"
+                defaultItem={{ title: "Step", text: "" }}
+                renderItem={(item, i, update) => (
+                  <div className="space-y-3">
+                    <div>
+                      <label className={labelClass}>Title</label>
+                      <input
+                        type="text"
+                        value={item.title ?? ""}
+                        onChange={(e) => update(i, { title: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                      <CharCount value={item.title ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Text</label>
+                      <input
+                        type="text"
+                        value={item.text ?? ""}
+                        onChange={(e) => update(i, { text: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.subtitle}
+                      />
+                      <CharCount value={item.text ?? ""} max={FIELD_LIMITS.subtitle} />
+                      <ArInput kind="subtitle" value={item.ar?.text} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), text: v } })} />
+                    </div>
+                  </div>
+                )}
+              />
             </div>
           </div>
           <ArrayItemEditor

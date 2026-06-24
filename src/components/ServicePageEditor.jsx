@@ -369,6 +369,38 @@ export default function ServicePageEditor() {
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             <ArInput kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), subtitle: v })} />
           </div>
+          <div>
+            <label className={labelClass}>Service Chips (comma-separated)</label>
+            <input
+              value={Array.isArray(hero.chips) ? hero.chips.join(", ") : ""}
+              onChange={(e) => updateHero("chips", e.target.value.split(",").map((s) => s.trim()))}
+              className={inputClass}
+              placeholder="Self-Parking, Valet Service, EV Charging, Car Storage, Airport Parking"
+              maxLength={FIELD_LIMITS.long}
+            />
+            <label className={labelClass} style={{ marginTop: 6 }}>Service Chips — Arabic (comma-separated, same order)</label>
+            <input
+              dir="rtl"
+              value={Array.isArray(hero.ar?.chips) ? hero.ar.chips.join("، ") : ""}
+              onChange={(e) => updateHero("ar", { ...(hero.ar ?? {}), chips: e.target.value.split(/،|,/).map((s) => s.trim()) })}
+              className={inputClass}
+              style={{ borderColor: "#16a34a" }}
+              maxLength={FIELD_LIMITS.long}
+              placeholder="ركن ذاتي، خدمة صف السيارات، شحن المركبات الكهربائية…"
+            />
+          </div>
+          <div>
+            <label className={labelClass}>&quot;+N More&quot; Pill</label>
+            <input
+              value={hero.chipsMore ?? ""}
+              onChange={(e) => updateHero("chipsMore", e.target.value)}
+              className={inputClass}
+              placeholder="+13 More"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={hero.chipsMore ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput kind="label" value={hero.ar?.chipsMore} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), chipsMore: v })} />
+          </div>
         </div>
       </CollapsibleSection>
 

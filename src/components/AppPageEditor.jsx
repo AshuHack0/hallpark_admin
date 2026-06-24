@@ -367,6 +367,34 @@ export default function AppPageEditor() {
           <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-[#050A13]">Main Content</h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>App Heading (after &quot;Halapark&quot;)</label>
+                  <input
+                    type="text"
+                    value={sections.platform.appSuffix ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appSuffix: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Online App"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.appSuffix ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={sections.platform.ar?.appSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appSuffix: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Website Heading (after &quot;Halapark&quot;)</label>
+                  <input
+                    type="text"
+                    value={sections.platform.webSuffix ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webSuffix: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Online Website"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.webSuffix ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput kind="label" value={sections.platform.ar?.webSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webSuffix: v } } })} />
+                </div>
+              </div>
               <div>
                 <label className={labelClass}>Title</label>
                 <input

@@ -115,6 +115,7 @@ export default function CareersPageEditor() {
     status: "active",
   });
   const [reasonText, setReasonText] = useState("");
+  const [reasonTextAr, setReasonTextAr] = useState("");
 
   const jobPostCount = content.openPositions?.posts?.length ?? 0;
   const reasonCount = content.whyJoin.reasons.length;
@@ -229,11 +230,15 @@ export default function CareersPageEditor() {
       });
     } else if (type === "reason") {
       setContent((prev) => {
+        const arReasons = Array.isArray(prev.whyJoin.ar?.reasons)
+          ? prev.whyJoin.ar.reasons.filter((_, i) => i !== index)
+          : undefined;
         const next = {
           ...prev,
           whyJoin: {
             ...prev.whyJoin,
             reasons: prev.whyJoin.reasons.filter((_, i) => i !== index),
+            ar: arReasons ? { ...(prev.whyJoin.ar ?? {}), reasons: arReasons } : prev.whyJoin.ar,
           },
         };
         void persistSections(next, "Reason deleted.");
@@ -458,7 +463,8 @@ export default function CareersPageEditor() {
         title: whyJoinForm.title,
         subtitle: whyJoinForm.subtitle,
         bodyParagraph: whyJoinForm.bodyParagraph,
-        ar: whyJoinForm.ar,
+        // Merge ar so the parallel reasons[] array is never wiped by a section edit.
+        ar: { ...(content.whyJoin.ar ?? {}), ...(whyJoinForm.ar ?? {}) },
       },
     };
     setContent(next);
@@ -469,25 +475,36 @@ export default function CareersPageEditor() {
   function openAddReason() {
     setEditReasonIndex(null);
     setReasonText("");
+    setReasonTextAr("");
     setReasonModalOpen(true);
   }
 
   function openEditReason(index) {
     setEditReasonIndex(index);
     setReasonText(content.whyJoin.reasons[index] ?? "");
+    setReasonTextAr(content.whyJoin.ar?.reasons?.[index] ?? "");
     setReasonModalOpen(true);
   }
 
   function saveReason() {
     const text = reasonText.trim();
     if (!text) return;
+    const textAr = reasonTextAr.trim();
 
     setContent((prev) => {
       const reasons =
         editReasonIndex === null
           ? [...prev.whyJoin.reasons, text]
           : prev.whyJoin.reasons.map((r, i) => (i === editReasonIndex ? text : r));
-      const next = { ...prev, whyJoin: { ...prev.whyJoin, reasons } };
+      // Parallel Arabic array (same indexes as reasons).
+      const prevAr = Array.isArray(prev.whyJoin.ar?.reasons) ? [...prev.whyJoin.ar.reasons] : [];
+      const targetIdx = editReasonIndex === null ? reasons.length - 1 : editReasonIndex;
+      while (prevAr.length <= targetIdx) prevAr.push("");
+      prevAr[targetIdx] = textAr;
+      const next = {
+        ...prev,
+        whyJoin: { ...prev.whyJoin, reasons, ar: { ...(prev.whyJoin.ar ?? {}), reasons: prevAr } },
+      };
       void persistSections(
         next,
         editReasonIndex === null ? "Reason added." : "Reason updated.",
@@ -1428,6 +1445,7 @@ export default function CareersPageEditor() {
           maxLength={FIELD_LIMITS.item}
         />
         <CharCount value={reasonText} max={FIELD_LIMITS.item} />
+        <ArInput kind="item" multiline value={reasonTextAr} onChange={setReasonTextAr} />
       </Modal>
 
       {/* CTA modal */}

@@ -130,76 +130,84 @@ function makeBlankDetail() {
     slug: "",
     group: "",
     eyebrow: "New Solution",
-    title: "New Solution Detail",
-    intro: "",
     image: "/image.png",
-    howItOperates: "",
-    systemComponentsHeading: "System Components",
-    systemComponents: [],
-    benefitsHeading: "Key Benefit",
-    benefits: [],
-    problemHeading: "Problem We Solve",
-    problemBody: "",
-    ctaLabel: "Talk to Our Team",
+    // 1. Banner
+    title: "New Solution",
+    subtitle: "",
+    shortDescription: "",
+    ctaLabel: "Contact Us",
     ctaLink: "/contact",
+    // 2. Why X Matters
+    whyHeading: "",
+    whyBody: "",
+    whyImage: "",
+    // 3. Problem We Face
+    problemHeading: "Problem We Face",
+    problemBody: "",
+    // 4. Our Solution
+    solutionHeading: "Our Solution",
+    solutionBody: "",
+    // 5. Key Benefits — [{ title, description }]
+    benefitsHeading: "Key Benefits",
+    keyBenefits: [],
+    // 6. How It Works — steps [{ title, description }] OR a paragraph
+    howItWorksHeading: "How It Works",
+    howItWorksBody: "",
+    steps: [],
+    // 7. Other Related Services — array of slugs
+    relatedHeading: "Other Related Services",
+    relatedServices: [],
+    ar: {},
   };
 }
 
-// Editable heading + list of plain-string bullet items (used for a detail's
-// "Integrated Systems" and "Key Benefit" lists).
+// Editor for a bilingual list of { title, description } objects (Key Benefits,
+// How-It-Works steps). EN fields live on the item; AR fields live on a parallel
+// `ar.<field>` array by index.
 // eslint-disable-next-line react/prop-types
-function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceholder, items, onItemChange, onAdd, onRemove }) {
-  const count = (items ?? []).length;
+function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, showStepNumber }) {
+  const list = Array.isArray(items) ? items : [];
+  const arList = Array.isArray(arItems) ? arItems : [];
+  const setItem = (i, patch) => onItemsChange(list.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
+  const setAr = (i, patch) => {
+    const next = [...arList];
+    while (next.length <= i) next.push({});
+    next[i] = { ...(next[i] ?? {}), ...patch };
+    onArItemsChange(next);
+  };
+  const add = () => onItemsChange([...list, { title: "", description: "" }]);
+  const remove = (i) => {
+    onItemsChange(list.filter((_, idx) => idx !== i));
+    onArItemsChange(arList.filter((_, idx) => idx !== i));
+  };
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="mb-2">
-        <label className={labelClass}>{label} — heading</label>
-        <input
-          value={headingValue}
-          onChange={(e) => onHeadingChange(e.target.value)}
-          className={inputClass}
-          placeholder={headingPlaceholder}
-          maxLength={FIELD_LIMITS.heading}
-        />
-        <CharCount value={headingValue} max={FIELD_LIMITS.heading} />
-      </div>
-
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-600">{label} items ({count})</span>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add Item
+        <span className="text-xs font-semibold text-slate-600">{label} ({list.length})</span>
+        <button type="button" onClick={add} className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110">
+          <Plus className="h-3.5 w-3.5" /> Add
         </button>
       </div>
-
-      <div className="space-y-2">
-        {count === 0 ? (
-          <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">
-            No items yet. Click &quot;Add Item&quot; to add one.
-          </p>
+      <div className="space-y-3">
+        {list.length === 0 ? (
+          <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">No items yet.</p>
         ) : (
-          (items ?? []).map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input
-                value={item ?? ""}
-                onChange={(e) => onItemChange(idx, e.target.value)}
-                className={inputClass}
-                placeholder={`${label} item ${idx + 1}`}
-                maxLength={FIELD_LIMITS.item}
-              />
-              <button
-                type="button"
-                onClick={() => onRemove(idx)}
-                title="Remove item"
-                className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete
-              </button>
+          list.map((item, i) => (
+            <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                  {showStepNumber ? `Step ${i + 1}` : `Item ${i + 1}`}
+                </span>
+                <button type="button" onClick={() => remove(i)} className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+              <label className={labelClass}>Title</label>
+              <input value={item.title ?? ""} onChange={(e) => setItem(i, { title: e.target.value })} className={inputClass} maxLength={FIELD_LIMITS.heading} />
+              <ArInput kind="heading" value={arList[i]?.title} onChange={(v) => setAr(i, { title: v })} />
+              <label className={labelClass} style={{ marginTop: 6 }}>Description</label>
+              <textarea value={item.description ?? ""} onChange={(e) => setItem(i, { description: e.target.value })} className={inputClass} rows={2} maxLength={FIELD_LIMITS.summary} />
+              <ArInput kind="summary" multiline value={arList[i]?.description} onChange={(v) => setAr(i, { description: v })} />
             </div>
           ))
         )}
@@ -208,22 +216,44 @@ function DetailStringList({ label, headingValue, onHeadingChange, headingPlaceho
   );
 }
 
+// Picker for "Other Related Services" — choose other solution detail slugs to
+// cross-link. `allDetails` is the full list (so options exclude the current one).
+// eslint-disable-next-line react/prop-types
+function RelatedServicesPicker({ currentSlug, selected, allDetails, onChange }) {
+  const chosen = Array.isArray(selected) ? selected : [];
+  const options = (allDetails ?? []).filter((d) => d.slug && d.slug !== currentSlug);
+  const toggle = (slug) => onChange(chosen.includes(slug) ? chosen.filter((s) => s !== slug) : [...chosen, slug]);
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <p className="mb-2 text-xs font-semibold text-slate-600">Pick related solutions ({chosen.length} selected)</p>
+      {options.length === 0 ? (
+        <p className="text-xs text-slate-400">No other solutions yet. Add more first.</p>
+      ) : (
+        <div className="max-h-44 space-y-1 overflow-y-auto">
+          {options.map((d) => (
+            <label key={d.slug} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-slate-50">
+              <input type="checkbox" checked={chosen.includes(d.slug)} onChange={() => toggle(d.slug)} className="h-4 w-4 accent-[#0088FF]" />
+              <span className="truncate text-slate-700">{d.title || d.slug}</span>
+              <span className="ml-auto shrink-0 text-[10px] text-slate-400">/{d.slug}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Full add/edit modal for a single solution detail page. Edits a local draft and
 // returns it via onSave; the parent merges it into `details` (persisted on the
 // page's main "Save Changes").
 // eslint-disable-next-line react/prop-types
-function DetailEditModal({ initial, isNew, onSave, onClose }) {
+function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
   const [draft, setDraft] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [err, setErr] = useState("");
 
   const setField = (field, value) => setDraft((d) => ({ ...d, [field]: value }));
-  const setListItem = (field, idx, value) =>
-    setDraft((d) => ({ ...d, [field]: (d[field] ?? []).map((v, i) => (i === idx ? value : v)) }));
-  const addListItem = (field) => setDraft((d) => ({ ...d, [field]: [...(d[field] ?? []), ""] }));
-  const removeListItem = (field, idx) =>
-    setDraft((d) => ({ ...d, [field]: (d[field] ?? []).filter((_, i) => i !== idx) }));
 
   async function handleUpload(file) {
     const err = validateImageFile(file);
@@ -247,13 +277,7 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
       return;
     }
     const cleanedSlug = slugify(draft.slug);
-    onSave({
-      ...draft,
-      slug: cleanedSlug,
-      systemComponents: (draft.systemComponents ?? []).map((s) => s.trim()).filter(Boolean),
-      systems: (draft.systems ?? []).map((s) => s.trim()).filter(Boolean),
-      benefits: (draft.benefits ?? []).map((s) => s.trim()).filter(Boolean),
-    });
+    onSave({ ...draft, slug: cleanedSlug });
   }
 
   return (
@@ -336,24 +360,50 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
             <ArInput kind="heading" value={draft.ar?.title} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), title: v })} />
           </div>
 
-          {/* Intro */}
+          {/* ── 1. BANNER ─────────────────────────────────────────────── */}
+          <p className="pt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">1 · Banner</p>
           <div>
-            <label className={labelClass}>Intro (italic paragraph)</label>
-            <textarea
-              value={draft.intro ?? ""}
-              onChange={(e) => setField("intro", e.target.value)}
+            <label className={labelClass}>Subtitle (eyebrow above title)</label>
+            <input
+              value={draft.subtitle ?? ""}
+              onChange={(e) => setField("subtitle", e.target.value)}
               className={inputClass}
-              rows={3}
-              placeholder="HalaPark connects with existing infrastructure to..."
+              placeholder="The Digital Backbone of Modern Parking Management"
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={draft.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={draft.ar?.subtitle} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), subtitle: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Short Description</label>
+            <textarea
+              value={draft.shortDescription ?? ""}
+              onChange={(e) => setField("shortDescription", e.target.value)}
+              className={inputClass}
+              rows={2}
+              placeholder="Seamlessly connect parking operations, security systems..."
               maxLength={FIELD_LIMITS.long}
             />
-            <CharCount value={draft.intro ?? ""} max={FIELD_LIMITS.long} />
-            <ArInput kind="long" multiline value={draft.ar?.intro} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), intro: v })} />
+            <CharCount value={draft.shortDescription ?? ""} max={FIELD_LIMITS.long} />
+            <ArInput kind="long" multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>CTA Label</label>
+              <input value={draft.ctaLabel ?? ""} onChange={(e) => setField("ctaLabel", e.target.value)} className={inputClass} placeholder="Contact Us" maxLength={FIELD_LIMITS.button} />
+              <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
+            </div>
+            <div>
+              <label className={labelClass}>CTA Link</label>
+              <input value={draft.ctaLink ?? ""} onChange={(e) => setField("ctaLink", e.target.value)} className={inputClass} placeholder="/contact" maxLength={FIELD_LIMITS.link} />
+              <FieldError error={validateUrl(draft.ctaLink ?? "")} />
+            </div>
           </div>
 
-          {/* Image */}
+          {/* Banner Image */}
           <div>
-            <label className={labelClass}>Image / Diagram</label>
+            <label className={labelClass}>Banner Image</label>
             <div className="flex items-start gap-3">
               <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                 {draft.image && draft.image !== "/image.png" ? (
@@ -372,19 +422,12 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
                   placeholder="Image URL"
                   maxLength={FIELD_LIMITS.link}
                 />
-                <CharCount value={draft.image ?? ""} max={FIELD_LIMITS.link} />
                 <FieldError error={validateUrl(draft.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                   {uploading ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {uploadPct}%
-                    </>
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadPct}%</>
                   ) : (
-                    <>
-                      <Upload className="h-3.5 w-3.5" />
-                      Upload image
-                    </>
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
                   )}
                   <input
                     type="file"
@@ -402,109 +445,101 @@ function DetailEditModal({ initial, isNew, onSave, onClose }) {
             </div>
           </div>
 
-          {/* How It Operates (optional) */}
+          {/* ── 2. WHY X MATTERS ──────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">2 · Why It Matters</p>
           <div>
-            <label className={labelClass}>How It Operates (optional)</label>
-            <textarea
-              value={draft.howItOperates ?? ""}
-              onChange={(e) => setField("howItOperates", e.target.value)}
-              className={inputClass}
-              rows={2}
-              placeholder="Vehicles are identified and validated automatically through AI cameras, QR codes..."
-              maxLength={FIELD_LIMITS.long}
-            />
-            <CharCount value={draft.howItOperates ?? ""} max={FIELD_LIMITS.long} />
-            <ArInput kind="long" multiline value={draft.ar?.howItOperates} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItOperates: v })} />
+            <label className={labelClass}>Why Heading</label>
+            <input value={draft.whyHeading ?? ""} onChange={(e) => setField("whyHeading", e.target.value)} className={inputClass} placeholder="Why Smart Ecosystem Integration Matters?" maxLength={FIELD_LIMITS.heading} />
+            <CharCount value={draft.whyHeading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.whyHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Why Body (use blank lines to split paragraphs)</label>
+            <textarea value={draft.whyBody ?? ""} onChange={(e) => setField("whyBody", e.target.value)} className={inputClass} rows={5} maxLength={2400} />
+            <ArInput kind="long" multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Why-Section Image URL (optional — defaults to banner image)</label>
+            <input value={draft.whyImage ?? ""} onChange={(e) => setField("whyImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+            <FieldError error={validateUrl(draft.whyImage ?? "")} />
           </div>
 
-          {/* System Components / Integrated Systems */}
-          <DetailStringList
-            label="System Components"
-            headingValue={draft.systemComponentsHeading ?? ""}
-            onHeadingChange={(v) => setField("systemComponentsHeading", v)}
-            headingPlaceholder="System Components / Integrated Systems"
-            items={draft.systemComponents ?? []}
-            onItemChange={(idx, v) => setListItem("systemComponents", idx, v)}
-            onAdd={() => addListItem("systemComponents")}
-            onRemove={(idx) => removeListItem("systemComponents", idx)}
-          />
-          <div className="-mt-1">
-            <label className={labelClass}>System Components Heading — العربية</label>
-            <ArInput kind="heading" value={draft.ar?.systemComponentsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), systemComponentsHeading: v })} />
+          {/* ── 3. PROBLEM WE FACE ────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">3 · Problem We Face</p>
+          <div>
+            <label className={labelClass}>Problem Heading</label>
+            <input value={draft.problemHeading ?? ""} onChange={(e) => setField("problemHeading", e.target.value)} className={inputClass} placeholder="Problem We Face" maxLength={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Problem Body (blank lines split paragraphs)</label>
+            <textarea value={draft.problemBody ?? ""} onChange={(e) => setField("problemBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
+            <ArInput kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
           </div>
 
-          {/* Key Benefit */}
-          <DetailStringList
-            label="Key Benefit"
-            headingValue={draft.benefitsHeading ?? ""}
-            onHeadingChange={(v) => setField("benefitsHeading", v)}
-            headingPlaceholder="Key Benefit"
-            items={draft.benefits ?? []}
-            onItemChange={(idx, v) => setListItem("benefits", idx, v)}
-            onAdd={() => addListItem("benefits")}
-            onRemove={(idx) => removeListItem("benefits", idx)}
-          />
-          <div className="-mt-1">
-            <label className={labelClass}>Key Benefit Heading — العربية</label>
+          {/* ── 4. OUR SOLUTION ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">4 · Our Solution</p>
+          <div>
+            <label className={labelClass}>Solution Heading</label>
+            <input value={draft.solutionHeading ?? ""} onChange={(e) => setField("solutionHeading", e.target.value)} className={inputClass} placeholder="Our Solution" maxLength={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.solutionHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Solution Body (blank lines split paragraphs)</label>
+            <textarea value={draft.solutionBody ?? ""} onChange={(e) => setField("solutionBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
+            <ArInput kind="long" multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
+          </div>
+
+          {/* ── 5. KEY BENEFITS ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">5 · Key Benefits</p>
+          <div>
+            <label className={labelClass}>Benefits Heading</label>
+            <input value={draft.benefitsHeading ?? ""} onChange={(e) => setField("benefitsHeading", e.target.value)} className={inputClass} placeholder="Key Benefits" maxLength={FIELD_LIMITS.heading} />
             <ArInput kind="heading" value={draft.ar?.benefitsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), benefitsHeading: v })} />
           </div>
+          <ObjListEditor
+            label="Key Benefits"
+            items={draft.keyBenefits ?? []}
+            arItems={draft.ar?.keyBenefits ?? []}
+            onItemsChange={(items) => setField("keyBenefits", items)}
+            onArItemsChange={(items) => setField("ar", { ...(draft.ar ?? {}), keyBenefits: items })}
+          />
 
-          {/* Problem We Solve */}
-          <div className="grid gap-3">
-            <div>
-              <label className={labelClass}>Problem Heading</label>
-              <input
-                value={draft.problemHeading ?? ""}
-                onChange={(e) => setField("problemHeading", e.target.value)}
-                className={inputClass}
-                placeholder="Problem We Solve"
-                maxLength={FIELD_LIMITS.heading}
-              />
-              <CharCount value={draft.problemHeading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
-            </div>
-            <div>
-              <label className={labelClass}>Problem Body</label>
-              <textarea
-                value={draft.problemBody ?? ""}
-                onChange={(e) => setField("problemBody", e.target.value)}
-                className={inputClass}
-                rows={3}
-                placeholder="Parking and facility systems are often disconnected..."
-                maxLength={FIELD_LIMITS.long}
-              />
-              <CharCount value={draft.problemBody ?? ""} max={FIELD_LIMITS.long} />
-              <ArInput kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
-            </div>
+          {/* ── 6. HOW IT WORKS ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">6 · How It Works</p>
+          <div>
+            <label className={labelClass}>How It Works Heading</label>
+            <input value={draft.howItWorksHeading ?? ""} onChange={(e) => setField("howItWorksHeading", e.target.value)} className={inputClass} placeholder="How It Works" maxLength={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.howItWorksHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksHeading: v })} />
+          </div>
+          <p className="text-[11px] text-slate-400">Add numbered Steps below, OR leave steps empty and write a single paragraph.</p>
+          <ObjListEditor
+            label="Steps"
+            showStepNumber
+            items={draft.steps ?? []}
+            arItems={draft.ar?.steps ?? []}
+            onItemsChange={(items) => setField("steps", items)}
+            onArItemsChange={(items) => setField("ar", { ...(draft.ar ?? {}), steps: items })}
+          />
+          <div>
+            <label className={labelClass}>How It Works Paragraph (used only if no Steps)</label>
+            <textarea value={draft.howItWorksBody ?? ""} onChange={(e) => setField("howItWorksBody", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.long} />
+            <ArInput kind="long" multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
           </div>
 
-          {/* CTA */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>CTA Label</label>
-              <input
-                value={draft.ctaLabel ?? ""}
-                onChange={(e) => setField("ctaLabel", e.target.value)}
-                className={inputClass}
-                placeholder="Talk to Our Team"
-                maxLength={FIELD_LIMITS.button}
-              />
-              <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
-            </div>
-            <div>
-              <label className={labelClass}>CTA Link</label>
-              <input
-                value={draft.ctaLink ?? ""}
-                onChange={(e) => setField("ctaLink", e.target.value)}
-                className={inputClass}
-                placeholder="/contact"
-                maxLength={FIELD_LIMITS.link}
-              />
-              <CharCount value={draft.ctaLink ?? ""} max={FIELD_LIMITS.link} />
-              <FieldError error={validateUrl(draft.ctaLink ?? "")} />
-            </div>
+          {/* ── 7. OTHER RELATED SERVICES ─────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">7 · Other Related Services</p>
+          <div>
+            <label className={labelClass}>Related Heading</label>
+            <input value={draft.relatedHeading ?? ""} onChange={(e) => setField("relatedHeading", e.target.value)} className={inputClass} placeholder="Other Related Services" maxLength={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={draft.ar?.relatedHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), relatedHeading: v })} />
           </div>
+          <RelatedServicesPicker
+            currentSlug={draft.slug}
+            selected={draft.relatedServices ?? []}
+            allDetails={allDetails}
+            onChange={(slugs) => setField("relatedServices", slugs)}
+          />
         </div>
 
         {/* Footer */}
@@ -2055,6 +2090,7 @@ export default function SolutionPageEditor() {
         <DetailEditModal
           initial={editingDetail.draft}
           isNew={editingDetail.isNew}
+          allDetails={details}
           onSave={saveDetailFromModal}
           onClose={() => setEditingDetail(null)}
         />

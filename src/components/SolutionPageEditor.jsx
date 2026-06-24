@@ -243,6 +243,105 @@ function RelatedServicesPicker({ currentSlug, selected, allDetails, onChange }) 
   );
 }
 
+// Manager for the solution dropdown CATEGORIES (`solutions.groups` — an ordered
+// list of group names). Add / rename / reorder / delete. The navbar dropdown
+// shows these groups (in this order); each card is assigned to one of them.
+// `cards` is passed so we can warn when deleting a group still in use.
+// eslint-disable-next-line react/prop-types
+function CategoryManager({ groups, arGroups, cards, onChange, onArChange }) {
+  const list = Array.isArray(groups) ? groups : [];
+  const arList = Array.isArray(arGroups) ? arGroups : [];
+  const usage = (name) => (cards ?? []).filter((c) => (c.group || "") === name).length;
+  const rename = (i, value) => onChange(list.map((g, idx) => (idx === i ? value : g)));
+  const renameAr = (i, value) => {
+    const next = [...arList];
+    while (next.length <= i) next.push("");
+    next[i] = value;
+    onArChange(next);
+  };
+  const move = (i, dir) => {
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    const next = [...list];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+    // Keep Arabic names aligned by index.
+    const nextAr = [...arList];
+    while (nextAr.length <= Math.max(i, j)) nextAr.push("");
+    [nextAr[i], nextAr[j]] = [nextAr[j], nextAr[i]];
+    onArChange(nextAr);
+  };
+  const remove = (i) => {
+    onChange(list.filter((_, idx) => idx !== i));
+    onArChange(arList.filter((_, idx) => idx !== i));
+  };
+  const add = () => onChange([...list, "New Category"]);
+  return (
+    <div className="mb-5 rounded-xl border border-[#0088FF]/20 bg-[#F4F9FF] p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-700">Solution Categories ({list.length})</h3>
+          <p className="text-[11px] text-slate-500">The groups shown in the Solutions dropdown. Assign each card to one below.</p>
+        </div>
+        <button
+          type="button"
+          onClick={add}
+          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Category
+        </button>
+      </div>
+      {list.length === 0 ? (
+        <p className="rounded-md border border-dashed border-slate-200 bg-white px-3 py-2 text-xs text-slate-400">
+          No categories yet. Cards with no category fall under a generic &quot;Solutions&quot; group.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {list.map((g, i) => {
+            const count = usage(g);
+            return (
+              <div key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2">
+                <span className="text-[11px] font-bold text-slate-300 w-5 text-center">{i + 1}</span>
+                <div className="flex-1 space-y-1">
+                  <input
+                    value={g}
+                    onChange={(e) => rename(i, e.target.value)}
+                    className={inputClass}
+                    placeholder="Category (English)"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <input
+                    dir="rtl"
+                    value={arList[i] ?? ""}
+                    onChange={(e) => renameAr(i, e.target.value)}
+                    className={inputClass}
+                    style={{ borderColor: "#16a34a" }}
+                    placeholder="الفئة (عربي)"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                </div>
+                <span className="shrink-0 text-[10px] font-semibold text-slate-400">{count} card{count === 1 ? "" : "s"}</span>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Move up" className="rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-500 hover:text-[#0088FF] disabled:opacity-30">↑</button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === list.length - 1} title="Move down" className="rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-500 hover:text-[#0088FF] disabled:opacity-30">↓</button>
+                  <button
+                    type="button"
+                    onClick={() => { if (count === 0 || window.confirm(`Delete "${g}"? ${count} card(s) use it and will become ungrouped.`)) remove(i); }}
+                    title="Delete category"
+                    className="rounded border border-red-200 bg-red-50 px-1.5 py-1 text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Full add/edit modal for a single solution detail page. Edits a local draft and
 // returns it via onSave; the parent merges it into `details` (persisted on the
 // page's main "Save Changes").
@@ -1050,6 +1149,15 @@ export default function SolutionPageEditor() {
             </div>
           </div>
 
+          {/* Solution Categories (dropdown groups) */}
+          <CategoryManager
+            groups={solutions.groups}
+            arGroups={solutions.ar?.groups}
+            cards={solutions.cards}
+            onChange={(groups) => setSolutions((p) => ({ ...p, groups }))}
+            onArChange={(arGroups) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), groups: arGroups } }))}
+          />
+
           {/* Solution Cards */}
           <div>
             <div className="mb-4 flex items-center justify-between">
@@ -1177,6 +1285,29 @@ export default function SolutionPageEditor() {
                       >
                         Auto
                       </button>
+                    </div>
+
+                    {/* Category (which dropdown group this card appears under) */}
+                    <div>
+                      <label className={labelClass}>Category</label>
+                      <select
+                        value={card.group ?? ""}
+                        onChange={(e) => setSolutions((p) => ({
+                          ...p,
+                          cards: p.cards.map((c, idx) => idx === i ? { ...c, group: e.target.value } : c)
+                        }))}
+                        className={inputClass}
+                      >
+                        <option value="">— Ungrouped (generic &quot;Solutions&quot;) —</option>
+                        {(solutions.groups ?? []).map((g, gi) => (
+                          <option key={gi} value={g}>{g}</option>
+                        ))}
+                      </select>
+                      {card.group && !(solutions.groups ?? []).includes(card.group) ? (
+                        <p className="mt-1 text-[11px] font-semibold text-amber-600">
+                          ⚠ &quot;{card.group}&quot; is not in the category list — add it above or pick another.
+                        </p>
+                      ) : null}
                     </div>
 
                     {/* Edit this card's detail page */}

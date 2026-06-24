@@ -132,6 +132,7 @@ export default function AboutPageEditor() {
   const [paragraphText, setParagraphText] = useState("");
   const [highlightForm, setHighlightForm] = useState(emptyHighlight);
   const [ecosystemText, setEcosystemText] = useState("");
+  const [ecosystemTextAr, setEcosystemTextAr] = useState("");
 
   const missionParagraphCount = content.mission.paragraphs.length;
   const visionParagraphCount = content.vision.paragraphs.length;
@@ -311,11 +312,15 @@ export default function AboutPageEditor() {
       });
     } else if (type === "ecosystemItem") {
       setContent((prev) => {
+        const arItems = Array.isArray(prev.whatWeDo.ar?.ecosystemItems)
+          ? prev.whatWeDo.ar.ecosystemItems.filter((_, i) => i !== index)
+          : undefined;
         const next = {
           ...prev,
           whatWeDo: {
             ...prev.whatWeDo,
             ecosystemItems: prev.whatWeDo.ecosystemItems.filter((_, i) => i !== index),
+            ar: arItems ? { ...(prev.whatWeDo.ar ?? {}), ecosystemItems: arItems } : prev.whatWeDo.ar,
           },
         };
         void persistSections(next, "Ecosystem item deleted.");
@@ -524,6 +529,7 @@ export default function AboutPageEditor() {
       subtitle: content.whatWeDo.subtitle,
       intro: content.whatWeDo.intro,
       image: content.whatWeDo.image,
+      ar: content.whatWeDo.ar ?? {},
     });
     setWhatWeDoSectionModalOpen(true);
   }
@@ -531,7 +537,12 @@ export default function AboutPageEditor() {
   function saveWhatWeDoSection() {
     const next = {
       ...content,
-      whatWeDo: { ...content.whatWeDo, ...whatWeDoSectionForm },
+      whatWeDo: {
+        ...content.whatWeDo,
+        ...whatWeDoSectionForm,
+        // Merge ar (preserve ecosystemItems parallel array stored under ar).
+        ar: { ...(content.whatWeDo.ar ?? {}), ...(whatWeDoSectionForm.ar ?? {}) },
+      },
     };
     setContent(next);
     void persistSections(next, "What we do section updated.");
@@ -541,18 +552,21 @@ export default function AboutPageEditor() {
   function openAddEcosystemItem() {
     setEditEcosystemIndex(null);
     setEcosystemText("");
+    setEcosystemTextAr("");
     setEcosystemModalOpen(true);
   }
 
   function openEditEcosystemItem(index) {
     setEditEcosystemIndex(index);
     setEcosystemText(content.whatWeDo.ecosystemItems[index] ?? "");
+    setEcosystemTextAr(content.whatWeDo.ar?.ecosystemItems?.[index] ?? "");
     setEcosystemModalOpen(true);
   }
 
   function saveEcosystemItem() {
     const text = ecosystemText.trim();
     if (!text) return;
+    const textAr = ecosystemTextAr.trim();
 
     setContent((prev) => {
       const ecosystemItems =
@@ -561,9 +575,21 @@ export default function AboutPageEditor() {
           : prev.whatWeDo.ecosystemItems.map((item, i) =>
               i === editEcosystemIndex ? text : item,
             );
+      // Parallel Arabic array (same indexes as ecosystemItems).
+      const prevAr = Array.isArray(prev.whatWeDo.ar?.ecosystemItems)
+        ? [...prev.whatWeDo.ar.ecosystemItems]
+        : [];
+      const targetIdx = editEcosystemIndex === null ? ecosystemItems.length - 1 : editEcosystemIndex;
+      while (prevAr.length <= targetIdx) prevAr.push("");
+      prevAr[targetIdx] = textAr;
+
       const next = {
         ...prev,
-        whatWeDo: { ...prev.whatWeDo, ecosystemItems },
+        whatWeDo: {
+          ...prev.whatWeDo,
+          ecosystemItems,
+          ar: { ...(prev.whatWeDo.ar ?? {}), ecosystemItems: prevAr },
+        },
       };
       void persistSections(
         next,
@@ -1735,6 +1761,7 @@ export default function AboutPageEditor() {
           maxLength={FIELD_LIMITS.item}
         />
         <CharCount value={ecosystemText} max={FIELD_LIMITS.item} />
+        <ArInput kind="item" value={ecosystemTextAr} onChange={setEcosystemTextAr} />
       </Modal>
 
       {/* Delete confirm */}

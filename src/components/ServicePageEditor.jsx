@@ -113,6 +113,7 @@ export default function ServicePageEditor() {
   const [partnersSection, setPartnersSection] = useState(DEFAULT_PARTNERS_SECTION);
   const [trustSection, setTrustSection] = useState(DEFAULT_TRUST_SECTION);
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
+  const [gridHeader, setGridHeader] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -136,6 +137,7 @@ export default function ServicePageEditor() {
         setPartnersSection(data.page.sections.partnersSection || DEFAULT_PARTNERS_SECTION);
         setTrustSection(data.page.sections.trustSection || DEFAULT_TRUST_SECTION);
         setCtaSection(data.page.sections.ctaSection || DEFAULT_CTA_SECTION);
+        setGridHeader(data.page.sections.servicesGridHeader || {});
       }
     } catch (err) {
       setError("Failed to load page data");
@@ -151,7 +153,7 @@ export default function ServicePageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("services", {
-        sections: { hero, services, partnersSection, trustSection, ctaSection },
+        sections: { hero, services, partnersSection, trustSection, ctaSection, servicesGridHeader: gridHeader },
       });
       setSuccess("Service page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -571,6 +573,61 @@ export default function ServicePageEditor() {
           </CollapsibleSection>
         ))}
       </div>
+
+      {/* SERVICES GRID HEADER */}
+      <CollapsibleSection title="Services Grid Header" defaultOpen={false}>
+        <div className="grid gap-3">
+          <div>
+            <label className={labelClass}>Heading (first part)</label>
+            <input
+              value={gridHeader.heading ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, heading: e.target.value }))}
+              className={inputClass}
+              placeholder="Explore Our"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={gridHeader.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput kind="heading" value={gridHeader.ar?.heading} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Heading Gradient (highlighted word)</label>
+            <input
+              value={gridHeader.headingGradient ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, headingGradient: e.target.value }))}
+              className={inputClass}
+              placeholder="Services"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={gridHeader.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput kind="label" value={gridHeader.ar?.headingGradient} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <input
+              value={gridHeader.subtitle ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              placeholder="Everything you need, one platform."
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={gridHeader.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput kind="subtitle" value={gridHeader.ar?.subtitle} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea
+              value={gridHeader.description ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, description: e.target.value }))}
+              className={inputClass}
+              rows={2}
+              placeholder="From self-parking to valet, EV charging to car storage…"
+              maxLength={FIELD_LIMITS.description}
+            />
+            <CharCount value={gridHeader.description ?? ""} max={FIELD_LIMITS.description} />
+            <ArInput kind="description" multiline value={gridHeader.ar?.description} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+          </div>
+        </div>
+      </CollapsibleSection>
 
       {/* PARTNERS SECTION */}
       <CollapsibleSection title="Partners Section" defaultOpen={false}>

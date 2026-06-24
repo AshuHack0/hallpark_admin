@@ -1705,6 +1705,68 @@ export default function HomePageEditor() {
               <CharCount value={globalMobility.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
               <ArInput kind="subtitle" value={globalMobility.ar?.subtitle} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
+            <div>
+              <label className={labelClass}>Heading Gradient (highlighted word)</label>
+              <input
+                value={globalMobility.headingGradient ?? ""}
+                onChange={(e) => setGlobalMobility((p) => ({ ...p, headingGradient: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="Locations"
+              />
+              <CharCount value={globalMobility.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput kind="label" value={globalMobility.ar?.headingGradient} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Description (second line)</label>
+              <textarea
+                value={globalMobility.description ?? ""}
+                onChange={(e) => setGlobalMobility((p) => ({ ...p, description: e.target.value }))}
+                maxLength={FIELD_LIMITS.description}
+                className={inputClass}
+                rows={2}
+              />
+              <CharCount value={globalMobility.description ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={globalMobility.ar?.description} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Map Panel Title</label>
+                <input
+                  value={globalMobility.panelTitle ?? ""}
+                  onChange={(e) => setGlobalMobility((p) => ({ ...p, panelTitle: e.target.value }))}
+                  maxLength={FIELD_LIMITS.heading}
+                  className={inputClass}
+                  placeholder="United by Mobility."
+                />
+                <CharCount value={globalMobility.panelTitle ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput kind="heading" value={globalMobility.ar?.panelTitle} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Map Panel Title (line 2)</label>
+                <input
+                  value={globalMobility.panelTitleAccent ?? ""}
+                  onChange={(e) => setGlobalMobility((p) => ({ ...p, panelTitleAccent: e.target.value }))}
+                  maxLength={FIELD_LIMITS.heading}
+                  className={inputClass}
+                  placeholder="Connected Globally."
+                />
+                <CharCount value={globalMobility.panelTitleAccent ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput kind="heading" value={globalMobility.ar?.panelTitleAccent} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Map Panel Body</label>
+              <textarea
+                value={globalMobility.panelBody ?? ""}
+                onChange={(e) => setGlobalMobility((p) => ({ ...p, panelBody: e.target.value }))}
+                maxLength={FIELD_LIMITS.description}
+                className={inputClass}
+                rows={2}
+              />
+              <CharCount value={globalMobility.panelBody ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput kind="description" multiline value={globalMobility.ar?.panelBody} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelBody: v } }))} />
+            </div>
 
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Capabilities ({(globalMobility.capabilities ?? []).length})</p>

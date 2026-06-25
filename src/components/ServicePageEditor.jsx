@@ -354,7 +354,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), title: v })} />
+            <ArInput label="Title" kind="heading" value={hero.ar?.title} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), title: v })} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -367,7 +367,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), subtitle: v })} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), subtitle: v })} />
           </div>
           <div>
             <label className={labelClass}>Service Chips (comma-separated)</label>
@@ -399,7 +399,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={hero.chipsMore ?? ""} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={hero.ar?.chipsMore} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), chipsMore: v })} />
+            <ArInput label="Chips More" kind="label" value={hero.ar?.chipsMore} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), chipsMore: v })} />
           </div>
         </div>
       </CollapsibleSection>
@@ -432,7 +432,7 @@ export default function ServicePageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={service.name ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={service.ar?.name} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), name: v })} />
+                  <ArInput label="Name" kind="heading" value={service.ar?.name} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), name: v })} />
                 </div>
                 <div>
                   <label className={labelClass}>Slug</label>
@@ -458,7 +458,7 @@ export default function ServicePageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={service.fullDesc ?? ""} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" multiline value={service.ar?.fullDesc} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), fullDesc: v })} />
+                <ArInput label="Full Desc" kind="description" multiline value={service.ar?.fullDesc} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), fullDesc: v })} />
               </div>
 
               <div>
@@ -512,7 +512,7 @@ export default function ServicePageEditor() {
                   maxLength={FIELD_LIMITS.label}
                 />
                 <CharCount value={service.includedLabel ?? ""} max={FIELD_LIMITS.label} />
-                <ArInput kind="label" value={service.ar?.includedLabel} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), includedLabel: v })} />
+                <ArInput label="Included Label" kind="label" value={service.ar?.includedLabel} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), includedLabel: v })} />
               </div>
 
               <ArrayItemEditor
@@ -619,7 +619,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={gridHeader.heading ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={gridHeader.ar?.heading} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+            <ArInput label="Heading" kind="heading" value={gridHeader.ar?.heading} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Heading Gradient (highlighted word)</label>
@@ -631,7 +631,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={gridHeader.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={gridHeader.ar?.headingGradient} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+            <ArInput label="Heading Gradient" kind="label" value={gridHeader.ar?.headingGradient} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -643,7 +643,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={gridHeader.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={gridHeader.ar?.subtitle} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={gridHeader.ar?.subtitle} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -656,7 +656,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={gridHeader.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" multiline value={gridHeader.ar?.description} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <ArInput label="Description" kind="description" multiline value={gridHeader.ar?.description} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
         </div>
       </CollapsibleSection>
@@ -675,7 +675,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={partnersSection.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={partnersSection.ar?.heading} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={partnersSection.ar?.heading} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -687,7 +687,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={partnersSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={partnersSection.ar?.headingGradient} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={partnersSection.ar?.headingGradient} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -700,7 +700,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={partnersSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={partnersSection.ar?.subtitle} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={partnersSection.ar?.subtitle} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -713,7 +713,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={partnersSection.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" multiline value={partnersSection.ar?.description} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <ArInput label="Description" kind="description" multiline value={partnersSection.ar?.description} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
 
           {/* Partner logos */}
@@ -794,7 +794,7 @@ export default function ServicePageEditor() {
                               placeholder="Partner name"
                               maxLength={FIELD_LIMITS.label}
                             />
-                            <ArInput kind="label" value={partner.ar?.name} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), name: v })} />
+                            <ArInput label="Name" kind="label" value={partner.ar?.name} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), name: v })} />
                           </div>
                           <div>
                             <input
@@ -804,7 +804,7 @@ export default function ServicePageEditor() {
                               placeholder="Industry"
                               maxLength={FIELD_LIMITS.label}
                             />
-                            <ArInput kind="label" value={partner.ar?.industry} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), industry: v })} />
+                            <ArInput label="Industry" kind="label" value={partner.ar?.industry} onChange={(v) => updatePartner(i, "ar", { ...(partner.ar ?? {}), industry: v })} />
                           </div>
                         </div>
                       </div>
@@ -831,7 +831,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={trustSection.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={trustSection.ar?.heading} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={trustSection.ar?.heading} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -843,7 +843,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={trustSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={trustSection.ar?.headingGradient} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={trustSection.ar?.headingGradient} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -856,7 +856,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={trustSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={trustSection.ar?.subtitle} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={trustSection.ar?.subtitle} onChange={(v) => setTrustSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
 
           {/* Trust items */}
@@ -896,7 +896,7 @@ export default function ServicePageEditor() {
                         maxLength={FIELD_LIMITS.item}
                       />
                       <CharCount value={item.label ?? ""} max={FIELD_LIMITS.item} />
-                      <ArInput kind="item" value={item.ar?.label} onChange={(v) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, ar: { ...(it.ar ?? {}), label: v } } : it)) }))} />
+                      <ArInput label="Label" kind="item" value={item.ar?.label} onChange={(v) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, ar: { ...(it.ar ?? {}), label: v } } : it)) }))} />
                     </div>
                     <div>
                       <label className={labelClass}>Icon name</label>
@@ -930,7 +930,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={ctaSection.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={ctaSection.ar?.heading} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={ctaSection.ar?.heading} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient Word</label>
@@ -942,7 +942,7 @@ export default function ServicePageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={ctaSection.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={ctaSection.ar?.headingGradient} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={ctaSection.ar?.headingGradient} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -956,7 +956,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={ctaSection.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={ctaSection.ar?.subtitle} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={ctaSection.ar?.subtitle} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>CTA Label</label>
@@ -968,7 +968,7 @@ export default function ServicePageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-            <ArInput kind="button" value={ctaSection.ar?.ctaLabel} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+            <ArInput label="CTA Label" kind="button" value={ctaSection.ar?.ctaLabel} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
           </div>
         </div>
       </CollapsibleSection>

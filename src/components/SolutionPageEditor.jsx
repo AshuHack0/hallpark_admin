@@ -204,10 +204,10 @@ function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, 
               </div>
               <label className={labelClass}>Title</label>
               <input value={item.title ?? ""} onChange={(e) => setItem(i, { title: e.target.value })} className={inputClass} maxLength={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={arList[i]?.title} onChange={(v) => setAr(i, { title: v })} />
+              <ArInput label="Title" kind="heading" value={arList[i]?.title} onChange={(v) => setAr(i, { title: v })} />
               <label className={labelClass} style={{ marginTop: 6 }}>Description</label>
               <textarea value={item.description ?? ""} onChange={(e) => setItem(i, { description: e.target.value })} className={inputClass} rows={2} maxLength={FIELD_LIMITS.summary} />
-              <ArInput kind="summary" multiline value={arList[i]?.description} onChange={(v) => setAr(i, { description: v })} />
+              <ArInput label="Description" kind="summary" multiline value={arList[i]?.description} onChange={(v) => setAr(i, { description: v })} />
             </div>
           ))
         )}
@@ -441,7 +441,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={draft.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={draft.ar?.eyebrow} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), eyebrow: v })} />
+              <ArInput label="Eyebrow" kind="label" value={draft.ar?.eyebrow} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), eyebrow: v })} />
             </div>
           </div>
 
@@ -456,7 +456,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={draft.title ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.title} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), title: v })} />
+            <ArInput label="Title" kind="heading" value={draft.ar?.title} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), title: v })} />
           </div>
 
           {/* ── 1. BANNER ─────────────────────────────────────────────── */}
@@ -471,7 +471,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={draft.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={draft.ar?.subtitle} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), subtitle: v })} />
+            <ArInput label="Subtitle" kind="subtitle" value={draft.ar?.subtitle} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), subtitle: v })} />
           </div>
           <div>
             <label className={labelClass}>Short Description</label>
@@ -484,14 +484,14 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={draft.shortDescription ?? ""} max={FIELD_LIMITS.long} />
-            <ArInput kind="long" multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
+            <ArInput label="Short Description" kind="long" multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>CTA Label</label>
               <input value={draft.ctaLabel ?? ""} onChange={(e) => setField("ctaLabel", e.target.value)} className={inputClass} placeholder="Contact Us" maxLength={FIELD_LIMITS.button} />
               <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
+              <ArInput label="CTA Label" kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -550,12 +550,12 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
             <label className={labelClass}>Why Heading</label>
             <input value={draft.whyHeading ?? ""} onChange={(e) => setField("whyHeading", e.target.value)} className={inputClass} placeholder="Why Smart Ecosystem Integration Matters?" maxLength={FIELD_LIMITS.heading} />
             <CharCount value={draft.whyHeading ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.whyHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyHeading: v })} />
+            <ArInput label="Why Heading" kind="heading" value={draft.ar?.whyHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyHeading: v })} />
           </div>
           <div>
             <label className={labelClass}>Why Body (use blank lines to split paragraphs)</label>
             <textarea value={draft.whyBody ?? ""} onChange={(e) => setField("whyBody", e.target.value)} className={inputClass} rows={5} maxLength={2400} />
-            <ArInput kind="long" multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
+            <ArInput label="Why Body" kind="long" multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
           </div>
           <div>
             <label className={labelClass}>Why-Section Image URL (optional — defaults to banner image)</label>
@@ -568,12 +568,12 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>Problem Heading</label>
             <input value={draft.problemHeading ?? ""} onChange={(e) => setField("problemHeading", e.target.value)} className={inputClass} placeholder="Problem We Face" maxLength={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
+            <ArInput label="Problem Heading" kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
           </div>
           <div>
             <label className={labelClass}>Problem Body (blank lines split paragraphs)</label>
             <textarea value={draft.problemBody ?? ""} onChange={(e) => setField("problemBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
-            <ArInput kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
+            <ArInput label="Problem Body" kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
           </div>
 
           {/* ── 4. OUR SOLUTION ───────────────────────────────────────── */}
@@ -581,12 +581,12 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>Solution Heading</label>
             <input value={draft.solutionHeading ?? ""} onChange={(e) => setField("solutionHeading", e.target.value)} className={inputClass} placeholder="Our Solution" maxLength={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.solutionHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionHeading: v })} />
+            <ArInput label="Solution Heading" kind="heading" value={draft.ar?.solutionHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionHeading: v })} />
           </div>
           <div>
             <label className={labelClass}>Solution Body (blank lines split paragraphs)</label>
             <textarea value={draft.solutionBody ?? ""} onChange={(e) => setField("solutionBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
-            <ArInput kind="long" multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
+            <ArInput label="Solution Body" kind="long" multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
           </div>
 
           {/* ── 5. KEY BENEFITS ───────────────────────────────────────── */}
@@ -594,7 +594,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>Benefits Heading</label>
             <input value={draft.benefitsHeading ?? ""} onChange={(e) => setField("benefitsHeading", e.target.value)} className={inputClass} placeholder="Key Benefits" maxLength={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.benefitsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), benefitsHeading: v })} />
+            <ArInput label="Benefits Heading" kind="heading" value={draft.ar?.benefitsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), benefitsHeading: v })} />
           </div>
           <ObjListEditor
             label="Key Benefits"
@@ -609,7 +609,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>How It Works Heading</label>
             <input value={draft.howItWorksHeading ?? ""} onChange={(e) => setField("howItWorksHeading", e.target.value)} className={inputClass} placeholder="How It Works" maxLength={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.howItWorksHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksHeading: v })} />
+            <ArInput label="How It Works Heading" kind="heading" value={draft.ar?.howItWorksHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksHeading: v })} />
           </div>
           <p className="text-[11px] text-slate-400">Add numbered Steps below, OR leave steps empty and write a single paragraph.</p>
           <ObjListEditor
@@ -623,7 +623,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>How It Works Paragraph (used only if no Steps)</label>
             <textarea value={draft.howItWorksBody ?? ""} onChange={(e) => setField("howItWorksBody", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.long} />
-            <ArInput kind="long" multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
+            <ArInput label="How It Works Body" kind="long" multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
           </div>
 
           {/* ── 7. OTHER RELATED SERVICES ─────────────────────────────── */}
@@ -631,7 +631,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           <div>
             <label className={labelClass}>Related Heading</label>
             <input value={draft.relatedHeading ?? ""} onChange={(e) => setField("relatedHeading", e.target.value)} className={inputClass} placeholder="Other Related Services" maxLength={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={draft.ar?.relatedHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), relatedHeading: v })} />
+            <ArInput label="Related Heading" kind="heading" value={draft.ar?.relatedHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), relatedHeading: v })} />
           </div>
           <RelatedServicesPicker
             currentSlug={draft.slug}
@@ -901,7 +901,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={hero.title ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+              <ArInput label="Title" kind="heading" value={hero.ar?.title} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Title Accent (gradient part)</label>
@@ -913,7 +913,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={hero.titleAccent ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={hero.ar?.titleAccent} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleAccent: v } }))} />
+              <ArInput label="Title Accent" kind="label" value={hero.ar?.titleAccent} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleAccent: v } }))} />
             </div>
           </div>
           <div>
@@ -927,7 +927,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={hero.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={hero.ar?.subtitle} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -940,7 +940,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={hero.ar?.ctaLabel} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              <ArInput label="CTA Label" kind="button" value={hero.ar?.ctaLabel} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
@@ -999,7 +999,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={challenges.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={challenges.ar?.heading} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={challenges.ar?.heading} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1011,7 +1011,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={challenges.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={challenges.ar?.headingGradient} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={challenges.ar?.headingGradient} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1024,7 +1024,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={challenges.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={challenges.ar?.subtitle} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={challenges.ar?.subtitle} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Description</label>
@@ -1037,7 +1037,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={challenges.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" multiline value={challenges.ar?.description} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <ArInput label="Description" kind="description" multiline value={challenges.ar?.description} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
 
           {/* Points list */}
@@ -1085,7 +1085,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={challenges.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={challenges.ar?.ctaLabel} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              <ArInput label="CTA Label" kind="button" value={challenges.ar?.ctaLabel} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Button Link</label>
@@ -1119,7 +1119,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={solutions.heading ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={solutions.ar?.heading} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+                  <ArInput label="Heading" kind="heading" value={solutions.ar?.heading} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -1131,7 +1131,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={solutions.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={solutions.ar?.headingGradient} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+                  <ArInput label="Heading Gradient" kind="label" value={solutions.ar?.headingGradient} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
                 </div>
               </div>
               <div>
@@ -1144,7 +1144,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={solutions.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={solutions.ar?.subtitle} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+                <ArInput label="Subtitle" kind="subtitle" value={solutions.ar?.subtitle} onChange={(v) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
             </div>
           </div>
@@ -1203,7 +1203,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                     <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
-                    <ArInput kind="heading" value={card.ar?.title} onChange={(v) => setSolutions((p) => ({
+                    <ArInput label="Title" kind="heading" value={card.ar?.title} onChange={(v) => setSolutions((p) => ({
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), title: v } } : c)
                     }))} />
@@ -1219,7 +1219,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.summary}
                     />
                     <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput kind="summary" multiline value={card.ar?.description} onChange={(v) => setSolutions((p) => ({
+                    <ArInput label="Description" kind="summary" multiline value={card.ar?.description} onChange={(v) => setSolutions((p) => ({
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
                     }))} />
@@ -1369,7 +1369,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={solutions.advantages?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={solutions.advantages?.ar?.heading} onChange={(v) => setSolutions((p) => ({
+              <ArInput label="Heading" kind="heading" value={solutions.advantages?.ar?.heading} onChange={(v) => setSolutions((p) => ({
                 ...p,
                 advantages: { ...(p.advantages ?? { items: [] }), ar: { ...(p.advantages?.ar ?? {}), heading: v } },
               }))} />
@@ -1401,7 +1401,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.item}
                   />
                   <CharCount value={adv.title ?? ""} max={FIELD_LIMITS.item} />
-                  <ArInput kind="item" value={adv.ar?.title} onChange={(v) => setSolutions((p) => ({
+                  <ArInput label="Title" kind="item" value={adv.ar?.title} onChange={(v) => setSolutions((p) => ({
                     ...p,
                     advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), title: v } } : a) },
                   }))} />
@@ -1417,7 +1417,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={adv.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" multiline value={adv.ar?.description} onChange={(v) => setSolutions((p) => ({
+                  <ArInput label="Description" kind="description" multiline value={adv.ar?.description} onChange={(v) => setSolutions((p) => ({
                     ...p,
                     advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), description: v } } : a) },
                   }))} />
@@ -1447,7 +1447,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={integration.heading ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={integration.ar?.heading} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+                  <ArInput label="Heading" kind="heading" value={integration.ar?.heading} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
                 </div>
                 <div>
                   <label className={labelClass}>Heading Gradient</label>
@@ -1459,7 +1459,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={integration.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={integration.ar?.headingGradient} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+                  <ArInput label="Heading Gradient" kind="label" value={integration.ar?.headingGradient} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
                 </div>
               </div>
               <div>
@@ -1472,7 +1472,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={integration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+                <ArInput label="Subtitle" kind="subtitle" value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
             </div>
           </div>
@@ -1519,7 +1519,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                     <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
-                    <ArInput kind="heading" value={card.ar?.title} onChange={(v) => setIntegration((p) => ({
+                    <ArInput label="Title" kind="heading" value={card.ar?.title} onChange={(v) => setIntegration((p) => ({
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), title: v } } : c)
                     }))} />
@@ -1535,7 +1535,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.summary}
                     />
                     <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput kind="summary" multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
+                    <ArInput label="Description" kind="summary" multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
                     }))} />
@@ -1621,7 +1621,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={trust.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={trust.ar?.heading} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={trust.ar?.heading} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1633,7 +1633,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={trust.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={trust.ar?.headingGradient} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={trust.ar?.headingGradient} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1647,7 +1647,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={trust.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={trust.ar?.subtitle} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={trust.ar?.subtitle} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
         </div>
       </CollapsibleSection>
@@ -1666,7 +1666,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={features.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={features.ar?.heading} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={features.ar?.heading} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1678,7 +1678,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={features.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={features.ar?.headingGradient} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={features.ar?.headingGradient} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1691,7 +1691,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={features.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={features.ar?.subtitle} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={features.ar?.subtitle} onChange={(v) => setFeatures((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
 
           {/* Background image */}
@@ -1766,7 +1766,7 @@ export default function SolutionPageEditor() {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <ArInput kind="item" value={ind.ar?.label} onChange={(v) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, ar: { ...(x.ar ?? {}), label: v } } : x) }))} />
+                  <ArInput label="Label" kind="item" value={ind.ar?.label} onChange={(v) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, ar: { ...(x.ar ?? {}), label: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -1788,7 +1788,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={deployment.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={deployment.ar?.heading} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={deployment.ar?.heading} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1800,7 +1800,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={deployment.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={deployment.ar?.headingGradient} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={deployment.ar?.headingGradient} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
           <div>
@@ -1814,7 +1814,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={deployment.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={deployment.ar?.subtitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={deployment.ar?.subtitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
 
           {/* Steps */}
@@ -1856,7 +1856,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.heading}
                     />
                   </div>
-                  <ArInput kind="heading" value={st.ar?.title} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
+                  <ArInput label="Title" kind="heading" value={st.ar?.title} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
                   <textarea
                     value={st.description ?? ""}
                     onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: e.target.value } : x) }))}
@@ -1866,7 +1866,7 @@ export default function SolutionPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={st.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
+                  <ArInput label="Description" kind="description" multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -1886,7 +1886,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={deployment.panelTitle ?? ""} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={deployment.ar?.panelTitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
+                <ArInput label="Panel Title" kind="heading" value={deployment.ar?.panelTitle} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
               </div>
               <div>
                 <label className={labelClass}>Panel Title (accent)</label>
@@ -1898,7 +1898,7 @@ export default function SolutionPageEditor() {
                   maxLength={FIELD_LIMITS.label}
                 />
                 <CharCount value={deployment.panelTitleAccent ?? ""} max={FIELD_LIMITS.label} />
-                <ArInput kind="label" value={deployment.ar?.panelTitleAccent} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
+                <ArInput label="Panel Title Accent" kind="label" value={deployment.ar?.panelTitleAccent} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
               </div>
             </div>
             <div className="mt-3">
@@ -1953,7 +1953,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={why.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={why.ar?.heading} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              <ArInput label="Heading" kind="heading" value={why.ar?.heading} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -1965,7 +1965,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={why.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={why.ar?.headingGradient} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+              <ArInput label="Heading Gradient" kind="label" value={why.ar?.headingGradient} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
             </div>
           </div>
 
@@ -2015,7 +2015,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.label}
               />
               <CharCount value={why.badge ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={why.ar?.badge} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge: v } }))} />
+              <ArInput label="Badge" kind="label" value={why.ar?.badge} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Panel Caption</label>
@@ -2027,7 +2027,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.subtitle}
               />
               <CharCount value={why.panelTitle ?? ""} max={FIELD_LIMITS.subtitle} />
-              <ArInput kind="subtitle" value={why.ar?.panelTitle} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
+              <ArInput label="Panel Title" kind="subtitle" value={why.ar?.panelTitle} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitle: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Caption Accent</label>
@@ -2039,7 +2039,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.subtitle}
               />
               <CharCount value={why.panelTitleAccent ?? ""} max={FIELD_LIMITS.subtitle} />
-              <ArInput kind="subtitle" value={why.ar?.panelTitleAccent} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
+              <ArInput label="Panel Title Accent" kind="subtitle" value={why.ar?.panelTitleAccent} onChange={(v) => setWhy((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelTitleAccent: v } }))} />
             </div>
           </div>
 
@@ -2109,7 +2109,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={cta.heading ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={cta.ar?.heading} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+            <ArInput label="Heading" kind="heading" value={cta.ar?.heading} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Heading Gradient</label>
@@ -2121,7 +2121,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={cta.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={cta.ar?.headingGradient} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+            <ArInput label="Heading Gradient" kind="label" value={cta.ar?.headingGradient} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
           </div>
           <div>
             <label className={labelClass}>Subtitle</label>
@@ -2134,7 +2134,7 @@ export default function SolutionPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={cta.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" multiline value={cta.ar?.subtitle} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={cta.ar?.subtitle} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -2147,7 +2147,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={cta.ar?.ctaLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              <ArInput label="CTA Label" kind="button" value={cta.ar?.ctaLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Secondary CTA Label</label>
@@ -2159,7 +2159,7 @@ export default function SolutionPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={cta.ctaSecondaryLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={cta.ar?.ctaSecondaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaSecondaryLabel: v } }))} />
+              <ArInput label="Cta Secondary Label" kind="button" value={cta.ar?.ctaSecondaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaSecondaryLabel: v } }))} />
             </div>
           </div>
 

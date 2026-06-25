@@ -703,7 +703,7 @@ export default function CareersPageEditor() {
                       <label className={labelClass}>Badge</label>
                       <input value={item.badge ?? ""} onChange={(e) => updateOpportunity(i, "badge", e.target.value)} className={inputClass} placeholder="Full-Time" maxLength={FIELD_LIMITS.label} />
                       <CharCount value={item.badge ?? ""} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.badge} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), badge: v })} />
+                      <ArInput label="Badge" kind="label" value={item.ar?.badge} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), badge: v })} />
                     </div>
                     <div>
                       <label className={labelClass}>Icon name</label>
@@ -714,13 +714,13 @@ export default function CareersPageEditor() {
                     <label className={labelClass}>Title</label>
                     <input value={item.title ?? ""} onChange={(e) => updateOpportunity(i, "title", e.target.value)} className={inputClass} placeholder="Full-Time Valet Roles" maxLength={FIELD_LIMITS.heading} />
                     <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
-                    <ArInput kind="heading" value={item.ar?.title} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), title: v })} />
+                    <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), title: v })} />
                   </div>
                   <div>
                     <label className={labelClass}>Description</label>
                     <textarea value={item.description ?? ""} onChange={(e) => updateOpportunity(i, "description", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.description} />
                     <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                    <ArInput kind="description" multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
+                    <ArInput label="Description" kind="description" multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
                   </div>
                 </div>
               </div>
@@ -964,7 +964,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={heroForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput
+            <ArInput label="Title"
               kind="heading"
               value={heroForm.ar?.title}
               onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -980,7 +980,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
-            <ArInput
+            <ArInput label="Description"
               kind="description"
               multiline
               value={heroForm.ar?.description}
@@ -1059,7 +1059,7 @@ export default function CareersPageEditor() {
             maxLength={FIELD_LIMITS.heading}
           />
           <CharCount value={buildingForm.title} max={FIELD_LIMITS.heading} />
-          <ArInput
+          <ArInput label="Title"
             kind="heading"
             value={buildingForm.ar?.title}
             onChange={(v) => setBuildingForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -1101,7 +1101,7 @@ export default function CareersPageEditor() {
           maxLength={FIELD_LIMITS.description}
         />
         <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
-        <ArInput kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <ArInput label="Paragraph" kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Open positions section modal */}
@@ -1140,7 +1140,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={openPositionsForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput
+            <ArInput label="Title"
               kind="heading"
               value={openPositionsForm.ar?.title}
               onChange={(v) => setOpenPositionsForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -1156,7 +1156,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={openPositionsForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput
+            <ArInput label="Subtitle"
               kind="subtitle"
               value={openPositionsForm.ar?.subtitle}
               onChange={(v) => setOpenPositionsForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
@@ -1201,7 +1201,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={jobPostForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput
+            <ArInput label="Title"
               kind="heading"
               value={jobPostForm.ar?.title}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -1217,7 +1217,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.department} max={FIELD_LIMITS.label} />
-            <ArInput
+            <ArInput label="Department"
               kind="label"
               value={jobPostForm.ar?.department}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), department: v } }))}
@@ -1233,7 +1233,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.location} max={FIELD_LIMITS.label} />
-            <ArInput
+            <ArInput label="Location"
               kind="label"
               value={jobPostForm.ar?.location}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), location: v } }))}
@@ -1249,7 +1249,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={jobPostForm.employmentType} max={FIELD_LIMITS.label} />
-            <ArInput
+            <ArInput label="Employment Type"
               kind="label"
               value={jobPostForm.ar?.employmentType}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), employmentType: v } }))}
@@ -1277,7 +1277,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={jobPostForm.description} max={FIELD_LIMITS.description} />
-            <ArInput
+            <ArInput label="Description"
               kind="description"
               multiline
               value={jobPostForm.ar?.description}
@@ -1295,7 +1295,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={jobPostForm.fullDescription} max={FIELD_LIMITS.long} />
-            <ArInput
+            <ArInput label="Full Description"
               kind="long"
               multiline
               value={jobPostForm.ar?.fullDescription}
@@ -1315,7 +1315,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={jobPostForm.applyLabel} max={FIELD_LIMITS.button} />
-            <ArInput
+            <ArInput label="Apply Label"
               kind="button"
               value={jobPostForm.ar?.applyLabel}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), applyLabel: v } }))}
@@ -1384,7 +1384,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={whyJoinForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput
+            <ArInput label="Title"
               kind="heading"
               value={whyJoinForm.ar?.title}
               onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -1399,7 +1399,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={whyJoinForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput
+            <ArInput label="Subtitle"
               kind="subtitle"
               value={whyJoinForm.ar?.subtitle}
               onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
@@ -1415,7 +1415,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={whyJoinForm.bodyParagraph} max={FIELD_LIMITS.description} />
-            <ArInput
+            <ArInput label="Body Paragraph"
               kind="description"
               multiline
               value={whyJoinForm.ar?.bodyParagraph}
@@ -1459,7 +1459,7 @@ export default function CareersPageEditor() {
           maxLength={FIELD_LIMITS.item}
         />
         <CharCount value={reasonText} max={FIELD_LIMITS.item} />
-        <ArInput kind="item" multiline value={reasonTextAr} onChange={setReasonTextAr} />
+        <ArInput label="Reason" kind="item" multiline value={reasonTextAr} onChange={setReasonTextAr} />
       </Modal>
 
       {/* CTA modal */}
@@ -1497,7 +1497,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={ctaForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput
+            <ArInput label="Title"
               kind="heading"
               value={ctaForm.ar?.title}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
@@ -1512,7 +1512,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={ctaForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput
+            <ArInput label="Subtitle"
               kind="subtitle"
               value={ctaForm.ar?.subtitle}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
@@ -1528,7 +1528,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
-            <ArInput
+            <ArInput label="Description"
               kind="description"
               multiline
               value={ctaForm.ar?.description}
@@ -1544,7 +1544,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput
+            <ArInput label="Primary Cta Text"
               kind="button"
               value={ctaForm.ar?.primaryCtaText}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))}
@@ -1571,7 +1571,7 @@ export default function CareersPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput
+            <ArInput label="Secondary Cta Text"
               kind="button"
               value={ctaForm.ar?.secondaryCtaText}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))}

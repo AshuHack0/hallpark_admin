@@ -81,14 +81,17 @@ export function FieldError({ error }) {
  * Renders RTL, right-aligned, with the same cap/counter as the English field.
  * Leave blank to fall back to English on the site.
  */
-export function ArInput({ kind = "subtitle", limit, value, onChange, rows, multiline = false }) {
+export function ArInput({ kind = "subtitle", limit, value, onChange, rows, multiline = false, label }) {
   const max = resolveLimit(kind, limit);
   const arClass =
     "w-full rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-300/30";
+  // Heading shows the paired English field name when provided (e.g.
+  // "Description (Arabic)"), so admin users aren't confused by an Arabic label.
+  const heading = label ? `${label} (Arabic)` : "Arabic translation";
   return (
     <div className="mt-1.5">
       <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-        العربية (Arabic)
+        {heading}
       </label>
       {multiline ? (
         <textarea

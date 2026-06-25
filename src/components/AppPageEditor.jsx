@@ -302,7 +302,7 @@ export default function AppPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={sections.hero.title} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} />
+              <ArInput label="Title" kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -314,7 +314,7 @@ export default function AppPageEditor() {
                 maxLength={FIELD_LIMITS.subtitle}
               />
               <CharCount value={sections.hero.subtitle} max={FIELD_LIMITS.subtitle} />
-              <ArInput kind="subtitle" value={sections.hero.ar?.subtitle} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), subtitle: v } } })} />
+              <ArInput label="Subtitle" kind="subtitle" value={sections.hero.ar?.subtitle} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), subtitle: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -326,7 +326,7 @@ export default function AppPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div>
               <label className={labelClass}>Hero Image URL</label>
@@ -379,7 +379,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={sections.platform.appSuffix ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={sections.platform.ar?.appSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appSuffix: v } } })} />
+                  <ArInput label="App Heading" kind="label" value={sections.platform.ar?.appSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appSuffix: v } } })} />
                 </div>
                 <div>
                   <label className={labelClass}>Website Heading (after &quot;Halapark&quot;)</label>
@@ -392,7 +392,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={sections.platform.webSuffix ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={sections.platform.ar?.webSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webSuffix: v } } })} />
+                  <ArInput label="Website Heading" kind="label" value={sections.platform.ar?.webSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webSuffix: v } } })} />
                 </div>
               </div>
               <div>
@@ -405,7 +405,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.platform.title} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.platform.ar?.title} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), title: v } } })} />
+                <ArInput label="Title" kind="heading" value={sections.platform.ar?.title} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), title: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -417,7 +417,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={sections.platform.subtitle} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.platform.ar?.subtitle} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), subtitle: v } } })} />
+                <ArInput label="Subtitle" kind="subtitle" value={sections.platform.ar?.subtitle} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), subtitle: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -429,7 +429,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={sections.platform.description} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" value={sections.platform.ar?.description} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })} multiline={true} />
+                <ArInput label="Description" kind="description" value={sections.platform.ar?.description} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })} multiline={true} />
               </div>
             </div>
 
@@ -453,7 +453,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.title} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                      <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
@@ -465,7 +465,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.summary}
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
                     </div>
                   </div>
                 )}
@@ -492,7 +492,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.title} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                      <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
@@ -504,7 +504,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.summary}
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
                     </div>
                   </div>
                 )}
@@ -554,7 +554,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={item.label} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={item.ar?.label} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })} />
+                  <ArInput label="Label" kind="label" value={item.ar?.label} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -566,7 +566,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
                   <label className={labelClass}>Steps (comma-separated)</label>
@@ -601,7 +601,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={item.cardKicker ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={item.ar?.cardKicker} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cardKicker: v } })} />
+                  <ArInput label="Card Kicker" kind="label" value={item.ar?.cardKicker} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cardKicker: v } })} />
                 </div>
                 <div>
                   <label className={labelClass}>Pill CTA (small outlined button)</label>
@@ -614,7 +614,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.button}
                   />
                   <CharCount value={item.cta ?? ""} max={FIELD_LIMITS.button} />
-                  <ArInput kind="button" value={item.ar?.cta} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cta: v } })} />
+                  <ArInput label="Cta" kind="button" value={item.ar?.cta} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), cta: v } })} />
                 </div>
                 <div>
                   <label className={labelClass}>&quot;Built for&quot; sentence (under the title)</label>
@@ -627,7 +627,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.builtFor ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" multiline value={item.ar?.builtFor} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), builtFor: v } })} />
+                  <ArInput label="Built For" kind="description" multiline value={item.ar?.builtFor} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), builtFor: v } })} />
                 </div>
               </div>
             )}
@@ -667,7 +667,7 @@ export default function AppPageEditor() {
                 maxLength={FIELD_LIMITS.button}
               />
               <CharCount value={sections.serviceTabs?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.serviceTabs?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), ctaLabel: v } } })} />
+              <ArInput label="CTA Label" kind="button" value={sections.serviceTabs?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), ctaLabel: v } } })} />
             </div>
           </div>
         </CollapsibleSection>
@@ -691,7 +691,7 @@ export default function AppPageEditor() {
                 placeholder="Built for a cleaner parking flow"
               />
               <CharCount value={sections.screenshotsHeader?.eyebrow ?? ""} max={FIELD_LIMITS.subtitle} />
-              <ArInput kind="subtitle" value={sections.screenshotsHeader?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), eyebrow: v } } })} />
+              <ArInput label="Eyebrow" kind="subtitle" value={sections.screenshotsHeader?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), eyebrow: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading (first line)</label>
@@ -704,7 +704,7 @@ export default function AppPageEditor() {
                 placeholder="Parking made simple."
               />
               <CharCount value={sections.screenshotsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.screenshotsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), heading: v } } })} />
+              <ArInput label="Heading" kind="heading" value={sections.screenshotsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), heading: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading Accent (second line, blue)</label>
@@ -717,7 +717,7 @@ export default function AppPageEditor() {
                 placeholder="From start to finish."
               />
               <CharCount value={sections.screenshotsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.screenshotsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), headingAccent: v } } })} />
+              <ArInput label="Heading Accent" kind="heading" value={sections.screenshotsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), headingAccent: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -730,7 +730,7 @@ export default function AppPageEditor() {
                 placeholder="Find your spot, book in seconds, pay securely…"
               />
               <CharCount value={sections.screenshotsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.screenshotsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.screenshotsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div>
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Process Steps (Find → Explore → Book → Pay → Confirm)</p>
@@ -752,7 +752,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.title ?? ""} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                      <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Text</label>
@@ -764,7 +764,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.subtitle}
                       />
                       <CharCount value={item.text ?? ""} max={FIELD_LIMITS.subtitle} />
-                      <ArInput kind="subtitle" value={item.ar?.text} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), text: v } })} />
+                      <ArInput label="Text" kind="subtitle" value={item.ar?.text} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), text: v } })} />
                     </div>
                   </div>
                 )}
@@ -855,7 +855,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.currency?.title} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.currency?.ar?.title} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), title: v } } })} />
+                <ArInput label="Title" kind="heading" value={sections.currency?.ar?.title} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), title: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -867,7 +867,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={sections.currency?.subtitle} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.currency?.ar?.subtitle} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), subtitle: v } } })} />
+                <ArInput label="Subtitle" kind="subtitle" value={sections.currency?.ar?.subtitle} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), subtitle: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -879,7 +879,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={sections.currency?.description} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" value={sections.currency?.ar?.description} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })} multiline={true} />
+                <ArInput label="Description" kind="description" value={sections.currency?.ar?.description} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })} multiline={true} />
               </div>
             </div>
 
@@ -903,7 +903,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.title} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                      <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Subtitle</label>
@@ -915,7 +915,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.subtitle} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.subtitle} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), subtitle: v } })} />
+                      <ArInput label="Subtitle" kind="label" value={item.ar?.subtitle} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), subtitle: v } })} />
                     </div>
                   </div>
                 )}
@@ -943,7 +943,7 @@ export default function AppPageEditor() {
                 placeholder="Parking Made"
               />
               <CharCount value={sections.featureCardsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.featureCardsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), heading: v } } })} />
+              <ArInput label="Heading" kind="heading" value={sections.featureCardsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), heading: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading Accent (blue part)</label>
@@ -956,7 +956,7 @@ export default function AppPageEditor() {
                 placeholder="Simple, Smart & Reliable"
               />
               <CharCount value={sections.featureCardsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.featureCardsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), headingAccent: v } } })} />
+              <ArInput label="Heading Accent" kind="heading" value={sections.featureCardsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), headingAccent: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -969,7 +969,7 @@ export default function AppPageEditor() {
                 placeholder="Powerful features designed to save you time, money, and effort."
               />
               <CharCount value={sections.featureCardsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.featureCardsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.featureCardsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
           </div>
           <ArrayItemEditor
@@ -990,7 +990,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -1002,7 +1002,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
                   <label className={labelClass}>Preview Type</label>
@@ -1039,7 +1039,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.halapark?.title} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.halapark?.ar?.title} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), title: v } } })} />
+                <ArInput label="Title" kind="heading" value={sections.halapark?.ar?.title} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), title: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
@@ -1051,7 +1051,7 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={sections.halapark?.subtitle} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.halapark?.ar?.subtitle} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), subtitle: v } } })} />
+                <ArInput label="Subtitle" kind="subtitle" value={sections.halapark?.ar?.subtitle} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), subtitle: v } } })} />
               </div>
             </div>
 
@@ -1117,7 +1117,7 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.label} max={FIELD_LIMITS.label} />
-                      <ArInput kind="label" value={item.ar?.label} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })} />
+                      <ArInput label="Label" kind="label" value={item.ar?.label} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })} />
                     </div>
                   </div>
                 )}

@@ -485,7 +485,7 @@ export default function FAQPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={hero.title} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={hero.ar?.title} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), title: v } })} />
+              <ArInput label="Title" kind="heading" value={hero.ar?.title} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), title: v } })} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -497,7 +497,7 @@ export default function FAQPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={hero.description} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" multiline value={hero.ar?.description} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), description: v } })} />
+              <ArInput label="Description" kind="description" multiline value={hero.ar?.description} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), description: v } })} />
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
@@ -588,7 +588,7 @@ export default function FAQPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={category.title ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={category.ar?.title} onChange={(v) => updateCategory(categoryIndex, "ar", { ...(category.ar ?? {}), title: v })} />
+                  <ArInput label="Title" kind="heading" value={category.ar?.title} onChange={(v) => updateCategory(categoryIndex, "ar", { ...(category.ar ?? {}), title: v })} />
                   <select
                     value={category.icon ?? "Building2"}
                     onChange={(e) => updateCategory(categoryIndex, "icon", e.target.value)}
@@ -734,7 +734,7 @@ export default function FAQPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={newQuestionForm.question} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" multiline value={newQuestionForm.ar?.question} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), question: v } })} />
+                <ArInput label="Question" kind="subtitle" multiline value={newQuestionForm.ar?.question} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), question: v } })} />
               </div>
               <div>
                 <label className={labelClass}>Answer</label>
@@ -747,7 +747,7 @@ export default function FAQPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={newQuestionForm.answer} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" multiline value={newQuestionForm.ar?.answer} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} />
+                <ArInput label="Answer" kind="description" multiline value={newQuestionForm.ar?.answer} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} />
               </div>
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between mb-3">

@@ -465,7 +465,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={sections.hero.title} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} multiline={false} />
+              <ArInput label="Title" kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -477,7 +477,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div>
               <label className={labelClass}>Checklist Items (comma-separated)</label>
@@ -504,7 +504,7 @@ export default function BusinessPageEditor() {
                 placeholder="Get Proposal"
               />
               <CharCount value={sections.hero?.ctaPrimary ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.hero?.ar?.ctaPrimary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaPrimary: v } } })} />
+              <ArInput label="Cta Primary" kind="button" value={sections.hero?.ar?.ctaPrimary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaPrimary: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Secondary Button (Book a Free Consultation)</label>
@@ -516,7 +516,7 @@ export default function BusinessPageEditor() {
                 placeholder="Book a Free Consultation"
               />
               <CharCount value={sections.hero?.ctaSecondary ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.hero?.ar?.ctaSecondary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaSecondary: v } } })} />
+              <ArInput label="Cta Secondary" kind="button" value={sections.hero?.ar?.ctaSecondary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaSecondary: v } } })} />
             </div>
           </div>
         </CollapsibleSection>
@@ -538,7 +538,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.heading}
               />
               <CharCount value={sections.builtForSpace.title} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.builtForSpace.ar?.title} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), title: v } } })} multiline={false} />
+              <ArInput label="Title" kind="heading" value={sections.builtForSpace.ar?.title} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), title: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -550,7 +550,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.builtForSpace.description} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.builtForSpace.ar?.description} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.builtForSpace.ar?.description} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), description: v } } })} multiline={true} />
             </div>
           </div>
         </CollapsibleSection>
@@ -573,7 +573,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whyChooseHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.whyChooseHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), heading: v } } })} />
+              <ArInput label="Heading" kind="heading" value={sections.whyChooseHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), heading: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (highlighted word)</label>
@@ -585,7 +585,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whyChooseHeader?.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whyChooseHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), headingGradient: v } } })} />
+              <ArInput label="Heading Gradient" kind="label" value={sections.whyChooseHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), headingGradient: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Card Eyebrow (e.g. Smart Solutions)</label>
@@ -597,7 +597,7 @@ export default function BusinessPageEditor() {
                 placeholder="Smart Solutions"
               />
               <CharCount value={sections.whyChooseHeader?.cardEyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whyChooseHeader?.ar?.cardEyebrow} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), cardEyebrow: v } } })} />
+              <ArInput label="Card Eyebrow" kind="label" value={sections.whyChooseHeader?.ar?.cardEyebrow} onChange={(v) => setSections({ ...sections, whyChooseHeader: { ...sections.whyChooseHeader, ar: { ...(sections.whyChooseHeader?.ar ?? {}), cardEyebrow: v } } })} />
             </div>
           </div>
           <ArrayItemEditor
@@ -623,7 +623,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -635,7 +635,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -687,7 +687,7 @@ export default function BusinessPageEditor() {
                 placeholder="Our Business"
               />
               <CharCount value={sections.solutionsHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.solutionsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), heading: v } } })} multiline={false} />
+              <ArInput label="Heading" kind="heading" value={sections.solutionsHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), heading: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Heading Accent (gradient part)</label>
@@ -700,7 +700,7 @@ export default function BusinessPageEditor() {
                 placeholder="Solutions"
               />
               <CharCount value={sections.solutionsHeader?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="label" value={sections.solutionsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), headingAccent: v } } })} multiline={false} />
+              <ArInput label="Heading Accent" kind="label" value={sections.solutionsHeader?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), headingAccent: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -713,7 +713,7 @@ export default function BusinessPageEditor() {
                 placeholder="Intelligent parking systems built for every business type…"
               />
               <CharCount value={sections.solutionsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.solutionsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.solutionsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div>
               <label className={labelClass}>Description (second, smaller)</label>
@@ -726,7 +726,7 @@ export default function BusinessPageEditor() {
                 placeholder="We make it possible to invest in parking infrastructure…"
               />
               <CharCount value={sections.solutionsHeader?.description2 ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.solutionsHeader?.ar?.description2} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description2: v } } })} multiline={true} />
+              <ArInput label="Description2" kind="description" value={sections.solutionsHeader?.ar?.description2} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description2: v } } })} multiline={true} />
             </div>
             <div>
               <label className={labelClass}>CTA Button (Explore All Solutions)</label>
@@ -738,7 +738,7 @@ export default function BusinessPageEditor() {
                 placeholder="Explore All Solutions"
               />
               <CharCount value={sections.solutionsHeader?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.solutionsHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), ctaLabel: v } } })} />
+              <ArInput label="CTA Label" kind="button" value={sections.solutionsHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), ctaLabel: v } } })} />
             </div>
           </div>
           <ArrayItemEditor
@@ -764,7 +764,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -776,7 +776,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -839,7 +839,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whoWeWorkHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.whoWeWorkHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), heading: v } } })} />
+              <ArInput label="Heading" kind="heading" value={sections.whoWeWorkHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), heading: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient</label>
@@ -851,7 +851,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whoWeWorkHeader?.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whoWeWorkHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), headingGradient: v } } })} />
+              <ArInput label="Heading Gradient" kind="label" value={sections.whoWeWorkHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), headingGradient: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>
@@ -863,7 +863,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whoWeWorkHeader?.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-              <ArInput kind="subtitle" value={sections.whoWeWorkHeader?.ar?.subtitle} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), subtitle: v } } })} />
+              <ArInput label="Subtitle" kind="subtitle" value={sections.whoWeWorkHeader?.ar?.subtitle} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), subtitle: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Category Label</label>
@@ -875,7 +875,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.whoWeWorkHeader?.categoryLabel ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whoWeWorkHeader?.ar?.categoryLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), categoryLabel: v } } })} />
+              <ArInput label="Category Label" kind="label" value={sections.whoWeWorkHeader?.ar?.categoryLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), categoryLabel: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Benefits Label (Key Benefits)</label>
@@ -887,7 +887,7 @@ export default function BusinessPageEditor() {
                 placeholder="Key Benefits"
               />
               <CharCount value={sections.whoWeWorkHeader?.benefitsLabel ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whoWeWorkHeader?.ar?.benefitsLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), benefitsLabel: v } } })} />
+              <ArInput label="Benefits Label" kind="label" value={sections.whoWeWorkHeader?.ar?.benefitsLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), benefitsLabel: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Learn More Button</label>
@@ -899,7 +899,7 @@ export default function BusinessPageEditor() {
                 placeholder="Learn More"
               />
               <CharCount value={sections.whoWeWorkHeader?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.whoWeWorkHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), ctaLabel: v } } })} />
+              <ArInput label="CTA Label" kind="button" value={sections.whoWeWorkHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), ctaLabel: v } } })} />
             </div>
           </div>
           <ArrayItemEditor
@@ -925,7 +925,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -937,7 +937,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
                   <label className={labelClass}>Image URL</label>
@@ -1002,7 +1002,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={sections.transformParking.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={sections.transformParking.ar?.title} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), title: v } } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={sections.transformParking.ar?.title} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), title: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Title Accent (gradient part — must be the end of the title)</label>
@@ -1015,7 +1015,7 @@ export default function BusinessPageEditor() {
                     placeholder="Parking Business?"
                   />
                   <CharCount value={sections.transformParking.titleAccent ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput kind="label" value={sections.transformParking.ar?.titleAccent} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), titleAccent: v } } })} multiline={false} />
+                  <ArInput label="Title Accent" kind="label" value={sections.transformParking.ar?.titleAccent} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), titleAccent: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -1027,7 +1027,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={sections.transformParking.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={sections.transformParking.ar?.description} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={sections.transformParking.ar?.description} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} multiline={true} />
                 </div>
               </div>
             </div>
@@ -1046,7 +1046,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={sections.transformParking.parkingPartnerTitle} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={sections.transformParking.ar?.parkingPartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerTitle: v } } })} multiline={false} />
+                  <ArInput label="Parking Partner Title" kind="heading" value={sections.transformParking.ar?.parkingPartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerTitle: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>
@@ -1058,7 +1058,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.subtitle}
                   />
                   <CharCount value={sections.transformParking.parkingPartnerSubtitle} max={FIELD_LIMITS.subtitle} />
-                  <ArInput kind="subtitle" value={sections.transformParking.ar?.parkingPartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerSubtitle: v } } })} multiline={false} />
+                  <ArInput label="Parking Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.parkingPartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerSubtitle: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -1070,7 +1070,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.long}
                   />
                   <CharCount value={sections.transformParking.parkingPartnerDescription} max={FIELD_LIMITS.long} />
-                  <ArInput kind="description" value={sections.transformParking.ar?.parkingPartnerDescription} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} multiline={true} />
+                  <ArInput label="Parking Partner Description" kind="description" value={sections.transformParking.ar?.parkingPartnerDescription} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} multiline={true} />
                 </div>
                 <div>
                   <div className="mb-2 flex items-center justify-between">
@@ -1121,7 +1121,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={sections.transformParking.servicePartnerTitle} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={sections.transformParking.ar?.servicePartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerTitle: v } } })} multiline={false} />
+                  <ArInput label="Service Partner Title" kind="heading" value={sections.transformParking.ar?.servicePartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerTitle: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Subtitle</label>
@@ -1133,7 +1133,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.subtitle}
                   />
                   <CharCount value={sections.transformParking.servicePartnerSubtitle} max={FIELD_LIMITS.subtitle} />
-                  <ArInput kind="subtitle" value={sections.transformParking.ar?.servicePartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerSubtitle: v } } })} multiline={false} />
+                  <ArInput label="Service Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.servicePartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerSubtitle: v } } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description 1</label>
@@ -1145,7 +1145,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={sections.transformParking.servicePartnerDescription1} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={sections.transformParking.ar?.servicePartnerDescription1} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} multiline={true} />
+                  <ArInput label="Service Partner Description1" kind="description" value={sections.transformParking.ar?.servicePartnerDescription1} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} multiline={true} />
                 </div>
                 <div>
                   <label className={labelClass}>Description 2</label>
@@ -1157,7 +1157,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={sections.transformParking.servicePartnerDescription2} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={sections.transformParking.ar?.servicePartnerDescription2} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} multiline={true} />
+                  <ArInput label="Service Partner Description2" kind="description" value={sections.transformParking.ar?.servicePartnerDescription2} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} multiline={true} />
                 </div>
                 <div>
                   <div className="mb-2 flex items-center justify-between">
@@ -1214,7 +1214,7 @@ export default function BusinessPageEditor() {
                 placeholder="..."
               />
               <CharCount value={sections.advantageHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.advantageHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), heading: v } } })} />
+              <ArInput label="Heading" kind="heading" value={sections.advantageHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), heading: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading Gradient (Advantage)</label>
@@ -1226,7 +1226,7 @@ export default function BusinessPageEditor() {
                 placeholder="Advantage"
               />
               <CharCount value={sections.advantageHeader?.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.advantageHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), headingGradient: v } } })} />
+              <ArInput label="Heading Gradient" kind="label" value={sections.advantageHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), headingGradient: v } } })} />
             </div>
           </div>
           <ArrayItemEditor
@@ -1250,7 +1250,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -1262,7 +1262,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
               </div>
             )}
@@ -1288,7 +1288,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.partnersShowcase.heading} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.partnersShowcase.ar?.heading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), heading: v } } })} multiline={false} />
+                <ArInput label="Heading" kind="heading" value={sections.partnersShowcase.ar?.heading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), heading: v } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Heading Gradient (highlighted text)</label>
@@ -1301,7 +1301,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.partnersShowcase.headingGradient} max={FIELD_LIMITS.heading} />
-                <ArInput kind="label" value={sections.partnersShowcase.ar?.headingGradient} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), headingGradient: v } } })} multiline={false} />
+                <ArInput label="Heading Gradient" kind="label" value={sections.partnersShowcase.ar?.headingGradient} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), headingGradient: v } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Subheading</label>
@@ -1314,7 +1314,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={sections.partnersShowcase.subheading} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.partnersShowcase.ar?.subheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), subheading: v } } })} multiline={false} />
+                <ArInput label="Subheading" kind="subtitle" value={sections.partnersShowcase.ar?.subheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), subheading: v } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Description</label>
@@ -1327,7 +1327,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={sections.partnersShowcase.description} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" value={sections.partnersShowcase.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), description: v } } })} multiline={true} />
+                <ArInput label="Description" kind="description" value={sections.partnersShowcase.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), description: v } } })} multiline={true} />
               </div>
             </div>
 
@@ -1361,7 +1361,7 @@ export default function BusinessPageEditor() {
                         placeholder="Label"
                         maxLength={FIELD_LIMITS.label}
                       />
-                      <ArInput kind="label" value={stat.ar?.label} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, ar: { ...(s.ar ?? {}), label: v } } : s) } })} multiline={false} />
+                      <ArInput label="Label" kind="label" value={stat.ar?.label} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, ar: { ...(s.ar ?? {}), label: v } } : s) } })} multiline={false} />
                     </div>
                     <button
                       onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
@@ -1412,7 +1412,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.button}
                 />
                 <CharCount value={sections.partnersShowcase.ctaLabel} max={FIELD_LIMITS.button} />
-                <ArInput kind="button" value={sections.partnersShowcase.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), ctaLabel: v } } })} multiline={false} />
+                <ArInput label="CTA Label" kind="button" value={sections.partnersShowcase.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), ctaLabel: v } } })} multiline={false} />
               </div>
             </div>
 
@@ -1430,7 +1430,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.partnersShowcase.partners?.heading || ""} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.partnersShowcase.partners?.ar?.heading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), heading: v } } } })} multiline={false} />
+                <ArInput label="Heading" kind="heading" value={sections.partnersShowcase.partners?.ar?.heading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), heading: v } } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Carousel Subheading</label>
@@ -1443,7 +1443,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.subtitle}
                 />
                 <CharCount value={sections.partnersShowcase.partners?.subheading || ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.partnersShowcase.partners?.ar?.subheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), subheading: v } } } })} multiline={false} />
+                <ArInput label="Subheading" kind="subtitle" value={sections.partnersShowcase.partners?.ar?.subheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), subheading: v } } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Carousel Heading (Trusted by Industry Leaders)</label>
@@ -1455,7 +1455,7 @@ export default function BusinessPageEditor() {
                   placeholder="Trusted by Industry Leaders"
                 />
                 <CharCount value={sections.partnersShowcase?.carouselHeading ?? ""} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.partnersShowcase?.ar?.carouselHeading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), carouselHeading: v } } })} />
+                <ArInput label="Carousel Heading" kind="heading" value={sections.partnersShowcase?.ar?.carouselHeading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), carouselHeading: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>Carousel Subheading</label>
@@ -1467,7 +1467,7 @@ export default function BusinessPageEditor() {
                   placeholder="..."
                 />
                 <CharCount value={sections.partnersShowcase?.carouselSubheading ?? ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput kind="subtitle" value={sections.partnersShowcase?.ar?.carouselSubheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), carouselSubheading: v } } })} />
+                <ArInput label="Carousel Subheading" kind="subtitle" value={sections.partnersShowcase?.ar?.carouselSubheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), carouselSubheading: v } } })} />
               </div>
 
               <div className="bg-slate-50 rounded-lg p-4">
@@ -1487,7 +1487,7 @@ export default function BusinessPageEditor() {
                           placeholder="Company Name"
                           maxLength={FIELD_LIMITS.label}
                         />
-                        <ArInput kind="label" value={partner.ar?.name} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: sections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), name: v } } : p) } } })} multiline={false} />
+                        <ArInput label="Name" kind="label" value={partner.ar?.name} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: sections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), name: v } } : p) } } })} multiline={false} />
                       </div>
                       <div className="flex-1">
                         <input
@@ -1501,7 +1501,7 @@ export default function BusinessPageEditor() {
                           placeholder="Industry"
                           maxLength={FIELD_LIMITS.label}
                         />
-                        <ArInput kind="label" value={partner.ar?.industry} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: sections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), industry: v } } : p) } } })} multiline={false} />
+                        <ArInput label="Industry" kind="label" value={partner.ar?.industry} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: sections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), industry: v } } : p) } } })} multiline={false} />
                       </div>
                       <input
                         value={partner.initials}
@@ -1565,7 +1565,7 @@ export default function BusinessPageEditor() {
                           placeholder="Company Name"
                           maxLength={FIELD_LIMITS.label}
                         />
-                        <ArInput kind="label" value={partner.ar?.name} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: sections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), name: v } } : p) } } })} multiline={false} />
+                        <ArInput label="Name" kind="label" value={partner.ar?.name} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: sections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), name: v } } : p) } } })} multiline={false} />
                       </div>
                       <div className="flex-1">
                         <input
@@ -1579,7 +1579,7 @@ export default function BusinessPageEditor() {
                           placeholder="Industry"
                           maxLength={FIELD_LIMITS.label}
                         />
-                        <ArInput kind="label" value={partner.ar?.industry} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: sections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), industry: v } } : p) } } })} multiline={false} />
+                        <ArInput label="Industry" kind="label" value={partner.ar?.industry} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: sections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, ar: { ...(p.ar ?? {}), industry: v } } : p) } } })} multiline={false} />
                       </div>
                       <input
                         value={partner.initials}
@@ -1641,7 +1641,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.heading}
                 />
                 <CharCount value={sections.partnersShowcase.ctaSection?.title || ""} max={FIELD_LIMITS.heading} />
-                <ArInput kind="heading" value={sections.partnersShowcase.ctaSection?.ar?.title} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), title: v } } } })} multiline={false} />
+                <ArInput label="Title" kind="heading" value={sections.partnersShowcase.ctaSection?.ar?.title} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), title: v } } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>CTA Description</label>
@@ -1654,7 +1654,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.description}
                 />
                 <CharCount value={sections.partnersShowcase.ctaSection?.description || ""} max={FIELD_LIMITS.description} />
-                <ArInput kind="description" value={sections.partnersShowcase.ctaSection?.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), description: v } } } })} multiline={true} />
+                <ArInput label="Description" kind="description" value={sections.partnersShowcase.ctaSection?.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), description: v } } } })} multiline={true} />
               </div>
               <div>
                 <label className={labelClass}>Bottom CTA Button (Get in Touch)</label>
@@ -1666,7 +1666,7 @@ export default function BusinessPageEditor() {
                   placeholder="Get in Touch"
                 />
                 <CharCount value={sections.partnersShowcase?.ctaSectionLabel ?? ""} max={FIELD_LIMITS.button} />
-                <ArInput kind="button" value={sections.partnersShowcase?.ar?.ctaSectionLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), ctaSectionLabel: v } } })} />
+                <ArInput label="Cta Section Label" kind="button" value={sections.partnersShowcase?.ar?.ctaSectionLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), ctaSectionLabel: v } } })} />
               </div>
               <div>
                 <label className={labelClass}>CTA Section Image URL</label>
@@ -1728,7 +1728,7 @@ export default function BusinessPageEditor() {
                 placeholder="How It Works"
               />
               <CharCount value={sections.valueProps?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.valueProps?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), eyebrow: v } } })} multiline={false} />
+              <ArInput label="Eyebrow" kind="label" value={sections.valueProps?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), eyebrow: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Heading</label>
@@ -1741,7 +1741,7 @@ export default function BusinessPageEditor() {
                 placeholder="Why Businesses Choose HalaPark"
               />
               <CharCount value={sections.valueProps?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.valueProps?.ar?.heading} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), heading: v } } })} multiline={false} />
+              <ArInput label="Heading" kind="heading" value={sections.valueProps?.ar?.heading} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), heading: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1753,7 +1753,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.valueProps?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.valueProps?.ar?.description} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.valueProps?.ar?.description} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
           </div>
           <ArrayItemEditor
@@ -1774,7 +1774,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
@@ -1786,7 +1786,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
               </div>
             )}
@@ -1810,7 +1810,7 @@ export default function BusinessPageEditor() {
                 placeholder="Who It's For"
               />
               <CharCount value={sections.whoItsFor?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.whoItsFor?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), eyebrow: v } } })} />
+              <ArInput label="Eyebrow" kind="label" value={sections.whoItsFor?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), eyebrow: v } } })} />
             </div>
             <div>
               <label className={labelClass}>Heading</label>
@@ -1823,7 +1823,7 @@ export default function BusinessPageEditor() {
                 placeholder="Who It's For"
               />
               <CharCount value={sections.whoItsFor?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.whoItsFor?.ar?.heading} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), heading: v } } })} multiline={false} />
+              <ArInput label="Heading" kind="heading" value={sections.whoItsFor?.ar?.heading} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), heading: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1835,7 +1835,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.whoItsFor?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.whoItsFor?.ar?.description} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.whoItsFor?.ar?.description} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
           </div>
           <ArrayItemEditor
@@ -1855,7 +1855,7 @@ export default function BusinessPageEditor() {
                   maxLength={FIELD_LIMITS.item}
                 />
                 <CharCount value={item.title ?? ""} max={FIELD_LIMITS.item} />
-                <ArInput kind="item" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                <ArInput label="Title" kind="item" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
               </div>
             )}
           />
@@ -1879,7 +1879,7 @@ export default function BusinessPageEditor() {
                 placeholder="How It Works"
               />
               <CharCount value={sections.howToGetStarted?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput kind="label" value={sections.howToGetStarted?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), eyebrow: v } } })} multiline={false} />
+              <ArInput label="Eyebrow" kind="label" value={sections.howToGetStarted?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), eyebrow: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Heading</label>
@@ -1892,7 +1892,7 @@ export default function BusinessPageEditor() {
                 placeholder="How to Get Started"
               />
               <CharCount value={sections.howToGetStarted?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.howToGetStarted?.ar?.heading} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), heading: v } } })} multiline={false} />
+              <ArInput label="Heading" kind="heading" value={sections.howToGetStarted?.ar?.heading} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), heading: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1904,7 +1904,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.howToGetStarted?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.howToGetStarted?.ar?.description} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.howToGetStarted?.ar?.description} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div>
               <label className={labelClass}>CTA Button (Book a Consultation)</label>
@@ -1916,7 +1916,7 @@ export default function BusinessPageEditor() {
                 placeholder="Book a Consultation"
               />
               <CharCount value={sections.howToGetStarted?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput kind="button" value={sections.howToGetStarted?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), ctaLabel: v } } })} />
+              <ArInput label="CTA Label" kind="button" value={sections.howToGetStarted?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), ctaLabel: v } } })} />
             </div>
           </div>
           <ArrayItemEditor
@@ -1937,7 +1937,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
                 </div>
                 <div>
                   <label className={labelClass}>Description (optional)</label>
@@ -1949,7 +1949,7 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                   />
                   <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
               </div>
             )}
@@ -1974,7 +1974,7 @@ export default function BusinessPageEditor() {
                 placeholder="Start a Smart Parking Business with"
               />
               <CharCount value={sections.cta.heading ?? sections.cta.title ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="heading" value={sections.cta.ar?.heading} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), heading: v } } })} multiline={false} />
+              <ArInput label="Heading" kind="heading" value={sections.cta.ar?.heading} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), heading: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Heading Accent (gradient part)</label>
@@ -1987,7 +1987,7 @@ export default function BusinessPageEditor() {
                 placeholder="No Upfront Investment"
               />
               <CharCount value={sections.cta.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput kind="label" value={sections.cta.ar?.headingAccent} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), headingAccent: v } } })} multiline={false} />
+              <ArInput label="Heading Accent" kind="label" value={sections.cta.ar?.headingAccent} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), headingAccent: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1999,7 +1999,7 @@ export default function BusinessPageEditor() {
                 maxLength={FIELD_LIMITS.description}
               />
               <CharCount value={sections.cta.description} max={FIELD_LIMITS.description} />
-              <ArInput kind="description" value={sections.cta.ar?.description} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" value={sections.cta.ar?.description} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), description: v } } })} multiline={true} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -2013,7 +2013,7 @@ export default function BusinessPageEditor() {
                   placeholder="Book a Free Consultation"
                 />
                 <CharCount value={sections.cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-                <ArInput kind="button" value={sections.cta.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), ctaLabel: v } } })} multiline={false} />
+                <ArInput label="CTA Label" kind="button" value={sections.cta.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), ctaLabel: v } } })} multiline={false} />
               </div>
               <div>
                 <label className={labelClass}>Button Link</label>

@@ -1095,7 +1095,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={heroForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={heroForm.ar?.title} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={heroForm.ar?.title} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Tagline</span>
@@ -1106,7 +1106,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={heroForm.tagline} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={heroForm.ar?.tagline} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), tagline: v } }))} />
+            <ArInput label="Tagline" kind="subtitle" value={heroForm.ar?.tagline} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), tagline: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1118,7 +1118,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" value={heroForm.ar?.description} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <ArInput label="Description" kind="description" value={heroForm.ar?.description} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1136,7 +1136,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={heroForm.primaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput kind="button" value={heroForm.ar?.primaryCtaText} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))} />
+            <ArInput label="Primary CTA" kind="button" value={heroForm.ar?.primaryCtaText} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1159,7 +1159,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={heroForm.secondaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput kind="button" value={heroForm.ar?.secondaryCtaText} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))} />
+            <ArInput label="Secondary CTA" kind="button" value={heroForm.ar?.secondaryCtaText} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1211,7 +1211,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={missionSectionForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={missionSectionForm.ar?.title} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={missionSectionForm.ar?.title} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1222,7 +1222,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={missionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={missionSectionForm.ar?.subtitle} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={missionSectionForm.ar?.subtitle} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1269,7 +1269,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={visionSectionForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={visionSectionForm.ar?.title} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={visionSectionForm.ar?.title} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1280,7 +1280,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={visionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={visionSectionForm.ar?.subtitle} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={visionSectionForm.ar?.subtitle} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1327,7 +1327,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={visionCardForm.badge} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={visionCardForm.ar?.badge} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge: v } }))} />
+            <ArInput label="Badge" kind="label" value={visionCardForm.ar?.badge} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Card title</span>
@@ -1338,7 +1338,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={visionCardForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={visionCardForm.ar?.title} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={visionCardForm.ar?.title} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Card subtitle</span>
@@ -1350,7 +1350,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.summary}
             />
             <CharCount value={visionCardForm.subtitle} max={FIELD_LIMITS.summary} />
-            <ArInput kind="subtitle" value={visionCardForm.ar?.subtitle} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} multiline />
+            <ArInput label="Subtitle" kind="subtitle" value={visionCardForm.ar?.subtitle} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} multiline />
           </label>
         </div>
       </Modal>
@@ -1390,7 +1390,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={storySectionForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={storySectionForm.ar?.title} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={storySectionForm.ar?.title} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1401,7 +1401,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={storySectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={storySectionForm.ar?.subtitle} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={storySectionForm.ar?.subtitle} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1448,7 +1448,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={whatWeDoSectionForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={whatWeDoSectionForm.ar?.title} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={whatWeDoSectionForm.ar?.title} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1461,7 +1461,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={whatWeDoSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={whatWeDoSectionForm.ar?.subtitle} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={whatWeDoSectionForm.ar?.subtitle} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Intro</span>
@@ -1473,7 +1473,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={whatWeDoSectionForm.intro} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" value={whatWeDoSectionForm.ar?.intro} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} multiline />
+            <ArInput label="Intro" kind="description" value={whatWeDoSectionForm.ar?.intro} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1520,7 +1520,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={technologyForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={technologyForm.ar?.title} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={technologyForm.ar?.title} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
@@ -1531,7 +1531,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.subtitle}
             />
             <CharCount value={technologyForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput kind="subtitle" value={technologyForm.ar?.subtitle} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" value={technologyForm.ar?.subtitle} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Body</span>
@@ -1543,7 +1543,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.long}
             />
             <CharCount value={technologyForm.body} max={FIELD_LIMITS.long} />
-            <ArInput kind="description" value={technologyForm.ar?.body} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))} multiline />
+            <ArInput label="Body" kind="description" value={technologyForm.ar?.body} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1562,7 +1562,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={technologyForm.imageBadge} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={technologyForm.ar?.imageBadge} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), imageBadge: v } }))} />
+            <ArInput label="Image Badge" kind="label" value={technologyForm.ar?.imageBadge} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), imageBadge: v } }))} />
           </label>
         </div>
       </Modal>
@@ -1602,7 +1602,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.heading}
             />
             <CharCount value={ctaForm.title} max={FIELD_LIMITS.heading} />
-            <ArInput kind="heading" value={ctaForm.ar?.title} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
+            <ArInput label="Title" kind="heading" value={ctaForm.ar?.title} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
@@ -1614,7 +1614,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.description}
             />
             <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
-            <ArInput kind="description" value={ctaForm.ar?.description} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <ArInput label="Description" kind="description" value={ctaForm.ar?.description} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1632,7 +1632,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput kind="button" value={ctaForm.ar?.primaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))} />
+            <ArInput label="Primary CTA" kind="button" value={ctaForm.ar?.primaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
@@ -1655,7 +1655,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.button}
             />
             <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
-            <ArInput kind="button" value={ctaForm.ar?.secondaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))} />
+            <ArInput label="Secondary CTA" kind="button" value={ctaForm.ar?.secondaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
@@ -1710,7 +1710,7 @@ export default function AboutPageEditor() {
           maxLength={FIELD_LIMITS.description}
         />
         <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
-        <ArInput kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <ArInput label="Paragraph" kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Highlight modal */}
@@ -1749,7 +1749,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={highlightForm.line1} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={highlightForm.line1Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line1Ar: v }))} />
+            <ArInput label="Line 1" kind="label" value={highlightForm.line1Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line1Ar: v }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Line 2</span>
@@ -1761,7 +1761,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={highlightForm.line2} max={FIELD_LIMITS.label} />
-            <ArInput kind="label" value={highlightForm.line2Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line2Ar: v }))} />
+            <ArInput label="Line 2" kind="label" value={highlightForm.line2Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line2Ar: v }))} />
           </label>
         </div>
       </Modal>
@@ -1799,7 +1799,7 @@ export default function AboutPageEditor() {
           maxLength={FIELD_LIMITS.item}
         />
         <CharCount value={ecosystemText} max={FIELD_LIMITS.item} />
-        <ArInput kind="item" value={ecosystemTextAr} onChange={setEcosystemTextAr} />
+        <ArInput label="Ecosystem Item" kind="item" value={ecosystemTextAr} onChange={setEcosystemTextAr} />
       </Modal>
 
       {/* Delete confirm */}

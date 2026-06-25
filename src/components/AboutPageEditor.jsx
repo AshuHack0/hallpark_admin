@@ -72,7 +72,7 @@ function PreviewRow({ label, value, multiline }) {
   );
 }
 
-const emptyHighlight = { line1: "", line2: "" };
+const emptyHighlight = { line1: "", line2: "", line1Ar: "", line2Ar: "" };
 
 export default function AboutPageEditor() {
   const slug = "about";
@@ -130,6 +130,7 @@ export default function AboutPageEditor() {
   const [technologyForm, setTechnologyForm] = useState(DEFAULT_ABOUT_SECTIONS.technology);
   const [ctaForm, setCtaForm] = useState(DEFAULT_ABOUT_SECTIONS.cta);
   const [paragraphText, setParagraphText] = useState("");
+  const [paragraphTextAr, setParagraphTextAr] = useState("");
   const [highlightForm, setHighlightForm] = useState(emptyHighlight);
   const [ecosystemText, setEcosystemText] = useState("");
   const [ecosystemTextAr, setEcosystemTextAr] = useState("");
@@ -261,11 +262,13 @@ export default function AboutPageEditor() {
 
     if (type === "missionParagraph" && missionParagraphCount > 1) {
       setContent((prev) => {
+        const arP = Array.isArray(prev.mission.ar?.paragraphs) ? prev.mission.ar.paragraphs.filter((_, i) => i !== index) : undefined;
         const next = {
           ...prev,
           mission: {
             ...prev.mission,
             paragraphs: prev.mission.paragraphs.filter((_, i) => i !== index),
+            ar: arP ? { ...(prev.mission.ar ?? {}), paragraphs: arP } : prev.mission.ar,
           },
         };
         void persistSections(next, "Mission paragraph deleted.");
@@ -273,11 +276,13 @@ export default function AboutPageEditor() {
       });
     } else if (type === "visionParagraph" && visionParagraphCount > 1) {
       setContent((prev) => {
+        const arP = Array.isArray(prev.vision.ar?.paragraphs) ? prev.vision.ar.paragraphs.filter((_, i) => i !== index) : undefined;
         const next = {
           ...prev,
           vision: {
             ...prev.vision,
             paragraphs: prev.vision.paragraphs.filter((_, i) => i !== index),
+            ar: arP ? { ...(prev.vision.ar ?? {}), paragraphs: arP } : prev.vision.ar,
           },
         };
         void persistSections(next, "Vision paragraph deleted.");
@@ -285,11 +290,13 @@ export default function AboutPageEditor() {
       });
     } else if (type === "storyParagraph" && storyParagraphCount > 1) {
       setContent((prev) => {
+        const arP = Array.isArray(prev.story.ar?.paragraphs) ? prev.story.ar.paragraphs.filter((_, i) => i !== index) : undefined;
         const next = {
           ...prev,
           story: {
             ...prev.story,
             paragraphs: prev.story.paragraphs.filter((_, i) => i !== index),
+            ar: arP ? { ...(prev.story.ar ?? {}), paragraphs: arP } : prev.story.ar,
           },
         };
         void persistSections(next, "Story paragraph deleted.");
@@ -297,6 +304,7 @@ export default function AboutPageEditor() {
       });
     } else if (type === "highlight") {
       setContent((prev) => {
+        const arH = Array.isArray(prev.vision.card.ar?.highlights) ? prev.vision.card.ar.highlights.filter((_, i) => i !== index) : undefined;
         const next = {
           ...prev,
           vision: {
@@ -304,6 +312,7 @@ export default function AboutPageEditor() {
             card: {
               ...prev.vision.card,
               highlights: prev.vision.card.highlights.filter((_, i) => i !== index),
+              ar: arH ? { ...(prev.vision.card.ar ?? {}), highlights: arH } : prev.vision.card.ar,
             },
           },
         };
@@ -367,25 +376,28 @@ export default function AboutPageEditor() {
     setParagraphSection(section);
     setEditParagraphIndex(null);
     setParagraphText("");
+    setParagraphTextAr("");
     setParagraphModalOpen(true);
   }
 
   function openEditParagraph(section, index) {
     setParagraphSection(section);
     setEditParagraphIndex(index);
-    const paragraphs =
+    const sec =
       section === "mission"
-        ? content.mission.paragraphs
+        ? content.mission
         : section === "vision"
-          ? content.vision.paragraphs
-          : content.story.paragraphs;
-    setParagraphText(paragraphs[index] ?? "");
+          ? content.vision
+          : content.story;
+    setParagraphText(sec.paragraphs[index] ?? "");
+    setParagraphTextAr(sec.ar?.paragraphs?.[index] ?? "");
     setParagraphModalOpen(true);
   }
 
   function saveParagraph() {
     const text = paragraphText.trim();
     if (!text || !paragraphSection) return;
+    const textAr = paragraphTextAr.trim();
 
     setContent((prev) => {
       const sectionKey =
@@ -400,9 +412,20 @@ export default function AboutPageEditor() {
           : prev[sectionKey].paragraphs.map((p, i) =>
               i === editParagraphIndex ? text : p,
             );
+      // Parallel Arabic paragraphs (same indexes).
+      const prevAr = Array.isArray(prev[sectionKey].ar?.paragraphs)
+        ? [...prev[sectionKey].ar.paragraphs]
+        : [];
+      const targetIdx = editParagraphIndex === null ? paragraphs.length - 1 : editParagraphIndex;
+      while (prevAr.length <= targetIdx) prevAr.push("");
+      prevAr[targetIdx] = textAr;
       const next = {
         ...prev,
-        [sectionKey]: { ...prev[sectionKey], paragraphs },
+        [sectionKey]: {
+          ...prev[sectionKey],
+          paragraphs,
+          ar: { ...(prev[sectionKey].ar ?? {}), paragraphs: prevAr },
+        },
       };
       const label =
         paragraphSection === "mission"
@@ -469,8 +492,14 @@ export default function AboutPageEditor() {
   function openEditHighlight(index) {
     const item = content.vision.card.highlights[index];
     if (!item) return;
+    const arItem = content.vision.card.ar?.highlights?.[index] ?? {};
     setEditHighlightIndex(index);
-    setHighlightForm({ line1: item.line1 ?? "", line2: item.line2 ?? "" });
+    setHighlightForm({
+      line1: item.line1 ?? "",
+      line2: item.line2 ?? "",
+      line1Ar: arItem.line1 ?? "",
+      line2Ar: arItem.line2 ?? "",
+    });
     setHighlightModalOpen(true);
   }
 
@@ -479,6 +508,7 @@ export default function AboutPageEditor() {
       line1: highlightForm.line1.trim() || "Line 1",
       line2: highlightForm.line2.trim(),
     };
+    const arItem = { line1: highlightForm.line1Ar.trim(), line2: highlightForm.line2Ar.trim() };
 
     setContent((prev) => {
       const highlights =
@@ -487,11 +517,16 @@ export default function AboutPageEditor() {
           : prev.vision.card.highlights.map((h, i) =>
               i === editHighlightIndex ? item : h,
             );
+      // Parallel Arabic highlights (objects, same indexes).
+      const prevAr = Array.isArray(prev.vision.card.ar?.highlights) ? [...prev.vision.card.ar.highlights] : [];
+      const targetIdx = editHighlightIndex === null ? highlights.length - 1 : editHighlightIndex;
+      while (prevAr.length <= targetIdx) prevAr.push({ line1: "", line2: "" });
+      prevAr[targetIdx] = arItem;
       const next = {
         ...prev,
         vision: {
           ...prev.vision,
-          card: { ...prev.vision.card, highlights },
+          card: { ...prev.vision.card, highlights, ar: { ...(prev.vision.card.ar ?? {}), highlights: prevAr } },
         },
       };
       void persistSections(
@@ -1675,6 +1710,7 @@ export default function AboutPageEditor() {
           maxLength={FIELD_LIMITS.description}
         />
         <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
+        <ArInput kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Highlight modal */}
@@ -1713,6 +1749,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={highlightForm.line1} max={FIELD_LIMITS.label} />
+            <ArInput kind="label" value={highlightForm.line1Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line1Ar: v }))} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Line 2</span>
@@ -1724,6 +1761,7 @@ export default function AboutPageEditor() {
               maxLength={FIELD_LIMITS.label}
             />
             <CharCount value={highlightForm.line2} max={FIELD_LIMITS.label} />
+            <ArInput kind="label" value={highlightForm.line2Ar} onChange={(v) => setHighlightForm((p) => ({ ...p, line2Ar: v }))} />
           </label>
         </div>
       </Modal>

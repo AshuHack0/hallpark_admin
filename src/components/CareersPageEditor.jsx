@@ -99,6 +99,7 @@ export default function CareersPageEditor() {
   const [heroForm, setHeroForm] = useState(DEFAULT_CAREERS_SECTIONS.hero);
   const [buildingForm, setBuildingForm] = useState(DEFAULT_CAREERS_SECTIONS.building);
   const [paragraphText, setParagraphText] = useState("");
+  const [paragraphTextAr, setParagraphTextAr] = useState("");
   const [whyJoinForm, setWhyJoinForm] = useState(DEFAULT_CAREERS_SECTIONS.whyJoin);
   const [ctaForm, setCtaForm] = useState(DEFAULT_CAREERS_SECTIONS.cta);
   const [openPositionsForm, setOpenPositionsForm] = useState(DEFAULT_CAREERS_SECTIONS.openPositions);
@@ -206,11 +207,13 @@ export default function CareersPageEditor() {
 
     if (type === "paragraph" && paragraphCount > 1) {
       setContent((prev) => {
+        const arP = Array.isArray(prev.building.ar?.paragraphs) ? prev.building.ar.paragraphs.filter((_, i) => i !== index) : undefined;
         const next = {
           ...prev,
           building: {
             ...prev.building,
             paragraphs: prev.building.paragraphs.filter((_, i) => i !== index),
+            ar: arP ? { ...(prev.building.ar ?? {}), paragraphs: arP } : prev.building.ar,
           },
         };
         void persistSections(next, "Paragraph deleted.");
@@ -307,25 +310,35 @@ export default function CareersPageEditor() {
   function openAddParagraph() {
     setEditParagraphIndex(null);
     setParagraphText("");
+    setParagraphTextAr("");
     setParagraphModalOpen(true);
   }
 
   function openEditParagraph(index) {
     setEditParagraphIndex(index);
     setParagraphText(content.building.paragraphs[index] ?? "");
+    setParagraphTextAr(content.building.ar?.paragraphs?.[index] ?? "");
     setParagraphModalOpen(true);
   }
 
   function saveParagraph() {
     const text = paragraphText.trim();
     if (!text) return;
+    const textAr = paragraphTextAr.trim();
 
     setContent((prev) => {
       const paragraphs =
         editParagraphIndex === null
           ? [...prev.building.paragraphs, text]
           : prev.building.paragraphs.map((p, i) => (i === editParagraphIndex ? text : p));
-      const next = { ...prev, building: { ...prev.building, paragraphs } };
+      const prevAr = Array.isArray(prev.building.ar?.paragraphs) ? [...prev.building.ar.paragraphs] : [];
+      const targetIdx = editParagraphIndex === null ? paragraphs.length - 1 : editParagraphIndex;
+      while (prevAr.length <= targetIdx) prevAr.push("");
+      prevAr[targetIdx] = textAr;
+      const next = {
+        ...prev,
+        building: { ...prev.building, paragraphs, ar: { ...(prev.building.ar ?? {}), paragraphs: prevAr } },
+      };
       void persistSections(
         next,
         editParagraphIndex === null ? "Paragraph added." : "Paragraph updated.",
@@ -1088,6 +1101,7 @@ export default function CareersPageEditor() {
           maxLength={FIELD_LIMITS.description}
         />
         <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
+        <ArInput kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Open positions section modal */}

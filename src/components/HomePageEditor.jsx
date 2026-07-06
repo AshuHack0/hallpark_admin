@@ -117,14 +117,6 @@ const DEFAULT_GOOD_LOOKING_SERVICES = {
   exploreCtaLink: "/services",
   contactCtaLabel: "Talk to us",
   contactCtaLink: "/contact",
-  parkingIntegrations: [
-    { name: "Technical Support", bgcolor: "bg-[#EC4899]", img: "/Group11.svg" },
-    { name: "Operations", bgcolor: "bg-[#4A44FE]", img: "/Group66.png" },
-    { name: "Installation", bgcolor: "bg-[#EC4899]", img: "/Group22.svg" },
-    { name: "Equipment Supply", bgcolor: "bg-[#0088FF]", img: "/Group55.png" },
-    { name: "Advisory Services", bgcolor: "bg-[#FA4162]", img: "/Group33.svg" },
-    { name: "Management", bgcolor: "bg-[#923BE2]", img: "/Group44.svg" },
-  ],
 };
 
 const DEFAULT_SOLUTION_INTEGRATION = {
@@ -326,7 +318,13 @@ export default function HomePageEditor() {
         setAiPoweredParking({ ...DEFAULT_AI_POWERED_PARKING, ...(sections.aiPoweredParking ?? {}) });
         setHowItWorks({ ...DEFAULT_HOW_IT_WORKS, ...(sections.howItWorks ?? {}) });
         setBlackBanner({ ...DEFAULT_BLACK_BANNER, ...(sections.blackBanner ?? {}) });
-        setGoodLookingServices({ ...DEFAULT_GOOD_LOOKING_SERVICES, ...(sections.goodLookingServices ?? {}) });
+        {
+          // Ribbon removed: drop the legacy parkingIntegrations key so the next
+          // save cleans it out of the DB.
+          // eslint-disable-next-line no-unused-vars
+          const { parkingIntegrations: _legacyRibbon, ...gls } = sections.goodLookingServices ?? {};
+          setGoodLookingServices({ ...DEFAULT_GOOD_LOOKING_SERVICES, ...gls });
+        }
         setSolutionIntegration({ ...DEFAULT_SOLUTION_INTEGRATION, ...(sections.solutionIntegration ?? {}) });
         setTechnologySection({ ...DEFAULT_TECHNOLOGY_SECTION, ...(sections.technologySection ?? {}) });
         setClientsPartners({ ...DEFAULT_CLIENTS_PARTNERS, ...(sections.clientsPartners ?? {}) });
@@ -427,13 +425,6 @@ export default function HomePageEditor() {
     setBlackBanner((prev) => ({
       ...prev,
       ctas: prev.ctas.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
-    }));
-  }
-
-  function updateGoodServiceIntegration(i, field, value) {
-    setGoodLookingServices((prev) => ({
-      ...prev,
-      parkingIntegrations: prev.parkingIntegrations.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)),
     }));
   }
 
@@ -1573,16 +1564,18 @@ export default function HomePageEditor() {
                     />
                     <CharCount value={card.name ?? ""} max={FIELD_LIMITS.label} />
                     <ArInput label="Name" kind="label" value={card.ar?.name} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), name: v })} />
+                    {/* Card description gets a larger cap (600) than the default
+                        summary limit — the card layout flows the text down. */}
                     <textarea
                       value={card.summary ?? ""}
                       onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
-                      maxLength={FIELD_LIMITS.summary}
+                      maxLength={600}
                       className={inputClass}
-                      rows={2}
-                      placeholder="Short summary shown on the card"
+                      rows={3}
+                      placeholder="Description shown on the card"
                     />
-                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput label="Summary" kind="summary" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
+                    <CharCount value={card.summary ?? ""} max={600} />
+                    <ArInput label="Summary" kind="summary" limit={600} multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>
@@ -1622,41 +1615,6 @@ export default function HomePageEditor() {
               ))
             )}
 
-            <div className="my-1 border-t border-slate-200" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Parking Integrations</p>
-            {(goodLookingServices.parkingIntegrations ?? []).map((integration, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Integration {i + 1}</p>
-                <div className="grid gap-2">
-                  <input
-                    value={integration.name ?? ""}
-                    onChange={(e) => updateGoodServiceIntegration(i, "name", e.target.value)}
-                    maxLength={FIELD_LIMITS.label}
-                    className={inputClass}
-                    placeholder="Name"
-                  />
-                  <CharCount value={integration.name ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput label="Name" kind="label" value={integration.ar?.name} onChange={(v) => updateGoodServiceIntegration(i, "ar", { ...(integration.ar ?? {}), name: v })} />
-                  <input
-                    value={integration.bgcolor ?? ""}
-                    onChange={(e) => updateGoodServiceIntegration(i, "bgcolor", e.target.value)}
-                    maxLength={FIELD_LIMITS.label}
-                    className={inputClass}
-                    placeholder="Background color class (e.g., bg-[#EC4899])"
-                  />
-                  <CharCount value={integration.bgcolor ?? ""} max={FIELD_LIMITS.label} />
-                  <input
-                    value={integration.img ?? ""}
-                    onChange={(e) => updateGoodServiceIntegration(i, "img", e.target.value)}
-                    maxLength={FIELD_LIMITS.link}
-                    className={inputClass}
-                    placeholder="Image path"
-                  />
-                  <CharCount value={integration.img ?? ""} max={FIELD_LIMITS.link} />
-                  <FieldError error={validateUrl(integration.img ?? "")} />
-                </div>
-              </div>
-            ))}
           </div>
         </CollapsibleSection>
 

@@ -207,10 +207,18 @@ function emptySlide() {
     title: "",
     subtitle: "",
     description: "",
+    mediaType: "image", // "image" | "video"
     image: "",
     cardImg: "",
     video: "",
   };
+}
+
+// Derive the media type for a slide loaded from the DB (older slides have no
+// mediaType): a video means "video", otherwise "image".
+function slideMediaType(slide) {
+  if (slide.mediaType === "image" || slide.mediaType === "video") return slide.mediaType;
+  return slide.video ? "video" : "image";
 }
 
 // A labelled text input + Cloudinary upload button for one media field.
@@ -656,11 +664,12 @@ export default function HomePageEditor() {
       setError("Please add at least one hero slide before saving.");
       return;
     }
-    const badSlide = slides.findIndex(
-      (s) => !(s.video || s.cardImg || s.image) || !(s.tag || s.title),
-    );
+    const badSlide = slides.findIndex((s) => {
+      const media = slideMediaType(s) === "video" ? s.video : s.image;
+      return !media || !(s.tag || s.title);
+    });
     if (badSlide !== -1) {
-      setError(`Slide ${badSlide + 1} needs a title and at least one image or video.`);
+      setError(`Slide ${badSlide + 1} needs a title and its ${slideMediaType(slides[badSlide])}.`);
       return;
     }
     setSaving(true);
@@ -791,36 +800,76 @@ export default function HomePageEditor() {
                   <ArInput label="Title" kind="subtitle" limit={160} multiline value={slide.ar?.title} onChange={(v) => updateSlide(index, "ar", { ...(slide.ar ?? {}), title: v })} />
                 </div>
 
-                <MediaField
-                  label="Background image"
-                  value={slide.image}
-                  accept="image/*"
-                  resourceType="image"
-                  uploading={prog(index, "image") !== undefined}
-                  progress={prog(index, "image")}
-                  onChange={(v) => updateSlide(index, "image", v)}
-                  onUpload={(file, rt) => handleUpload(index, "image", file, rt)}
-                />
-                <MediaField
-                  label="Card image"
-                  value={slide.cardImg}
-                  accept="image/*"
-                  resourceType="image"
-                  uploading={prog(index, "cardImg") !== undefined}
-                  progress={prog(index, "cardImg")}
-                  onChange={(v) => updateSlide(index, "cardImg", v)}
-                  onUpload={(file, rt) => handleUpload(index, "cardImg", file, rt)}
-                />
-                <MediaField
-                  label="Background video (optional)"
-                  value={slide.video}
-                  accept="video/*"
-                  resourceType="video"
-                  uploading={prog(index, "video") !== undefined}
-                  progress={prog(index, "video")}
-                  onChange={(v) => updateSlide(index, "video", v)}
-                  onUpload={(file, rt) => handleUpload(index, "video", file, rt)}
-                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Button Label</label>
+                    <input
+                      value={slide.ctaLabel ?? ""}
+                      onChange={(e) => updateSlide(index, "ctaLabel", e.target.value)}
+                      className={inputClass}
+                      placeholder="Get In Touch"
+                      maxLength={FIELD_LIMITS.button}
+                    />
+                    <CharCount value={slide.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+                    <ArInput label="Button Label" kind="button" value={slide.ar?.ctaLabel} onChange={(v) => updateSlide(index, "ar", { ...(slide.ar ?? {}), ctaLabel: v })} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Button Link</label>
+                    <input
+                      value={slide.ctaLink ?? ""}
+                      onChange={(e) => updateSlide(index, "ctaLink", e.target.value)}
+                      className={inputClass}
+                      placeholder="/contact"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <p className="mt-1 text-[10px] text-slate-400">Where the button goes (e.g. /contact).</p>
+                  </div>
+                </div>
+
+                {/* Media: image OR video (one choice per slide) */}
+                <div>
+                  <label className={labelClass}>Slide Media</label>
+                  <div className="mb-2 inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold">
+                    {["image", "video"].map((type) => {
+                      const active = slideMediaType(slide) === type;
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => updateSlide(index, "mediaType", type)}
+                          className={`rounded-md px-4 py-1.5 capitalize transition ${
+                            active ? "bg-white text-[#0088FF] shadow-sm" : "text-slate-500 hover:text-slate-700"
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {slideMediaType(slide) === "video" ? (
+                    <MediaField
+                      label="Video"
+                      value={slide.video}
+                      accept="video/*"
+                      resourceType="video"
+                      uploading={prog(index, "video") !== undefined}
+                      progress={prog(index, "video")}
+                      onChange={(v) => updateSlide(index, "video", v)}
+                      onUpload={(file, rt) => handleUpload(index, "video", file, rt)}
+                    />
+                  ) : (
+                    <MediaField
+                      label="Image"
+                      value={slide.image}
+                      accept="image/*"
+                      resourceType="image"
+                      uploading={prog(index, "image") !== undefined}
+                      progress={prog(index, "image")}
+                      onChange={(v) => updateSlide(index, "image", v)}
+                      onUpload={(file, rt) => handleUpload(index, "image", file, rt)}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           ))}

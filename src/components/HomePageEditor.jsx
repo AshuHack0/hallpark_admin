@@ -1374,7 +1374,7 @@ export default function HomePageEditor() {
         </CollapsibleSection>
 
         {/* BLACK BANNER */}
-        <CollapsibleSection title="Black Banner Section">
+        <CollapsibleSection title="AI-Powered Smart Parking Solutions (Box Section)">
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Title</label>

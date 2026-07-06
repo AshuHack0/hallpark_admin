@@ -654,6 +654,29 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleBlackBannerImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "blackBanner-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setBlackBanner((prev) => ({ ...prev, image: url }));
+      setSuccess("Banner image uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSupportImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -1399,6 +1422,19 @@ export default function HomePageEditor() {
               />
               <CharCount value={blackBanner.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" multiline value={blackBanner.ar?.description} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            </div>
+            <div>
+              <MediaField
+                label="Banner Image (right-side visual)"
+                value={blackBanner.image ?? ""}
+                accept="image/*"
+                resourceType="image"
+                uploading={uploadProgress["blackBanner-image"] !== undefined}
+                progress={uploadProgress["blackBanner-image"]}
+                onChange={(v) => setBlackBanner((p) => ({ ...p, image: v }))}
+                onUpload={(file) => handleBlackBannerImageUpload(file)}
+              />
+              <p className="mt-1 text-[10px] text-slate-400">Leave empty to hide the banner visual. PNG with transparent background recommended.</p>
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">CTAs</p>

@@ -295,6 +295,7 @@ export default function HomePageEditor() {
   const [clientsPartners, setClientsPartners] = useState(DEFAULT_CLIENTS_PARTNERS);
   const [globalMobility, setGlobalMobility] = useState(DEFAULT_GLOBAL_MOBILITY);
   const [halaParkInAction, setHalaParkInAction] = useState(DEFAULT_HALAPARK_IN_ACTION);
+  const [supportCta, setSupportCta] = useState({});
   const [sectionsObj, setSectionsObj] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -323,6 +324,7 @@ export default function HomePageEditor() {
         setClientsPartners({ ...DEFAULT_CLIENTS_PARTNERS, ...(sections.clientsPartners ?? {}) });
         setGlobalMobility({ ...DEFAULT_GLOBAL_MOBILITY, ...(sections.globalMobility ?? {}) });
         setHalaParkInAction({ ...DEFAULT_HALAPARK_IN_ACTION, ...(sections.halaParkInAction ?? {}) });
+        setSupportCta(sections.supportCta ?? {});
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -495,7 +497,13 @@ export default function HomePageEditor() {
   }
 
   function removeSlide(index) {
-    setSlides((prev) => prev.filter((_, i) => i !== index));
+    setSlides((prev) => {
+      if (prev.length <= 1) {
+        setError("At least one hero slide is required — you can't remove the last one.");
+        return prev;
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   function moveSlide(index, dir) {
@@ -615,10 +623,46 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleSupportImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "support-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setSupportCta((prev) => ({ ...prev, image: url }));
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSave(e) {
     e.preventDefault();
     setError("");
     setSuccess("");
+    // Validation: the hero slider needs at least one slide, and each slide needs
+    // some media (video/card image/image) + a title.
+    if (slides.length < 1) {
+      setError("Please add at least one hero slide before saving.");
+      return;
+    }
+    const badSlide = slides.findIndex(
+      (s) => !(s.video || s.cardImg || s.image) || !(s.tag || s.title),
+    );
+    if (badSlide !== -1) {
+      setError(`Slide ${badSlide + 1} needs a title and at least one image or video.`);
+      return;
+    }
     setSaving(true);
     try {
       const sections = {
@@ -635,6 +679,7 @@ export default function HomePageEditor() {
         clientsPartners,
         globalMobility,
         halaParkInAction,
+        supportCta,
       };
       const data = await api.updatePage(slug, { sections });
       setPage(data.page);
@@ -1920,6 +1965,87 @@ export default function HomePageEditor() {
                 </div>
               </div>
             ))}
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Get In Touch / Contact Section">
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Eyebrow</label>
+              <input value={supportCta.eyebrow ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, eyebrow: e.target.value }))} className={inputClass} placeholder="Get In Touch" maxLength={FIELD_LIMITS.label} />
+              <CharCount value={supportCta.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Eyebrow" kind="label" value={supportCta.ar?.eyebrow} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), eyebrow: v } }))} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Heading</label>
+                <input value={supportCta.heading ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, heading: e.target.value }))} className={inputClass} placeholder="Ready to Transform Your" maxLength={FIELD_LIMITS.heading} />
+                <CharCount value={supportCta.heading ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Heading" kind="heading" value={supportCta.ar?.heading} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Heading Gradient (accent)</label>
+                <input value={supportCta.headingAccent ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, headingAccent: e.target.value }))} className={inputClass} placeholder="Parking Operations?" maxLength={FIELD_LIMITS.heading} />
+                <CharCount value={supportCta.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Heading Gradient" kind="heading" value={supportCta.ar?.headingAccent} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingAccent: v } }))} />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea value={supportCta.description ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, description: e.target.value }))} className={inputClass} rows={2} maxLength={FIELD_LIMITS.description} />
+              <CharCount value={supportCta.description ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput label="Description" kind="description" multiline value={supportCta.ar?.description} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Contact Button Label</label>
+                <input value={supportCta.contactLabel ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, contactLabel: e.target.value }))} className={inputClass} placeholder="Contact Us" maxLength={FIELD_LIMITS.button} />
+                <ArInput label="Contact Button" kind="button" value={supportCta.ar?.contactLabel} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), contactLabel: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>WhatsApp Button Label</label>
+                <input value={supportCta.whatsappLabel ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, whatsappLabel: e.target.value }))} className={inputClass} placeholder="WhatsApp Us" maxLength={FIELD_LIMITS.button} />
+                <ArInput label="WhatsApp Button" kind="button" value={supportCta.ar?.whatsappLabel} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), whatsappLabel: v } }))} />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>WhatsApp Link</label>
+              <input value={supportCta.whatsappHref ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, whatsappHref: e.target.value }))} className={inputClass} placeholder="https://wa.me/…" maxLength={FIELD_LIMITS.link} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Email</label>
+                <input value={supportCta.email ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, email: e.target.value }))} className={inputClass} placeholder="info@halapark.com" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={supportCta.email ? validateEmail(supportCta.email) : ""} />
+              </div>
+              <div>
+                <label className={labelClass}>Phone</label>
+                <input value={supportCta.phone ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, phone: e.target.value }))} className={inputClass} placeholder="+971 4 3782022" maxLength={FIELD_LIMITS.label} />
+                <FieldError error={supportCta.phone ? validatePhone(supportCta.phone) : ""} />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Support Panel Eyebrow</label>
+                <input value={supportCta.supportEyebrow ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, supportEyebrow: e.target.value }))} className={inputClass} placeholder="Support" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Support Eyebrow" kind="label" value={supportCta.ar?.supportEyebrow} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), supportEyebrow: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Support Panel Title</label>
+                <input value={supportCta.supportTitle ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, supportTitle: e.target.value }))} className={inputClass} placeholder="Talk to the team directly" maxLength={FIELD_LIMITS.heading} />
+                <ArInput label="Support Title" kind="heading" value={supportCta.ar?.supportTitle} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), supportTitle: v } }))} />
+              </div>
+            </div>
+            <MediaField
+              label="Background Image"
+              value={supportCta.image}
+              accept="image/*"
+              resourceType="image"
+              uploading={uploadProgress["support-image"] !== undefined}
+              progress={uploadProgress["support-image"]}
+              onChange={(v) => setSupportCta((p) => ({ ...p, image: v }))}
+              onUpload={(file) => handleSupportImageUpload(file)}
+            />
           </div>
         </CollapsibleSection>
       </div>

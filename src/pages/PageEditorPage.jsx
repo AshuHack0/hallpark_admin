@@ -38,6 +38,7 @@ import BusinessPageEditor from "../components/BusinessPageEditor.jsx";
 import ServicePageEditor from "../components/ServicePageEditor.jsx";
 import SolutionPageEditor from "../components/SolutionPageEditor.jsx";
 import FAQPageEditor from "../components/FAQPageEditor.jsx";
+import SettingsPageEditor from "../components/SettingsPageEditor.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { api, uploadVideoToCloudinary } from "../lib/api";
 
@@ -151,6 +152,10 @@ export default function PageEditorPage() {
 
   if (slug === "faqs") {
     return <FAQPageEditor />;
+  }
+
+  if (slug === "settings") {
+    return <SettingsPageEditor />;
   }
 
   const pageMeta = FRONTEND_PAGES.find((p) => p.slug === slug);

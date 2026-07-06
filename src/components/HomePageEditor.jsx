@@ -631,6 +631,29 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleHowItWorksVideoUpload(file) {
+    const err = validateVideoFile(file);
+    if (err) { setError(err); return; }
+    const key = "howItWorks-video";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setHowItWorks((prev) => ({ ...prev, videoUrl: url }));
+      setSuccess("Video uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSupportImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -1268,15 +1291,16 @@ export default function HomePageEditor() {
               <ArInput label="Subtitle" kind="subtitle" multiline value={howItWorks.ar?.subtitle} onChange={(v) => setHowItWorks((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
             <div>
-              <label className={labelClass}>Video URL</label>
-              <input
+              <MediaField
+                label="Video (URL or upload)"
                 value={howItWorks.videoUrl ?? ""}
-                onChange={(e) => setHowItWorks((p) => ({ ...p, videoUrl: e.target.value }))}
-                maxLength={FIELD_LIMITS.link}
-                className={inputClass}
+                accept="video/*"
+                resourceType="video"
+                uploading={uploadProgress["howItWorks-video"] !== undefined}
+                progress={uploadProgress["howItWorks-video"]}
+                onChange={(v) => setHowItWorks((p) => ({ ...p, videoUrl: v }))}
+                onUpload={(file) => handleHowItWorksVideoUpload(file)}
               />
-              <CharCount value={howItWorks.videoUrl ?? ""} max={FIELD_LIMITS.link} />
-              <FieldError error={validateUrl(howItWorks.videoUrl ?? "")} />
             </div>
             <div>
               <label className={labelClass}>CTA Label</label>

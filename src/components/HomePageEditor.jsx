@@ -901,16 +901,18 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
+              {/* Who We Are main description gets a larger cap (1500) — the
+                  layout has no clamp, the paragraph just flows down. */}
               <textarea
                 value={whoWeAre.audiences?.business?.body ?? ""}
                 onChange={(e) => updateWhoAudience("business", "body", e.target.value)}
-                maxLength={FIELD_LIMITS.description}
+                maxLength={1500}
                 className={inputClass}
-                rows={4}
+                rows={6}
                 placeholder="Section description shown on the website"
               />
-              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Body" kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
+              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={1500} />
+              <ArInput label="Body" kind="description" limit={1500} multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
             </div>
 
             <div className="mt-1 flex items-center justify-between">

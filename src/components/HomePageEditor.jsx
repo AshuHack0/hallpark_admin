@@ -913,11 +913,38 @@ export default function HomePageEditor() {
               <ArInput label="Body" kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
             </div>
 
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-              Highlights
-            </p>
+            <div className="mt-1 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Highlights ({(whoWeAre.highlights ?? []).length})
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setWhoWeAre((prev) => ({
+                    ...prev,
+                    highlights: [...(prev.highlights ?? []), { icon: "Layers", title: "", description: "" }],
+                  }))
+                }
+                className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+              >
+                + Add Highlight
+              </button>
+            </div>
             {(whoWeAre.highlights ?? []).map((h, i) => (
-              <div key={i} className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-[140px_1fr]">
+              <div key={i} className="relative grid gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-[140px_1fr]">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setWhoWeAre((prev) => ({
+                      ...prev,
+                      highlights: (prev.highlights ?? []).filter((_, idx) => idx !== i),
+                    }))
+                  }
+                  title="Delete highlight"
+                  className="absolute right-2 top-2 z-10 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
+                >
+                  Delete
+                </button>
                 <select
                   value={h.icon ?? "Layers"}
                   onChange={(e) => updateWhoHighlight(i, "icon", e.target.value)}

@@ -1467,7 +1467,7 @@ export default function HomePageEditor() {
         </CollapsibleSection>
 
         {/* GOOD LOOKING SERVICES */}
-        <CollapsibleSection title="Good Looking Services Section">
+        <CollapsibleSection title="Services Section">
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Section heading</label>

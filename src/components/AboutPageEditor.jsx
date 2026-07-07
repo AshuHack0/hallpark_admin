@@ -80,6 +80,7 @@ export default function AboutPageEditor() {
   const [content, setContent] = useState(DEFAULT_ABOUT_SECTIONS);
   const [published, setPublished] = useState(true);
   const [error, setError] = useState("");
+  const [modalError, setModalError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -251,6 +252,80 @@ export default function AboutPageEditor() {
     );
   }
 
+  // --- Hero slides (hero.images = [{ img, label, ar?: { label } }]) ---
+
+  function updateHeroSlide(index, patch) {
+    setHeroForm((p) => ({
+      ...p,
+      images: (p.images ?? []).map((slide, i) => (i === index ? { ...slide, ...patch } : slide)),
+    }));
+  }
+
+  function addHeroSlide() {
+    setHeroForm((p) => ({ ...p, images: [...(p.images ?? []), { img: "", label: "" }] }));
+  }
+
+  function removeHeroSlide(index) {
+    setHeroForm((p) => ({
+      ...p,
+      images: (p.images ?? []).filter((_, i) => i !== index),
+    }));
+  }
+
+  async function uploadHeroSlideImage(index, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    setError("");
+    const key = `about-hero-${index}`;
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setHeroForm((p) => ({
+        ...p,
+        images: (p.images ?? []).map((slide, i) => (i === index ? { ...slide, img: url } : slide)),
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // --- Per-section enable/disable (frontend hides a section when enabled === false) ---
+
+  function setSectionEnabled(sectionKey, enabled) {
+    const next = {
+      ...content,
+      [sectionKey]: { ...content[sectionKey], enabled },
+    };
+    setContent(next);
+    void persistSections(
+      next,
+      enabled ? "Section is now shown on the website." : "Section is now hidden from the website.",
+    );
+  }
+
+  function renderEnabledToggle(sectionKey) {
+    const enabled = content[sectionKey]?.enabled !== false;
+    return (
+      <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+        <input
+          type="checkbox"
+          checked={enabled}
+          disabled={saving}
+          onChange={(e) => setSectionEnabled(sectionKey, e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+        />
+        Show this section on the website
+      </label>
+    );
+  }
+
   function openDeleteConfirm(type, index, label) {
     setDeleteTarget({ type, index, label });
     setDeleteModalOpen(true);
@@ -342,12 +417,24 @@ export default function AboutPageEditor() {
   }
 
   function openHeroModal() {
-    setHeroForm({ ...content.hero });
+    setModalError("");
+    setHeroForm({
+      ...content.hero,
+      images: Array.isArray(content.hero.images)
+        ? content.hero.images.map((slide) => ({ ...slide }))
+        : [],
+    });
     setHeroModalOpen(true);
   }
 
   function saveHero() {
-    const next = { ...content, hero: { ...heroForm } };
+    if (!heroForm.title?.trim()) {
+      setModalError("Title is required — the hero cannot be saved without a title.");
+      return;
+    }
+    setModalError("");
+    // Spread content.hero first so section flags (e.g. `enabled`) survive.
+    const next = { ...content, hero: { ...content.hero, ...heroForm } };
     setContent(next);
     void persistSections(next, "Hero updated.");
     setHeroModalOpen(false);
@@ -358,6 +445,7 @@ export default function AboutPageEditor() {
       title: content.mission.title,
       subtitle: content.mission.subtitle,
       image: content.mission.image,
+      ar: content.mission.ar ?? {},
     });
     setMissionSectionModalOpen(true);
   }
@@ -365,7 +453,12 @@ export default function AboutPageEditor() {
   function saveMissionSection() {
     const next = {
       ...content,
-      mission: { ...content.mission, ...missionSectionForm },
+      mission: {
+        ...content.mission,
+        ...missionSectionForm,
+        // Merge ar (preserve the parallel `ar.paragraphs` array).
+        ar: { ...(content.mission.ar ?? {}), ...(missionSectionForm.ar ?? {}) },
+      },
     };
     setContent(next);
     void persistSections(next, "Mission section updated.");
@@ -451,6 +544,7 @@ export default function AboutPageEditor() {
       title: content.vision.title,
       subtitle: content.vision.subtitle,
       image: content.vision.image,
+      ar: content.vision.ar ?? {},
     });
     setVisionSectionModalOpen(true);
   }
@@ -458,7 +552,12 @@ export default function AboutPageEditor() {
   function saveVisionSection() {
     const next = {
       ...content,
-      vision: { ...content.vision, ...visionSectionForm },
+      vision: {
+        ...content.vision,
+        ...visionSectionForm,
+        // Merge ar (preserve the parallel `ar.paragraphs` array).
+        ar: { ...(content.vision.ar ?? {}), ...(visionSectionForm.ar ?? {}) },
+      },
     };
     setContent(next);
     void persistSections(next, "Vision section updated.");
@@ -544,6 +643,7 @@ export default function AboutPageEditor() {
       title: content.story.title,
       subtitle: content.story.subtitle,
       image: content.story.image,
+      ar: content.story.ar ?? {},
     });
     setStorySectionModalOpen(true);
   }
@@ -551,7 +651,12 @@ export default function AboutPageEditor() {
   function saveStorySection() {
     const next = {
       ...content,
-      story: { ...content.story, ...storySectionForm },
+      story: {
+        ...content.story,
+        ...storySectionForm,
+        // Merge ar (preserve the parallel `ar.paragraphs` array).
+        ar: { ...(content.story.ar ?? {}), ...(storySectionForm.ar ?? {}) },
+      },
     };
     setContent(next);
     void persistSections(next, "Story section updated.");
@@ -559,6 +664,7 @@ export default function AboutPageEditor() {
   }
 
   function openWhatWeDoSectionModal() {
+    setModalError("");
     setWhatWeDoSectionForm({
       title: content.whatWeDo.title,
       subtitle: content.whatWeDo.subtitle,
@@ -570,6 +676,11 @@ export default function AboutPageEditor() {
   }
 
   function saveWhatWeDoSection() {
+    if (!whatWeDoSectionForm.title?.trim()) {
+      setModalError("Heading is required — the section cannot be saved without a title.");
+      return;
+    }
+    setModalError("");
     const next = {
       ...content,
       whatWeDo: {
@@ -642,7 +753,8 @@ export default function AboutPageEditor() {
   }
 
   function saveTechnology() {
-    const next = { ...content, technology: { ...technologyForm } };
+    // Spread content.technology first so section flags (e.g. `enabled`) survive.
+    const next = { ...content, technology: { ...content.technology, ...technologyForm } };
     setContent(next);
     void persistSections(next, "Technology section updated.");
     setTechnologyModalOpen(false);
@@ -654,7 +766,8 @@ export default function AboutPageEditor() {
   }
 
   function saveCta() {
-    const next = { ...content, cta: { ...ctaForm } };
+    // Spread content.cta first so section flags (e.g. `enabled`) survive.
+    const next = { ...content, cta: { ...content.cta, ...ctaForm } };
     setContent(next);
     void persistSections(next, "Call to action updated.");
     setCtaModalOpen(false);
@@ -692,24 +805,26 @@ export default function AboutPageEditor() {
                     <Pencil className="h-3.5 w-3.5" />
                     Edit
                   </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openDeleteConfirm(
-                        deleteType,
-                        index,
-                        `${sectionLabel} paragraph ${index + 1}`,
-                      )
-                    }
-                    disabled={paragraphs.length <= minCount}
-                    className={btnDanger}
-                    title={
-                      paragraphs.length <= minCount ? "Keep at least one paragraph" : "Delete"
-                    }
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
-                  </button>
+                  {/* Hidden (not just disabled) at the minimum count — a visible
+                      no-op Delete button confuses editors. confirmDelete keeps
+                      the min-count guard as a backstop. */}
+                  {paragraphs.length > minCount ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openDeleteConfirm(
+                          deleteType,
+                          index,
+                          `${sectionLabel} paragraph ${index + 1}`,
+                        )
+                      }
+                      className={btnDanger}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                  ) : null}
                 </div>
               </div>
               <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">{paragraph}</p>
@@ -769,7 +884,14 @@ export default function AboutPageEditor() {
 
       {/* Save Button */}
       <button
-        onClick={() => persistSections(content, "Page saved successfully.", published)}
+        onClick={() => {
+          if (!content.hero.title?.trim()) {
+            setError("Hero title is required — add a hero title before saving the page.");
+            return;
+          }
+          setError("");
+          void persistSections(content, "Page saved successfully.", published);
+        }}
         disabled={saving}
         className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
       >
@@ -792,13 +914,21 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          {renderEnabledToggle("hero")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.hero.title} />
             <PreviewRow label="Tagline" value={content.hero.tagline} />
             <div className="sm:col-span-2">
               <PreviewRow label="Description" value={content.hero.description} multiline />
             </div>
-            <PreviewRow label="Image" value={content.hero.image} />
+            <PreviewRow
+              label="Hero slides"
+              value={
+                (content.hero.images ?? []).length
+                  ? `${content.hero.images.length} slide${content.hero.images.length === 1 ? "" : "s"}`
+                  : "No slides"
+              }
+            />
             <PreviewRow
               label="Primary button"
               value={`${content.hero.primaryCtaText} → ${content.hero.primaryCtaLink}`}
@@ -824,6 +954,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          {renderEnabledToggle("mission")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.mission.title} />
             <PreviewRow label="Subtitle" value={content.mission.subtitle} />
@@ -851,6 +982,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          {renderEnabledToggle("vision")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.vision.title} />
             <PreviewRow label="Subtitle" value={content.vision.subtitle} />
@@ -935,6 +1067,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          {renderEnabledToggle("story")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.story.title} />
             <PreviewRow label="Subtitle" value={content.story.subtitle} />
@@ -957,6 +1090,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          {renderEnabledToggle("whatWeDo")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.whatWeDo.title} />
             <PreviewRow label="Subtitle" value={content.whatWeDo.subtitle} />
@@ -1017,6 +1151,7 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          {renderEnabledToggle("technology")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.technology.title} />
             <PreviewRow label="Subtitle" value={content.technology.subtitle} />
@@ -1042,6 +1177,7 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          {renderEnabledToggle("cta")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.cta.title} />
             <PreviewRow label="Image" value={content.cta.image} />
@@ -1086,6 +1222,11 @@ export default function AboutPageEditor() {
         }
       >
         <div className="grid gap-3">
+          {modalError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+              {modalError}
+            </p>
+          ) : null}
           <label className="grid gap-1">
             <span className={labelClass}>Title</span>
             <input
@@ -1115,18 +1256,94 @@ export default function AboutPageEditor() {
               onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
               rows={5}
-              maxLength={FIELD_LIMITS.description}
             />
-            <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
-            <ArInput label="Description" kind="description" value={heroForm.ar?.description} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <ArInput label="Description" kind="description" limit={100000} value={heroForm.ar?.description} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
           </label>
-          <ImageField
-            label="Image path"
-            value={heroForm.image}
-            onChange={(e) => setHeroForm((p) => ({ ...p, image: e.target.value }))}
-            setForm={setHeroForm}
-            uploadKey="image-hero"
-          />
+
+          {/* Hero slides — hero.images = [{ img, label, ar?: { label } }] */}
+          <div className="grid gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className={labelClass}>Hero slides</span>
+              <button type="button" onClick={addHeroSlide} className={btnPrimary}>
+                <Plus className="h-3.5 w-3.5" />
+                Add Slide
+              </button>
+            </div>
+            {(heroForm.images ?? []).length === 0 ? (
+              <p className="rounded-xl border border-dashed border-slate-200 px-4 py-3 text-xs text-slate-400">
+                No slides yet. Add a slide to show images in the hero carousel.
+              </p>
+            ) : null}
+            {(heroForm.images ?? []).map((slide, i) => (
+              <div key={`hero-slide-${i}`} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    Slide {i + 1}
+                  </p>
+                  <button type="button" onClick={() => removeHeroSlide(i)} className={btnDanger}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </button>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    {slide.img ? (
+                      <img src={slide.img} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-slate-300">
+                        <ImageIcon className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 gap-2">
+                    <input
+                      value={slide.img ?? ""}
+                      onChange={(e) => updateHeroSlide(i, { img: e.target.value })}
+                      maxLength={FIELD_LIMITS.link}
+                      className={inputClass}
+                      placeholder="/slide-image.png"
+                    />
+                    <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                      {uploadProgress[`about-hero-${i}`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`about-hero-${i}`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadProgress[`about-hero-${i}`] !== undefined}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadHeroSlideImage(i, file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <FieldError error={validateUrl(slide.img)} />
+                <label className="mt-2 grid gap-1">
+                  <span className={labelClass}>Label</span>
+                  <input
+                    value={slide.label ?? ""}
+                    onChange={(e) => updateHeroSlide(i, { label: e.target.value })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                    placeholder="Smart Parking"
+                  />
+                  <CharCount value={slide.label} max={FIELD_LIMITS.label} />
+                  <ArInput
+                    label="Label"
+                    kind="label"
+                    value={slide.ar?.label}
+                    onChange={(v) => updateHeroSlide(i, { ar: { ...(slide.ar ?? {}), label: v } })}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
             <input
@@ -1215,14 +1432,13 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
-            <input
+            <textarea
               value={missionSectionForm.subtitle}
               onChange={(e) => setMissionSectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
-              maxLength={FIELD_LIMITS.subtitle}
+              rows={4}
             />
-            <CharCount value={missionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput label="Subtitle" kind="subtitle" value={missionSectionForm.ar?.subtitle} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" limit={100000} multiline value={missionSectionForm.ar?.subtitle} onChange={(v) => setMissionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1273,14 +1489,13 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
-            <input
+            <textarea
               value={visionSectionForm.subtitle}
               onChange={(e) => setVisionSectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
-              maxLength={FIELD_LIMITS.subtitle}
+              rows={4}
             />
-            <CharCount value={visionSectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput label="Subtitle" kind="subtitle" value={visionSectionForm.ar?.subtitle} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" limit={100000} multiline value={visionSectionForm.ar?.subtitle} onChange={(v) => setVisionSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1346,11 +1561,9 @@ export default function AboutPageEditor() {
               value={visionCardForm.subtitle}
               onChange={(e) => setVisionCardForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
-              rows={3}
-              maxLength={FIELD_LIMITS.summary}
+              rows={4}
             />
-            <CharCount value={visionCardForm.subtitle} max={FIELD_LIMITS.summary} />
-            <ArInput label="Subtitle" kind="subtitle" value={visionCardForm.ar?.subtitle} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} multiline />
+            <ArInput label="Subtitle" kind="subtitle" limit={100000} value={visionCardForm.ar?.subtitle} onChange={(v) => setVisionCardForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} multiline />
           </label>
         </div>
       </Modal>
@@ -1394,14 +1607,13 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Subtitle</span>
-            <input
+            <textarea
               value={storySectionForm.subtitle}
               onChange={(e) => setStorySectionForm((p) => ({ ...p, subtitle: e.target.value }))}
               className={inputClass}
-              maxLength={FIELD_LIMITS.subtitle}
+              rows={4}
             />
-            <CharCount value={storySectionForm.subtitle} max={FIELD_LIMITS.subtitle} />
-            <ArInput label="Subtitle" kind="subtitle" value={storySectionForm.ar?.subtitle} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+            <ArInput label="Subtitle" kind="subtitle" limit={100000} multiline value={storySectionForm.ar?.subtitle} onChange={(v) => setStorySectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </label>
           <ImageField
             label="Image path"
@@ -1439,6 +1651,11 @@ export default function AboutPageEditor() {
         }
       >
         <div className="grid gap-3">
+          {modalError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+              {modalError}
+            </p>
+          ) : null}
           <label className="grid gap-1">
             <span className={labelClass}>Title</span>
             <input
@@ -1470,10 +1687,8 @@ export default function AboutPageEditor() {
               onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, intro: e.target.value }))}
               className={inputClass}
               rows={4}
-              maxLength={FIELD_LIMITS.description}
             />
-            <CharCount value={whatWeDoSectionForm.intro} max={FIELD_LIMITS.description} />
-            <ArInput label="Intro" kind="description" value={whatWeDoSectionForm.ar?.intro} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} multiline />
+            <ArInput label="Intro" kind="description" limit={100000} value={whatWeDoSectionForm.ar?.intro} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1540,10 +1755,8 @@ export default function AboutPageEditor() {
               onChange={(e) => setTechnologyForm((p) => ({ ...p, body: e.target.value }))}
               className={inputClass}
               rows={6}
-              maxLength={FIELD_LIMITS.long}
             />
-            <CharCount value={technologyForm.body} max={FIELD_LIMITS.long} />
-            <ArInput label="Body" kind="description" value={technologyForm.ar?.body} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))} multiline />
+            <ArInput label="Body" kind="description" limit={100000} value={technologyForm.ar?.body} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1610,11 +1823,9 @@ export default function AboutPageEditor() {
               value={ctaForm.description}
               onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
-              rows={3}
-              maxLength={FIELD_LIMITS.description}
+              rows={4}
             />
-            <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
-            <ArInput label="Description" kind="description" value={ctaForm.ar?.description} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <ArInput label="Description" kind="description" limit={100000} value={ctaForm.ar?.description} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
           </label>
           <ImageField
             label="Image path"
@@ -1707,10 +1918,8 @@ export default function AboutPageEditor() {
           className={inputClass}
           rows={5}
           placeholder="Paragraph text"
-          maxLength={FIELD_LIMITS.description}
         />
-        <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
-        <ArInput label="Paragraph" kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <ArInput label="Paragraph" kind="description" limit={100000} multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Highlight modal */}

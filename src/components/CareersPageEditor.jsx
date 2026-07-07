@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ExternalLink,
   Plus,
   Trash2,
   Pencil,
@@ -119,7 +118,6 @@ export default function CareersPageEditor() {
   const [reasonTextAr, setReasonTextAr] = useState("");
 
   const jobPostCount = content.openPositions?.posts?.length ?? 0;
-  const reasonCount = content.whyJoin.reasons.length;
   const paragraphCount = content.building.paragraphs.length;
 
   const buildingTitlePreview = useMemo(() => {
@@ -147,6 +145,7 @@ export default function CareersPageEditor() {
       hero,
       building: nextContent.building,
       opportunities: nextContent.opportunities,
+      opportunitiesHeader: nextContent.opportunitiesHeader,
       openPositions: nextContent.openPositions,
       whyJoin: nextContent.whyJoin,
       cta: nextContent.cta,
@@ -169,23 +168,18 @@ export default function CareersPageEditor() {
     }
   }
 
-  async function handleImageUpload(field, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    const key = `image-${field}`;
+  // Generic image upload with a per-upload progress key; `assign(url)` writes
+  // the uploaded URL wherever the caller needs it.
+  async function uploadImageToKey(file, key, assign) {
+    const validationError = validateImageFile(file);
+    if (validationError) { setError(validationError); return; }
     setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
         setUploadProgress((p) => ({ ...p, [key]: pct }))
       );
-      setContent((prev) => ({
-        ...prev,
-        [field === "heroImage" ? "hero" : field]: {
-          ...prev[field === "heroImage" ? "hero" : field],
-          image: url,
-        },
-      }));
+      assign(url);
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -194,6 +188,29 @@ export default function CareersPageEditor() {
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
     }
+  }
+
+  // ── Hero mosaic images (hero.images[]) ─────────────────────────────────────
+  function updateHeroImage(i, value) {
+    setContent((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, images: (prev.hero.images ?? []).map((u, idx) => (idx === i ? value : u)) },
+    }));
+  }
+  function addHeroImage() {
+    setContent((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, images: [...(prev.hero.images ?? []), ""] },
+    }));
+  }
+  function removeHeroImage(i) {
+    setContent((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, images: (prev.hero.images ?? []).filter((_, idx) => idx !== i) },
+    }));
+  }
+  function saveHeroImages() {
+    void persistSections(content, "Hero images saved.");
   }
 
   function openDeleteConfirm(type, index, label) {
@@ -259,11 +276,13 @@ export default function CareersPageEditor() {
   }
 
   function saveHero() {
+    // Spread everything so fields not edited in this modal (e.g. images[])
+    // are never dropped from the hero section.
     const hero = {
-      title: heroForm.title,
-      description: heroForm.description,
-      image: heroForm.image,
-      ar: heroForm.ar,
+      ...content.hero,
+      ...heroForm,
+      badges: { ...(content.hero.badges ?? {}), ...(heroForm.badges ?? {}) },
+      ar: { ...(content.hero.ar ?? {}), ...(heroForm.ar ?? {}) },
     };
     const next = { ...content, hero };
     setContent(next);
@@ -381,6 +400,7 @@ export default function CareersPageEditor() {
       location: "",
       employmentType: "",
       description: "",
+      fullDescription: "",
       applyLabel: "Apply Now",
       applyMode: "form",
       applyLink: "/contact",
@@ -601,6 +621,73 @@ export default function CareersPageEditor() {
             </div>
             <PreviewRow label="Background image" value={content.hero.image} />
           </div>
+
+          {/* Hero mosaic images */}
+          <div className="mt-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className={labelClass}>Hero Images (mosaic)</p>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={addHeroImage} className={btnPrimary}>
+                  <Plus className="h-3.5 w-3.5" /> Add Image
+                </button>
+                <button type="button" onClick={saveHeroImages} disabled={saving} className={btnOutline}>
+                  <Save className="h-3.5 w-3.5" /> Save
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {(content.hero.images ?? []).map((url, i) => (
+                <div
+                  key={`hero-img-${i}`}
+                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    {url ? (
+                      <img src={url} alt={`Hero image ${i + 1}`} className="h-full w-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-4 w-4 text-slate-300" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <input
+                      value={url}
+                      onChange={(e) => updateHeroImage(i, e.target.value)}
+                      className={inputClass}
+                      placeholder="/your-image.png or https://…"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <FieldError error={validateUrl(url)} />
+                  </div>
+                  <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                    <Upload className="h-3.5 w-3.5" />
+                    {uploadProgress[`hero-img-${i}`] !== undefined
+                      ? `${uploadProgress[`hero-img-${i}`]}%`
+                      : "Upload"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          void uploadImageToKey(file, `hero-img-${i}`, (u) => updateHeroImage(i, u));
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  <button type="button" onClick={() => removeHeroImage(i)} className={btnDanger}>
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+              ))}
+              {(content.hero.images ?? []).length === 0 ? (
+                <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">
+                  No mosaic images yet. Click &quot;Add Image&quot;, then Save.
+                </p>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         {/* Building */}
@@ -669,6 +756,56 @@ export default function CareersPageEditor() {
           </div>
         </div>
 
+        {/* Opportunities section heading */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF6FF]">
+                <Sparkles className="h-4 w-4 text-[#0088FF]" />
+              </div>
+              <p className="text-sm font-semibold text-[#050A13]">Opportunities Section Heading</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => persistSections(content, "Opportunities heading saved.")}
+              disabled={saving}
+              className={btnOutline}
+            >
+              <Save className="h-3.5 w-3.5" /> Save
+            </button>
+          </div>
+          <label className="grid gap-1">
+            <span className={labelClass}>Heading</span>
+            <input
+              value={content.opportunitiesHeader?.heading ?? ""}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: { ...(prev.opportunitiesHeader ?? {}), heading: e.target.value },
+                }))
+              }
+              className={inputClass}
+              placeholder="Opportunities with HalaPark"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={content.opportunitiesHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput
+              label="Heading"
+              kind="heading"
+              value={content.opportunitiesHeader?.ar?.heading}
+              onChange={(v) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: {
+                    ...(prev.opportunitiesHeader ?? {}),
+                    ar: { ...(prev.opportunitiesHeader?.ar ?? {}), heading: v },
+                  },
+                }))
+              }
+            />
+          </label>
+        </div>
+
         {/* Opportunities */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -687,7 +824,7 @@ export default function CareersPageEditor() {
               </button>
             </div>
           </div>
-          <p className="mb-3 text-[11px] text-slate-400">Icon options: Briefcase, Headset, Building2. Click Save after editing.</p>
+          <p className="mb-3 text-[11px] text-slate-400">Pick a built-in icon or upload a custom icon image per card. Click Save after editing.</p>
           <div className="space-y-3">
             {(content.opportunities ?? []).map((item, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
@@ -706,9 +843,57 @@ export default function CareersPageEditor() {
                       <ArInput label="Badge" kind="label" value={item.ar?.badge} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), badge: v })} />
                     </div>
                     <div>
-                      <label className={labelClass}>Icon name</label>
-                      <input value={item.icon ?? ""} onChange={(e) => updateOpportunity(i, "icon", e.target.value)} className={inputClass} placeholder="Briefcase" maxLength={FIELD_LIMITS.label} />
+                      <label className={labelClass}>Icon</label>
+                      <select
+                        value={item.icon ?? "Briefcase"}
+                        onChange={(e) => updateOpportunity(i, "icon", e.target.value)}
+                        className={inputClass}
+                      >
+                        <option value="Briefcase">Briefcase</option>
+                        <option value="Headset">Headset</option>
+                        <option value="Building2">Building2</option>
+                      </select>
                     </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                    <div className="flex items-center gap-2">
+                      {item.iconImage ? (
+                        <img
+                          src={item.iconImage}
+                          alt={`Opportunity ${i + 1} icon`}
+                          className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white object-cover"
+                        />
+                      ) : null}
+                      <input
+                        value={item.iconImage ?? ""}
+                        onChange={(e) => updateOpportunity(i, "iconImage", e.target.value)}
+                        className={inputClass}
+                        placeholder="Leave empty to use the built-in icon"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                        <Upload className="h-3.5 w-3.5" />
+                        {uploadProgress[`opp-${i}-icon`] !== undefined
+                          ? `${uploadProgress[`opp-${i}-icon`]}%`
+                          : "Upload"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              void uploadImageToKey(file, `opp-${i}-icon`, (u) =>
+                                updateOpportunity(i, "iconImage", u)
+                              );
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <FieldError error={validateUrl(item.iconImage ?? "")} />
                   </div>
                   <div>
                     <label className={labelClass}>Title</label>
@@ -718,9 +903,8 @@ export default function CareersPageEditor() {
                   </div>
                   <div>
                     <label className={labelClass}>Description</label>
-                    <textarea value={item.description ?? ""} onChange={(e) => updateOpportunity(i, "description", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.description} />
-                    <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                    <ArInput label="Description" kind="description" multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
+                    <textarea value={item.description ?? ""} onChange={(e) => updateOpportunity(i, "description", e.target.value)} className={inputClass} rows={4} />
+                    <ArInput label="Description" kind="description" limit={100000} multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
                   </div>
                 </div>
               </div>
@@ -976,19 +1160,18 @@ export default function CareersPageEditor() {
               value={heroForm.description}
               onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
-              rows={5}
-              maxLength={FIELD_LIMITS.description}
+              rows={6}
             />
-            <CharCount value={heroForm.description} max={FIELD_LIMITS.description} />
             <ArInput label="Description"
               kind="description"
+              limit={100000}
               multiline
               value={heroForm.ar?.description}
               onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
             />
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Background image path</span>
+            <span className={labelClass}>Fallback image (also used as CTA background)</span>
             <div className="flex gap-2">
               <input
                 value={heroForm.image}
@@ -999,6 +1182,7 @@ export default function CareersPageEditor() {
               />
               <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                 <Upload className="h-3.5 w-3.5" />
+                {uploadProgress["hero-image"] !== undefined ? `${uploadProgress["hero-image"]}%` : null}
                 <input
                   type="file"
                   accept="image/*"
@@ -1006,13 +1190,9 @@ export default function CareersPageEditor() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      handleImageUpload("heroImage", file).then(() => {
-                        setContent((prev) => ({
-                          ...prev,
-                          hero: { ...prev.hero, image: prev.hero.image },
-                        }));
-                        setHeroForm((p) => ({ ...p, image: p.image }));
-                      });
+                      void uploadImageToKey(file, "hero-image", (u) =>
+                        setHeroForm((p) => ({ ...p, image: u }))
+                      );
                     }
                     e.target.value = "";
                   }}
@@ -1021,6 +1201,85 @@ export default function CareersPageEditor() {
             </div>
             <FieldError error={validateUrl(heroForm.image)} />
           </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Primary Button (View Open Positions)</span>
+            <input
+              value={heroForm.primaryCta ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, primaryCta: e.target.value }))}
+              className={inputClass}
+              placeholder="View Open Positions"
+              maxLength={FIELD_LIMITS.button}
+            />
+            <CharCount value={heroForm.primaryCta ?? ""} max={FIELD_LIMITS.button} />
+            <ArInput label="Primary Button"
+              kind="button"
+              value={heroForm.ar?.primaryCta}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCta: v } }))}
+            />
+          </label>
+          <label className="grid gap-1">
+            <span className={labelClass}>Secondary Button (Get In Touch)</span>
+            <input
+              value={heroForm.secondaryCta ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, secondaryCta: e.target.value }))}
+              className={inputClass}
+              placeholder="Get In Touch"
+              maxLength={FIELD_LIMITS.button}
+            />
+            <CharCount value={heroForm.secondaryCta ?? ""} max={FIELD_LIMITS.button} />
+            <ArInput label="Secondary Button"
+              kind="button"
+              value={heroForm.ar?.secondaryCta}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCta: v } }))}
+            />
+          </label>
+
+          {/* Hero badges (floating cards over the mosaic) */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
+              Hero Badges
+            </p>
+            <div className="grid gap-3">
+              {[
+                ["teamTag", "Team tag", "label"],
+                ["hiringTitle", "Hiring title", "heading"],
+                ["hiringSub", "Hiring subtext", "subtitle"],
+                ["cultureTag", "Culture tag", "label"],
+                ["cultureTitle", "Culture title", "heading"],
+                ["cultureSub", "Culture subtext", "subtitle"],
+              ].map(([key, label, kind]) => (
+                <label key={key} className="grid gap-1">
+                  <span className={labelClass}>{label}</span>
+                  <input
+                    value={heroForm.badges?.[key] ?? ""}
+                    onChange={(e) =>
+                      setHeroForm((p) => ({
+                        ...p,
+                        badges: { ...(p.badges ?? {}), [key]: e.target.value },
+                      }))
+                    }
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS[kind]}
+                  />
+                  <CharCount value={heroForm.badges?.[key] ?? ""} max={FIELD_LIMITS[kind]} />
+                  <ArInput
+                    label={label}
+                    kind={kind}
+                    value={heroForm.badges?.ar?.[key]}
+                    onChange={(v) =>
+                      setHeroForm((p) => ({
+                        ...p,
+                        badges: {
+                          ...(p.badges ?? {}),
+                          ar: { ...(p.badges?.ar ?? {}), [key]: v },
+                        },
+                      }))
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </Modal>
 
@@ -1096,12 +1355,10 @@ export default function CareersPageEditor() {
           value={paragraphText}
           onChange={(e) => setParagraphText(e.target.value)}
           className={inputClass}
-          rows={5}
+          rows={6}
           placeholder="Paragraph text"
-          maxLength={FIELD_LIMITS.description}
         />
-        <CharCount value={paragraphText} max={FIELD_LIMITS.description} />
-        <ArInput label="Paragraph" kind="description" multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <ArInput label="Paragraph" kind="description" limit={100000} multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
       </Modal>
 
       {/* Open positions section modal */}
@@ -1208,6 +1465,23 @@ export default function CareersPageEditor() {
             />
           </label>
           <label className="grid gap-1">
+            <span className={labelClass}>Short description (shown on the card)</span>
+            <textarea
+              value={jobPostForm.description}
+              onChange={(e) => setJobPostForm((p) => ({ ...p, description: e.target.value }))}
+              className={inputClass}
+              rows={3}
+              placeholder="Brief one- or two-line summary shown on the careers listing"
+            />
+            <ArInput label="Short Description"
+              kind="description"
+              limit={100000}
+              multiline
+              value={jobPostForm.ar?.description}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+            />
+          </label>
+          <label className="grid gap-1">
             <span className={labelClass}>Department</span>
             <input
               value={jobPostForm.department}
@@ -1267,42 +1541,23 @@ export default function CareersPageEditor() {
             </select>
           </label>
           <label className="grid gap-1">
-            <span className={labelClass}>Short description (shown on the card)</span>
-            <textarea
-              value={jobPostForm.description}
-              onChange={(e) => setJobPostForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={3}
-              placeholder="Brief one- or two-line summary shown on the careers listing"
-              maxLength={FIELD_LIMITS.description}
-            />
-            <CharCount value={jobPostForm.description} max={FIELD_LIMITS.description} />
-            <ArInput label="Description"
-              kind="description"
-              multiline
-              value={jobPostForm.ar?.description}
-              onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
-            />
-          </label>
-          <label className="grid gap-1">
-            <span className={labelClass}>Full details (HTML — shown on the job detail view)</span>
+            <span className={labelClass}>Full details (plain text — line breaks are shown on the site)</span>
             <textarea
               value={jobPostForm.fullDescription}
               onChange={(e) => setJobPostForm((p) => ({ ...p, fullDescription: e.target.value }))}
-              className={`${inputClass} font-mono text-xs`}
+              className={inputClass}
               rows={8}
-              placeholder={"<h3>Responsibilities</h3>\n<ul>\n  <li>Lead the valet team…</li>\n</ul>\n<h3>Requirements</h3>\n<p>…</p>"}
-              maxLength={FIELD_LIMITS.long}
+              placeholder={"Responsibilities:\n- Lead the valet team…\n\nRequirements:\n- 3+ years experience…"}
             />
-            <CharCount value={jobPostForm.fullDescription} max={FIELD_LIMITS.long} />
-            <ArInput label="Full Description"
+            <ArInput label="Full Details"
               kind="long"
+              limit={100000}
               multiline
               value={jobPostForm.ar?.fullDescription}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), fullDescription: v } }))}
             />
             <span className="text-[11px] text-slate-400">
-              Supports HTML: headings, paragraphs, lists, bold, links. Leave blank to use the short description.
+              Leave blank to use the short description on the job detail view.
             </span>
           </label>
           <label className="grid gap-1">
@@ -1411,12 +1666,11 @@ export default function CareersPageEditor() {
               value={whyJoinForm.bodyParagraph}
               onChange={(e) => setWhyJoinForm((p) => ({ ...p, bodyParagraph: e.target.value }))}
               className={inputClass}
-              rows={4}
-              maxLength={FIELD_LIMITS.description}
+              rows={5}
             />
-            <CharCount value={whyJoinForm.bodyParagraph} max={FIELD_LIMITS.description} />
             <ArInput label="Body Paragraph"
               kind="description"
+              limit={100000}
               multiline
               value={whyJoinForm.ar?.bodyParagraph}
               onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), bodyParagraph: v } }))}
@@ -1456,10 +1710,13 @@ export default function CareersPageEditor() {
           className={inputClass}
           rows={4}
           placeholder="Why candidates should join"
-          maxLength={FIELD_LIMITS.item}
         />
-        <CharCount value={reasonText} max={FIELD_LIMITS.item} />
-        <ArInput label="Reason" kind="item" multiline value={reasonTextAr} onChange={setReasonTextAr} />
+        {!reasonText.trim() && reasonTextAr.trim() ? (
+          <p className="mt-1 text-[11px] font-medium text-amber-600">
+            English text is required — the Arabic field is a translation and can’t be saved on its own.
+          </p>
+        ) : null}
+        <ArInput label="Reason" kind="item" limit={100000} multiline value={reasonTextAr} onChange={setReasonTextAr} />
       </Modal>
 
       {/* CTA modal */}
@@ -1524,12 +1781,11 @@ export default function CareersPageEditor() {
               value={ctaForm.description}
               onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
               className={inputClass}
-              rows={3}
-              maxLength={FIELD_LIMITS.description}
+              rows={4}
             />
-            <CharCount value={ctaForm.description} max={FIELD_LIMITS.description} />
             <ArInput label="Description"
               kind="description"
+              limit={100000}
               multiline
               value={ctaForm.ar?.description}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}

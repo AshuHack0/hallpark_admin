@@ -91,40 +91,29 @@ const DEFAULT_SOLUTIONS = {
 };
 
 const DEFAULT_INTEGRATION = {
-  heading: "Solution Integration",
-  headingGradient: "Integration",
-  subtitle: "End-to-End Integrated Parking Solution",
-  cards: [
-    { title: "All-in-One Barrier Integration", description: "All-in-one compact system with barriers, AI cameras, and lighting for efficient parking.", points: ["Smart barrier control", "AI camera integration", "Automated lighting"], image: "/hf_20260327_061900_db12a62e-2867-44b6-83f0-ea7f1a5442ef.png", gradient: "from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20" },
-    { title: "ANPR & AI Camera Integration", description: "ANPR and AI cameras enable secure, real-time parking detection.", points: ["License plate recognition", "Real-time detection", "Secure access control"], image: "/hf_20260327_064316_9c7b1a28-dbfa-456e-b88a-0087cb567a61.png", gradient: "from-[#0050B3]/85 via-[#0066CC]/60 to-[#0088FF]/20" },
-    { title: "Guidance Display Integration", description: "Smart displays show real-time parking info for better user experience.", points: ["Live space availability", "Wayfinding signage", "Zone-level guidance"], image: "/hf_20260327_062407_6dca49c0-90dd-468a-96f9-b36bba13ea8b.png", gradient: "from-[#004F9A]/85 via-[#0070D0]/60 to-[#1AB2FF]/20" },
-    { title: "Software & Kiosk Integration", description: "Unified system with apps, operations, and kiosks for quick payments and access.", points: ["Mobile app & web portal", "Self-service kiosks", "Integrated payments"], image: "/hf_20260327_065515_cd3808b8-d99d-4faa-817d-e3f772726da6.png", gradient: "from-[#005FA3]/85 via-[#0078C8]/60 to-[#1AB2FF]/20" },
-    { title: "Sensor-Based Parking Management", description: "IoT sensors enable real-time parking tracking and space management.", points: ["Bay-level occupancy", "Instant alerts", "Predictive analytics"], image: "/hf_20260327_071129_800d49da-6fb8-4b7e-a1ba-b32db4c31565.png", gradient: "from-[#003F7F]/85 via-[#005BB8]/60 to-[#0088FF]/20" },
-    { title: "End-to-End System Integration", description: "Integrated platform for scalable, automated parking operations.", points: ["IoT sensor management", "Guidance display system", "Full stack automation"], image: "/hf_20260327_060926_cbb82448-441c-42ee-9589-785e7acd7565.png", gradient: "from-[#003F7F]/85 via-[#0060B8]/60 to-[#0088FF]/20" },
-  ],
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
+  color: "#0088FF",
+  cards: [],
 };
 
 const DEFAULT_TRUST = {
-  heading: "Built for Smart Cities",
-  headingGradient: "Smart Cities",
-  subtitle: "HalaPark extends beyond parking into urban mobility infrastructure, supporting large-scale smart city development and city-wide optimization.",
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
+  image: "",
+  keyPoints: [],
+  ar: {},
 };
 
 const DEFAULT_FEATURES = {
-  heading: "Built for High-Demand Environments",
-  headingGradient: "Environments",
-  subtitle: "From airports to smart cities, HalaPark scales across every high-traffic environment.",
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
   image: "",
-  industries: [
-    { icon: "Zap", label: "Airports" },
-    { icon: "Building2", label: "Shopping Malls" },
-    { icon: "BadgeCheck", label: "Hotels" },
-    { icon: "Cctv", label: "Residential Towers" },
-    { icon: "Shield", label: "Hospitals" },
-    { icon: "MapPin", label: "Universities" },
-    { icon: "Lock", label: "Government Facilities" },
-    { icon: "TrendingUp", label: "Smart Cities" },
-  ],
+  industries: [],
+  ar: {},
 };
 
 // Icon names the frontend (INDUSTRY_ICONS) knows how to render.
@@ -133,18 +122,29 @@ const INDUSTRY_ICON_NAMES = [
 ];
 
 const DEFAULT_DEPLOYMENT = {
-  heading: "Deployment",
-  headingGradient: "Journey",
-  subtitle: "We ensure a smooth rollout by understanding your environment, integrating with existing systems, and improving performance over time without disruption.",
-  steps: [
-    { step: "01", title: "Audit Current Setup", description: "Mapping gates, cameras, payment flows, access rules, and workflows." },
-    { step: "02", title: "Connect the Stack", description: "Integration with hardware, software, and payment systems while preserving operations." },
-    { step: "03", title: "Launch & Optimize", description: "Go live with dashboards, alerts, reporting, and continuous optimization." },
-  ],
+  brand: "",
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
+  steps: [],
   image: "",
-  panelTitle: "Go live in days,",
-  panelTitleAccent: "not months.",
+  panelTitle: "",
+  panelTitleAccent: "",
+  ar: {},
 };
+
+const DEFAULT_SEAMLESS = {
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
+  items: [],
+  ar: {},
+};
+
+// Icon names the frontend (SEAMLESS_ICONS) knows how to render for Seamless items.
+const SEAMLESS_ICON_NAMES = [
+  "ParkingCircle", "ShieldCheck", "CreditCard", "Building2", "Zap", "Cpu",
+];
 
 const DEFAULT_WHY = {
   heading: "Why Leading Developments Choose Halapark?",
@@ -189,9 +189,11 @@ function makeBlankDetail() {
     // 3. Problem We Face
     problemHeading: "Problem We Face",
     problemBody: "",
+    problemImage: "",
     // 4. Our Solution
     solutionHeading: "Our Solution",
     solutionBody: "",
+    solutionImage: "",
     // 5. Key Benefits — [{ title, description }]
     benefitsHeading: "Key Benefits",
     keyBenefits: [],
@@ -396,6 +398,9 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [err, setErr] = useState("");
+  // Per-field image upload progress, keyed by a progress key (e.g.
+  // "detail-whyImage"). null = idle; a number = uploading at that %.
+  const [fieldUpload, setFieldUpload] = useState({});
 
   const setField = (field, value) => setDraft((d) => ({ ...d, [field]: value }));
 
@@ -412,6 +417,25 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
       setErr("Image upload failed. Please try again.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  // Upload an image into a named draft field (whyImage / problemImage /
+  // solutionImage), tracking progress under `progressKey`.
+  async function handleFieldUpload(file, field, progressKey) {
+    const verr = validateImageFile(file);
+    if (verr) { setErr(verr); return; }
+    setErr("");
+    setFieldUpload((m) => ({ ...m, [progressKey]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setFieldUpload((m) => ({ ...m, [progressKey]: pct })),
+      );
+      setField(field, url);
+    } catch {
+      setErr("Image upload failed. Please try again.");
+    } finally {
+      setFieldUpload((m) => { const next = { ...m }; delete next[progressKey]; return next; });
     }
   }
 
@@ -526,10 +550,8 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
               className={inputClass}
               rows={2}
               placeholder="Seamlessly connect parking operations, security systems..."
-              maxLength={FIELD_LIMITS.long}
             />
-            <CharCount value={draft.shortDescription ?? ""} max={FIELD_LIMITS.long} />
-            <ArInput label="Short Description" kind="long" multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
+            <ArInput label="Short Description" kind="long" limit={100000} multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -598,13 +620,44 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           </div>
           <div>
             <label className={labelClass}>Why Body (use blank lines to split paragraphs)</label>
-            <textarea value={draft.whyBody ?? ""} onChange={(e) => setField("whyBody", e.target.value)} className={inputClass} rows={5} maxLength={2400} />
-            <ArInput label="Why Body" kind="long" multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
+            <textarea value={draft.whyBody ?? ""} onChange={(e) => setField("whyBody", e.target.value)} className={inputClass} rows={5} />
+            <ArInput label="Why Body" kind="long" limit={100000} multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
           </div>
           <div>
-            <label className={labelClass}>Why-Section Image URL (optional — defaults to banner image)</label>
-            <input value={draft.whyImage ?? ""} onChange={(e) => setField("whyImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
-            <FieldError error={validateUrl(draft.whyImage ?? "")} />
+            <label className={labelClass}>Why-Section Image (optional — defaults to banner image)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.whyImage ? (
+                  <img src={draft.whyImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.whyImage ?? ""} onChange={(e) => setField("whyImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.whyImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-whyImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-whyImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-whyImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "whyImage", "detail-whyImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* ── 3. PROBLEM WE FACE ────────────────────────────────────── */}
@@ -616,8 +669,44 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           </div>
           <div>
             <label className={labelClass}>Problem Body (blank lines split paragraphs)</label>
-            <textarea value={draft.problemBody ?? ""} onChange={(e) => setField("problemBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
-            <ArInput label="Problem Body" kind="long" multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
+            <textarea value={draft.problemBody ?? ""} onChange={(e) => setField("problemBody", e.target.value)} className={inputClass} rows={4} />
+            <ArInput label="Problem Body" kind="long" limit={100000} multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Problem Image (optional)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.problemImage ? (
+                  <img src={draft.problemImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.problemImage ?? ""} onChange={(e) => setField("problemImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.problemImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-problemImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-problemImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-problemImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "problemImage", "detail-problemImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* ── 4. OUR SOLUTION ───────────────────────────────────────── */}
@@ -629,8 +718,44 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           </div>
           <div>
             <label className={labelClass}>Solution Body (blank lines split paragraphs)</label>
-            <textarea value={draft.solutionBody ?? ""} onChange={(e) => setField("solutionBody", e.target.value)} className={inputClass} rows={4} maxLength={2400} />
-            <ArInput label="Solution Body" kind="long" multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
+            <textarea value={draft.solutionBody ?? ""} onChange={(e) => setField("solutionBody", e.target.value)} className={inputClass} rows={4} />
+            <ArInput label="Solution Body" kind="long" limit={100000} multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Our Solution Image (optional)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.solutionImage ? (
+                  <img src={draft.solutionImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.solutionImage ?? ""} onChange={(e) => setField("solutionImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.solutionImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-solutionImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-solutionImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-solutionImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "solutionImage", "detail-solutionImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* ── 5. KEY BENEFITS ───────────────────────────────────────── */}
@@ -666,8 +791,8 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
           />
           <div>
             <label className={labelClass}>How It Works Paragraph (used only if no Steps)</label>
-            <textarea value={draft.howItWorksBody ?? ""} onChange={(e) => setField("howItWorksBody", e.target.value)} className={inputClass} rows={3} maxLength={FIELD_LIMITS.long} />
-            <ArInput label="How It Works Body" kind="long" multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
+            <textarea value={draft.howItWorksBody ?? ""} onChange={(e) => setField("howItWorksBody", e.target.value)} className={inputClass} rows={3} />
+            <ArInput label="How It Works Body" kind="long" limit={100000} multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
           </div>
 
           {/* ── 7. OTHER RELATED SERVICES ─────────────────────────────── */}
@@ -730,6 +855,7 @@ export default function SolutionPageEditor() {
   const [solutions, setSolutions] = useState(DEFAULT_SOLUTIONS);
   const [integration, setIntegration] = useState(DEFAULT_INTEGRATION);
   const [trust, setTrust] = useState(DEFAULT_TRUST);
+  const [seamless, setSeamless] = useState(DEFAULT_SEAMLESS);
   const [features, setFeatures] = useState(DEFAULT_FEATURES);
   const [deployment, setDeployment] = useState(DEFAULT_DEPLOYMENT);
   const [why, setWhy] = useState(DEFAULT_WHY);
@@ -802,6 +928,7 @@ export default function SolutionPageEditor() {
         setSolutions(data.page.sections.solutions || DEFAULT_SOLUTIONS);
         setIntegration(data.page.sections.integration || DEFAULT_INTEGRATION);
         setTrust(data.page.sections.trust || DEFAULT_TRUST);
+        setSeamless(data.page.sections.seamless || DEFAULT_SEAMLESS);
         setFeatures({ ...DEFAULT_FEATURES, ...(data.page.sections.features || {}) });
         setDeployment({ ...DEFAULT_DEPLOYMENT, ...(data.page.sections.deployment || {}) });
         setWhy(data.page.sections.why || DEFAULT_WHY);
@@ -822,7 +949,7 @@ export default function SolutionPageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("solutions", {
-        sections: { hero, challenges, solutions, integration, trust, features, deployment, why, cta, details },
+        sections: { hero, challenges, solutions, integration, trust, seamless, features, deployment, why, cta, details },
       });
       setSuccess("Solutions page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -897,6 +1024,73 @@ export default function SolutionPageEditor() {
     }
   }
 
+  async function handleTrustImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "trust-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setTrust((p) => ({ ...p, image: url }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  async function handleCtaImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "cta-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setCtA((p) => ({ ...p, image: url }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // Upload an icon image for a Seamless Integrations item, keyed seamless-${i}-icon.
+  async function handleSeamlessIconUpload(index, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `seamless-${index}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setSeamless((p) => ({
+        ...p,
+        items: (p.items ?? []).map((it, i) => (i === index ? { ...it, iconImage: url } : it)),
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(section, cardIndex, file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -931,6 +1125,31 @@ export default function SolutionPageEditor() {
     } catch (err) {
       setError("Image upload failed");
       console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // Per-industry icon image upload → features.industries[i].iconImage.
+  async function handleIndustryIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `feat-ind-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setFeatures((p) => ({
+        ...p,
+        industries: (p.industries ?? []).map((x, idx) => idx === i ? { ...x, iconImage: url } : x),
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (uploadErr) {
+      setError("Image upload failed");
+      console.error(uploadErr);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
     }
@@ -1620,6 +1839,25 @@ export default function SolutionPageEditor() {
                 <CharCount value={integration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
                 <ArInput label="Subtitle" kind="subtitle" value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
+              <div>
+                <label className={labelClass}>Accent Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={integration.color || "#0088FF"}
+                    onChange={(e) => setIntegration((p) => ({ ...p, color: e.target.value }))}
+                    className="h-9 w-12 shrink-0 cursor-pointer rounded border border-slate-200 bg-white p-1"
+                    aria-label="Accent color picker"
+                  />
+                  <input
+                    value={integration.color ?? ""}
+                    onChange={(e) => setIntegration((p) => ({ ...p, color: e.target.value }))}
+                    className={inputClass}
+                    placeholder="#0088FF"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1630,7 +1868,7 @@ export default function SolutionPageEditor() {
               <button
                 onClick={() => setIntegration((p) => ({
                   ...p,
-                  cards: [...(p.cards ?? []), { title: "New Integration", description: "Description", points: [], image: "/image.png", gradient: "from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20" }]
+                  cards: [...(p.cards ?? []), { title: "", description: "", points: [], image: "", gradient: "from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20", ar: {} }]
                 }))}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
@@ -1676,12 +1914,10 @@ export default function SolutionPageEditor() {
                         cards: p.cards.map((c, idx) => idx === i ? { ...c, description: e.target.value } : c)
                       }))}
                       className={inputClass}
-                      rows={2}
+                      rows={3}
                       placeholder="Card Description"
-                      maxLength={FIELD_LIMITS.summary}
                     />
-                    <CharCount value={card.description ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput label="Description" kind="summary" multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
+                    <ArInput label="Description" limit={100000} multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
                     }))} />
@@ -1722,17 +1958,16 @@ export default function SolutionPageEditor() {
                       </label>
                     </div>
                     <FieldError error={validateUrl(card.image ?? "")} />
-                    <input
+                    <textarea
                       value={card.gradient ?? ""}
                       onChange={(e) => setIntegration((p) => ({
                         ...p,
                         cards: p.cards.map((c, idx) => idx === i ? { ...c, gradient: e.target.value } : c)
                       }))}
                       className={inputClass}
+                      rows={2}
                       placeholder="Gradient (e.g., from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20)"
-                      maxLength={FIELD_LIMITS.subtitle}
                     />
-                    <CharCount value={card.gradient ?? ""} max={FIELD_LIMITS.subtitle} />
                     <textarea
                       value={Array.isArray(card.points) ? card.points.join("\n") : ""}
                       onChange={(e) => setIntegration((p) => ({
@@ -1742,9 +1977,7 @@ export default function SolutionPageEditor() {
                       className={inputClass}
                       rows={3}
                       placeholder="Points (one per line)"
-                      maxLength={FIELD_LIMITS.description}
                     />
-                    <CharCount value={Array.isArray(card.points) ? card.points.join("\n") : ""} max={FIELD_LIMITS.description} />
                   </div>
                 </div>
               ))}
@@ -1794,6 +2027,236 @@ export default function SolutionPageEditor() {
             />
             <CharCount value={trust.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             <ArInput label="Subtitle" kind="subtitle" multiline value={trust.ar?.subtitle} onChange={(v) => setTrust((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+          </div>
+
+          {/* Trust Image */}
+          <div>
+            <label className={labelClass}>Trust Image</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                {trust.image && trust.image !== "/image.png" ? (
+                  <img src={trust.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={trust.image ?? ""}
+                  onChange={(e) => setTrust((p) => ({ ...p, image: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Image URL (leave blank to hide)"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <CharCount value={trust.image ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(trust.image ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["trust-image"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["trust-image"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload image</>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["trust-image"] !== undefined}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTrustImageUpload(f); e.target.value = ""; }} />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Points — string list with parallel ar.keyPoints by index */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className={labelClass}>Key Points ({(trust.keyPoints ?? []).length})</label>
+              <button
+                type="button"
+                onClick={() => setTrust((p) => ({ ...p, keyPoints: [...(p.keyPoints ?? []), ""] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Point
+              </button>
+            </div>
+            {(trust.keyPoints ?? []).length === 0 ? (
+              <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">No key points yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {(trust.keyPoints ?? []).map((point, i) => (
+                  <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Point {i + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setTrust((p) => ({
+                          ...p,
+                          keyPoints: (p.keyPoints ?? []).filter((_, idx) => idx !== i),
+                          ar: { ...(p.ar ?? {}), keyPoints: (p.ar?.keyPoints ?? []).filter((_, idx) => idx !== i) },
+                        }))}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete
+                      </button>
+                    </div>
+                    <input
+                      value={point ?? ""}
+                      onChange={(e) => setTrust((p) => ({ ...p, keyPoints: (p.keyPoints ?? []).map((it, idx) => (idx === i ? e.target.value : it)) }))}
+                      className={inputClass}
+                      placeholder={`Point ${i + 1}`}
+                      maxLength={FIELD_LIMITS.item}
+                    />
+                    <ArInput
+                      label="Point"
+                      kind="item"
+                      value={trust.ar?.keyPoints?.[i]}
+                      onChange={(v) => setTrust((p) => {
+                        const nextAr = [...(p.ar?.keyPoints ?? [])];
+                        while (nextAr.length <= i) nextAr.push("");
+                        nextAr[i] = v;
+                        return { ...p, ar: { ...(p.ar ?? {}), keyPoints: nextAr } };
+                      })}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* SEAMLESS INTEGRATIONS SECTION */}
+      <CollapsibleSection title="Seamless Integrations Section">
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>Heading</label>
+            <input
+              value={seamless.heading ?? ""}
+              onChange={(e) => setSeamless((p) => ({ ...p, heading: e.target.value }))}
+              className={inputClass}
+              placeholder="Seamless"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={seamless.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Heading" kind="heading" value={seamless.ar?.heading} onChange={(v) => setSeamless((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Heading Gradient (accent — shown after heading)</label>
+            <input
+              value={seamless.headingGradient ?? ""}
+              onChange={(e) => setSeamless((p) => ({ ...p, headingGradient: e.target.value }))}
+              className={inputClass}
+              placeholder="Integrations"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={seamless.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput label="Heading Gradient" kind="label" value={seamless.ar?.headingGradient} onChange={(v) => setSeamless((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <textarea
+              value={seamless.subtitle ?? ""}
+              onChange={(e) => setSeamless((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              rows={3}
+              placeholder="End-to-end integrated parking solution that connects hardware, software, and operations into one unified platform."
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={seamless.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput label="Subtitle" kind="subtitle" multiline value={seamless.ar?.subtitle} onChange={(v) => setSeamless((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+          </div>
+
+          {/* Integration items (icon + title) */}
+          <div className="border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-700">Integration Items ({(seamless.items ?? []).length})</h3>
+              <button
+                type="button"
+                onClick={() => setSeamless((p) => ({ ...p, items: [...(p.items ?? []), { title: "New Integration", icon: "ParkingCircle", iconImage: "", ar: {} }] }))}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Item
+              </button>
+            </div>
+            {(seamless.items ?? []).length === 0 ? (
+              <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">No items yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {(seamless.items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Item {i + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSeamless((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={item.icon ?? "ParkingCircle"}
+                        onChange={(e) => setSeamless((p) => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, icon: e.target.value } : x) }))}
+                        className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
+                      >
+                        {SEAMLESS_ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                      <input
+                        value={item.title ?? ""}
+                        onChange={(e) => setSeamless((p) => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x) }))}
+                        className={inputClass}
+                        placeholder="Payment gateways"
+                        maxLength={FIELD_LIMITS.item}
+                      />
+                    </div>
+                    <ArInput label="Title" kind="item" value={item.ar?.title} onChange={(v) => setSeamless((p) => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
+
+                    {/* Icon image override (uploaded image overrides the named icon) */}
+                    <div className="mt-2">
+                      <label className={labelClass}>Icon Image (optional — overrides the named icon)</label>
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                          {item.iconImage ? (
+                            <img src={item.iconImage} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-slate-300">
+                              <ImageIcon className="h-5 w-5" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <input
+                            value={item.iconImage ?? ""}
+                            onChange={(e) => setSeamless((p) => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, iconImage: e.target.value } : x) }))}
+                            className={inputClass}
+                            placeholder="Icon image URL"
+                            maxLength={FIELD_LIMITS.link}
+                          />
+                          <FieldError error={validateUrl(item.iconImage ?? "")} />
+                          <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                            {uploadProgress[`seamless-${i}-icon`] !== undefined ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`seamless-${i}-icon`]}%</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadProgress[`seamless-${i}-icon`] !== undefined}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleSeamlessIconUpload(i, file);
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleSection>
@@ -1881,28 +2344,30 @@ export default function SolutionPageEditor() {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-700">Environments ({(features.industries ?? []).length})</h3>
               <button
-                onClick={() => setFeatures((p) => ({ ...p, industries: [...(p.industries ?? []), { icon: "Building2", label: "New Environment" }] }))}
+                onClick={() => setFeatures((p) => ({ ...p, industries: [...(p.industries ?? []), { icon: "Building2", title: "" }] }))}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
                 <Plus className="h-3.5 w-3.5" /> Add Environment
               </button>
             </div>
-            <div className="space-y-2">
-              {(features.industries ?? []).map((ind, ii) => (
-                <div key={ii}>
+            <div className="space-y-3">
+              {(features.industries ?? []).map((ind, ii) => {
+                const iconKey = `feat-ind-${ii}-icon`;
+                return (
+                <div key={ii} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center gap-2">
                     <select
                       value={ind.icon ?? "Building2"}
                       onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, icon: e.target.value } : x) }))}
-                      className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
+                      className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-2.5 text-sm outline-none focus:border-[#0088FF]"
                     >
                       {INDUSTRY_ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                     <input
-                      value={ind.label ?? ""}
-                      onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, label: e.target.value } : x) }))}
+                      value={ind.title ?? ind.label ?? ""}
+                      onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, title: e.target.value } : x) }))}
                       className={inputClass}
-                      placeholder="Environment label (e.g. Airports)"
+                      placeholder="Environment title (e.g. Airports)"
                       maxLength={FIELD_LIMITS.item}
                     />
                     <button
@@ -1912,9 +2377,55 @@ export default function SolutionPageEditor() {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <ArInput label="Label" kind="item" value={ind.ar?.label} onChange={(v) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, ar: { ...(x.ar ?? {}), label: v } } : x) }))} />
+                  <ArInput label="Title" kind="item" value={ind.ar?.title ?? ind.ar?.label} onChange={(v) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
+
+                  {/* Optional icon image — overrides the named icon on the site */}
+                  <div className="mt-2">
+                    <label className={labelClass}>Icon image (optional — overrides the icon above)</label>
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {ind.iconImage ? (
+                          <img src={ind.iconImage} alt="" className="h-full w-full object-contain" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-slate-300">
+                            <ImageIcon className="h-5 w-5" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          value={ind.iconImage ?? ""}
+                          onChange={(e) => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, iconImage: e.target.value } : x) }))}
+                          className={inputClass}
+                          placeholder="Icon image URL (leave blank to use the named icon)"
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <FieldError error={validateUrl(ind.iconImage ?? "")} />
+                        <div className="flex items-center gap-2">
+                          <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                            {uploadProgress[iconKey] !== undefined ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[iconKey]}%</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" />Upload icon</>
+                            )}
+                            <input type="file" accept="image/*" className="hidden" disabled={uploadProgress[iconKey] !== undefined}
+                              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleIndustryIconUpload(ii, f); e.target.value = ""; }} />
+                          </label>
+                          {ind.iconImage ? (
+                            <button
+                              onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.map((x, idx) => idx === ii ? { ...x, iconImage: "" } : x) }))}
+                              className="rounded p-1.5 text-red-600 transition hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1923,6 +2434,18 @@ export default function SolutionPageEditor() {
       {/* DEPLOYMENT JOURNEY SECTION */}
       <CollapsibleSection title="Deployment Journey Section">
         <div className="space-y-4">
+          <div>
+            <label className={labelClass}>Brand (e.g. HalaPark)</label>
+            <input
+              value={deployment.brand ?? ""}
+              onChange={(e) => setDeployment((p) => ({ ...p, brand: e.target.value }))}
+              className={inputClass}
+              placeholder="HalaPark"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={deployment.brand ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput label="Brand" kind="label" value={deployment.ar?.brand} onChange={(v) => setDeployment((p) => ({ ...p, ar: { ...(p.ar ?? {}), brand: v } }))} />
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Heading</label>
@@ -1968,7 +2491,7 @@ export default function SolutionPageEditor() {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-700">Steps ({(deployment.steps ?? []).length})</h3>
               <button
-                onClick={() => setDeployment((p) => ({ ...p, steps: [...(p.steps ?? []), { step: String((p.steps?.length ?? 0) + 1).padStart(2, "0"), title: "New Step", description: "" }] }))}
+                onClick={() => setDeployment((p) => ({ ...p, steps: [...(p.steps ?? []), { step: String((p.steps?.length ?? 0) + 1).padStart(2, "0"), title: "", description: "" }] }))}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
                 <Plus className="h-3.5 w-3.5" /> Add Step
@@ -2007,12 +2530,10 @@ export default function SolutionPageEditor() {
                     value={st.description ?? ""}
                     onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: e.target.value } : x) }))}
                     className={`${inputClass} mt-2`}
-                    rows={2}
+                    rows={3}
                     placeholder="Step description"
-                    maxLength={FIELD_LIMITS.description}
                   />
-                  <CharCount value={st.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
+                  <ArInput label="Description" limit={100000} multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -2282,30 +2803,55 @@ export default function SolutionPageEditor() {
             <CharCount value={cta.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
             <ArInput label="Subtitle" kind="subtitle" multiline value={cta.ar?.subtitle} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
           </div>
+          <div>
+            <label className={labelClass}>Description (optional — smaller text under subtitle)</label>
+            <textarea
+              value={cta.description ?? ""}
+              onChange={(e) => setCtA((p) => ({ ...p, description: e.target.value }))}
+              className={inputClass}
+              rows={3}
+              placeholder="Additional supporting copy…"
+            />
+            <ArInput label="Description" kind="long" limit={100000} multiline value={cta.ar?.description} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+          </div>
+
+          {/* Primary Button */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>Primary CTA Label</label>
+              <label className={labelClass}>Primary Button Label</label>
               <input
-                value={cta.ctaLabel ?? ""}
-                onChange={(e) => setCtA((p) => ({ ...p, ctaLabel: e.target.value }))}
+                value={cta.primaryLabel ?? cta.ctaLabel ?? ""}
+                onChange={(e) => setCtA((p) => ({ ...p, primaryLabel: e.target.value }))}
                 className={inputClass}
                 placeholder="Request Demo"
                 maxLength={FIELD_LIMITS.button}
               />
-              <CharCount value={cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput label="CTA Label" kind="button" value={cta.ar?.ctaLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              <CharCount value={cta.primaryLabel ?? cta.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="Primary Button Label" kind="button" value={cta.ar?.primaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryLabel: v } }))} />
             </div>
             <div>
-              <label className={labelClass}>Secondary CTA Label</label>
+              <label className={labelClass}>Primary Button Link</label>
+              <PageLinkSelect value={cta.primaryLink} onChange={(v) => setCtA((p) => ({ ...p, primaryLink: v }))} />
+            </div>
+          </div>
+
+          {/* Secondary Button */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Secondary Button Label</label>
               <input
-                value={cta.ctaSecondaryLabel ?? ""}
-                onChange={(e) => setCtA((p) => ({ ...p, ctaSecondaryLabel: e.target.value }))}
+                value={cta.secondaryLabel ?? cta.ctaSecondaryLabel ?? ""}
+                onChange={(e) => setCtA((p) => ({ ...p, secondaryLabel: e.target.value }))}
                 className={inputClass}
                 placeholder="Talk to Our Team"
                 maxLength={FIELD_LIMITS.button}
               />
-              <CharCount value={cta.ctaSecondaryLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput label="Cta Secondary Label" kind="button" value={cta.ar?.ctaSecondaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaSecondaryLabel: v } }))} />
+              <CharCount value={cta.secondaryLabel ?? cta.ctaSecondaryLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="Secondary Button Label" kind="button" value={cta.ar?.secondaryLabel} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryLabel: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Secondary Button Link</label>
+              <PageLinkSelect value={cta.secondaryLink} onChange={(v) => setCtA((p) => ({ ...p, secondaryLink: v }))} />
             </div>
           </div>
 
@@ -2333,10 +2879,10 @@ export default function SolutionPageEditor() {
                 <CharCount value={cta.image ?? ""} max={FIELD_LIMITS.link} />
                 <FieldError error={validateUrl(cta.image ?? "")} />
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
-                  {uploadProgress["cta-0"] !== undefined ? (
+                  {uploadProgress["cta-image"] !== undefined ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {uploadProgress["cta-0"]}%
+                      {uploadProgress["cta-image"]}%
                     </>
                   ) : (
                     <>
@@ -2348,10 +2894,10 @@ export default function SolutionPageEditor() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    disabled={uploadProgress["cta-0"] !== undefined}
+                    disabled={uploadProgress["cta-image"] !== undefined}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleImageUpload("cta", 0, file);
+                      if (file) handleCtaImageUpload(file);
                       e.target.value = "";
                     }}
                   />

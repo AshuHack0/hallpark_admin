@@ -849,6 +849,24 @@ function CollapsibleSection({ title, children, defaultOpen = false }) {
   );
 }
 
+// "Show this section on the website" toggle. Writes `enabled` on the section
+// object; the website hides a section only when enabled === false.
+// eslint-disable-next-line react/prop-types
+function EnabledToggle({ section, setSection }) {
+  const enabled = section?.enabled !== false;
+  return (
+    <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={(e) => setSection((p) => ({ ...p, enabled: e.target.checked }))}
+        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+      />
+      Show this section on the website
+    </label>
+  );
+}
+
 export default function SolutionPageEditor() {
   const [hero, setHero] = useState(DEFAULT_HERO);
   const [challenges, setChallenges] = useState(DEFAULT_CHALLENGES);
@@ -1194,6 +1212,7 @@ export default function SolutionPageEditor() {
 
       {/* HERO SECTION */}
       <CollapsibleSection title="Hero Section" defaultOpen={true}>
+        <EnabledToggle section={hero} setSection={setHero} />
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -1327,6 +1346,7 @@ export default function SolutionPageEditor() {
 
       {/* CHALLENGES SECTION */}
       <CollapsibleSection title="Challenges Section">
+        <EnabledToggle section={challenges} setSection={setChallenges} />
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -1470,6 +1490,7 @@ export default function SolutionPageEditor() {
 
       {/* SOLUTIONS SECTION */}
       <CollapsibleSection title="Solutions Section">
+        <EnabledToggle section={solutions} setSection={setSolutions} />
         <div className="space-y-6">
           <div className="border-b border-slate-200 pb-4">
             <div className="space-y-4">
@@ -1798,6 +1819,7 @@ export default function SolutionPageEditor() {
 
       {/* INTEGRATION SECTION */}
       <CollapsibleSection title="Integration Section">
+        <EnabledToggle section={integration} setSection={setIntegration} />
         <div className="space-y-6">
           <div className="border-b border-slate-200 pb-4">
             <div className="space-y-4">
@@ -1988,6 +2010,7 @@ export default function SolutionPageEditor() {
 
       {/* TRUST SECTION */}
       <CollapsibleSection title="Trust Section (Smart Cities)">
+        <EnabledToggle section={trust} setSection={setTrust} />
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -2125,6 +2148,7 @@ export default function SolutionPageEditor() {
 
       {/* SEAMLESS INTEGRATIONS SECTION */}
       <CollapsibleSection title="Seamless Integrations Section">
+        <EnabledToggle section={seamless} setSection={setSeamless} />
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Heading</label>
@@ -2263,6 +2287,7 @@ export default function SolutionPageEditor() {
 
       {/* FEATURES SECTION */}
       <CollapsibleSection title="Features Section (High-Demand)">
+        <EnabledToggle section={features} setSection={setFeatures} />
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -2433,6 +2458,7 @@ export default function SolutionPageEditor() {
 
       {/* DEPLOYMENT JOURNEY SECTION */}
       <CollapsibleSection title="Deployment Journey Section">
+        <EnabledToggle section={deployment} setSection={setDeployment} />
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Brand (e.g. HalaPark)</label>
@@ -2608,6 +2634,7 @@ export default function SolutionPageEditor() {
 
       {/* WHY SECTION */}
       <CollapsibleSection title="Why Section">
+        <EnabledToggle section={why} setSection={setWhy} />
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -2765,6 +2792,7 @@ export default function SolutionPageEditor() {
 
       {/* CTA SECTION */}
       <CollapsibleSection title="Final CTA Section">
+        <EnabledToggle section={cta} setSection={setCtA} />
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Heading</label>

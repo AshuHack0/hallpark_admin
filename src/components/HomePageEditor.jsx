@@ -451,8 +451,40 @@ export default function HomePageEditor() {
   function updateImpactStat(i, field, value) {
     setGlobalMobility((prev) => ({
       ...prev,
-      impactStats: prev.impactStats.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)),
+      impactStats: (prev.impactStats ?? []).map((s, idx) => (idx === i ? { ...s, [field]: value } : s)),
     }));
+  }
+  function addImpactStat() {
+    setGlobalMobility((prev) => ({ ...prev, impactStats: [...(prev.impactStats ?? []), { value: "", label: "", icon: "building" }] }));
+  }
+  function removeImpactStat(i) {
+    setGlobalMobility((prev) => ({ ...prev, impactStats: (prev.impactStats ?? []).filter((_, idx) => idx !== i) }));
+  }
+
+  // ── Global Mobility map animation (mapNodes / mapLinks) ───────────────────
+  function updateMapNode(i, field, value) {
+    setGlobalMobility((prev) => ({
+      ...prev,
+      mapNodes: (prev.mapNodes ?? []).map((n, idx) => (idx === i ? { ...n, [field]: value } : n)),
+    }));
+  }
+  function addMapNode() {
+    setGlobalMobility((prev) => ({ ...prev, mapNodes: [...(prev.mapNodes ?? []), { id: "", label: "", x: 50, y: 50 }] }));
+  }
+  function removeMapNode(i) {
+    setGlobalMobility((prev) => ({ ...prev, mapNodes: (prev.mapNodes ?? []).filter((_, idx) => idx !== i) }));
+  }
+  function updateMapLink(i, field, value) {
+    setGlobalMobility((prev) => ({
+      ...prev,
+      mapLinks: (prev.mapLinks ?? []).map((l, idx) => (idx === i ? { ...l, [field]: value } : l)),
+    }));
+  }
+  function addMapLink() {
+    setGlobalMobility((prev) => ({ ...prev, mapLinks: [...(prev.mapLinks ?? []), { from: "", to: "", curve: -12 }] }));
+  }
+  function removeMapLink(i) {
+    setGlobalMobility((prev) => ({ ...prev, mapLinks: (prev.mapLinks ?? []).filter((_, idx) => idx !== i) }));
   }
 
   function updateStoreLink(i, field, value) {
@@ -668,6 +700,52 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleCapIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `gm-cap-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateCapability(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
+  async function handleStatIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `gm-stat-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateImpactStat(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleBlackBannerImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -730,6 +808,21 @@ export default function HomePageEditor() {
     });
     if (badSlide !== -1) {
       setError(`Slide ${badSlide + 1} needs a title and its ${slideMediaType(slides[badSlide])}.`);
+      return;
+    }
+    // Global Mobility map animation: every location needs an ID + label, and
+    // every connection must point at existing location IDs. Empty rows can be
+    // deleted instead of being silently dropped.
+    const gmNodes = globalMobility.mapNodes ?? [];
+    const badNode = gmNodes.findIndex((n) => !String(n.id ?? "").trim() || !String(n.label ?? "").trim());
+    if (badNode !== -1) {
+      setError(`Global Mobility map location ${badNode + 1} needs both an ID and a label — fill them in or delete the row.`);
+      return;
+    }
+    const gmNodeIds = new Set(gmNodes.map((n) => n.id));
+    const badLink = (globalMobility.mapLinks ?? []).findIndex((l) => !gmNodeIds.has(l.from) || !gmNodeIds.has(l.to));
+    if (badLink !== -1) {
+      setError(`Global Mobility map connection ${badLink + 1} needs valid From and To locations — pick existing locations or delete the row.`);
       return;
     }
     setSaving(true);
@@ -1786,6 +1879,33 @@ export default function HomePageEditor() {
               <ArInput label="Heading End" kind="heading" value={clientsPartners.ar?.headingEnd} onChange={(v) => setClientsPartners((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingEnd: v } }))} />
             </div>
 
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>CTA Button Label (optional)</label>
+                <input
+                  value={clientsPartners.ctaLabel ?? ""}
+                  onChange={(e) => setClientsPartners((p) => ({ ...p, ctaLabel: e.target.value }))}
+                  maxLength={FIELD_LIMITS.button}
+                  className={inputClass}
+                  placeholder="Leave empty to hide the button"
+                />
+                <CharCount value={clientsPartners.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+                <ArInput label="CTA Button" kind="button" value={clientsPartners.ar?.ctaLabel} onChange={(v) => setClientsPartners((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>CTA Button Link</label>
+                <input
+                  value={clientsPartners.ctaHref ?? ""}
+                  onChange={(e) => setClientsPartners((p) => ({ ...p, ctaHref: e.target.value }))}
+                  maxLength={FIELD_LIMITS.link}
+                  className={inputClass}
+                  placeholder="/contact"
+                />
+                <CharCount value={clientsPartners.ctaHref ?? ""} max={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(clientsPartners.ctaHref ?? "")} />
+              </div>
+            </div>
+
             <div className="my-1 border-t border-slate-200" />
 
             {/* Logos */}
@@ -1979,14 +2099,42 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={cap.description ?? ""} max={FIELD_LIMITS.description} />
                   <ArInput label="Description" kind="description" multiline value={cap.ar?.description} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), description: v })} />
+                  <MediaField
+                    label="Icon Image (optional — overrides the built-in icon)"
+                    value={cap.iconImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`gm-cap-${i}-icon`] !== undefined}
+                    progress={uploadProgress[`gm-cap-${i}-icon`]}
+                    onChange={(v) => updateCapability(i, "iconImage", v)}
+                    onUpload={(file) => handleCapIconUpload(i, file)}
+                  />
                 </div>
               </div>
             ))}
 
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Impact Stats</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Impact Stats ({(globalMobility.impactStats ?? []).length})</p>
+              <button
+                type="button"
+                onClick={addImpactStat}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Stat
+              </button>
+            </div>
             {(globalMobility.impactStats ?? []).map((stat, i) => (
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Stat {i + 1}</p>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Stat {i + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeImpactStat(i)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={stat.value ?? ""}
@@ -2005,9 +2153,167 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={stat.label ?? ""} max={FIELD_LIMITS.label} />
                   <ArInput label="Label" kind="label" value={stat.ar?.label} onChange={(v) => updateImpactStat(i, "ar", { ...(stat.ar ?? {}), label: v })} />
+                  <MediaField
+                    label="Icon Image (optional — overrides the built-in icon)"
+                    value={stat.iconImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`gm-stat-${i}-icon`] !== undefined}
+                    progress={uploadProgress[`gm-stat-${i}-icon`]}
+                    onChange={(v) => updateImpactStat(i, "iconImage", v)}
+                    onUpload={(file) => handleStatIconUpload(i, file)}
+                  />
                 </div>
               </div>
             ))}
+
+            <div className="mt-2 rounded-xl border border-slate-200 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Map Animation — Locations &amp; Connections</p>
+              <p className="mt-1 mb-3 text-xs text-slate-500">
+                Positions are % of the map area (x: 0 left → 100 right, y: 0 top → 100 bottom). Connections animate between locations.
+              </p>
+
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Locations ({(globalMobility.mapNodes ?? []).length})</p>
+                <button
+                  type="button"
+                  onClick={addMapNode}
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Location
+                </button>
+              </div>
+              <div className="mt-2 grid gap-3">
+                {(globalMobility.mapNodes ?? []).map((node, i) => (
+                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Location {i + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => removeMapNode(i)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    </div>
+                    <div className="grid gap-2">
+                      <div>
+                        <label className={labelClass}>Label</label>
+                        <input
+                          value={node.label ?? ""}
+                          onChange={(e) => updateMapNode(i, "label", e.target.value)}
+                          maxLength={FIELD_LIMITS.label}
+                          className={inputClass}
+                          placeholder="Dubai"
+                        />
+                        <CharCount value={node.label ?? ""} max={FIELD_LIMITS.label} />
+                        <ArInput label="Label" kind="label" value={node.ar?.label} onChange={(v) => updateMapNode(i, "ar", { ...(node.ar ?? {}), label: v })} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>ID (short unique slug)</label>
+                        <input
+                          value={node.id ?? ""}
+                          onChange={(e) => updateMapNode(i, "id", e.target.value)}
+                          maxLength={FIELD_LIMITS.label}
+                          className={inputClass}
+                          placeholder="dubai"
+                        />
+                        <p className="mt-1 text-[11px] text-slate-400">used by connections</p>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div>
+                          <label className={labelClass}>X (0–100)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={node.x ?? ""}
+                            onChange={(e) => updateMapNode(i, "x", e.target.value === "" ? "" : Number(e.target.value))}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Y (0–100)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={node.y ?? ""}
+                            onChange={(e) => updateMapNode(i, "y", e.target.value === "" ? "" : Number(e.target.value))}
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Connections ({(globalMobility.mapLinks ?? []).length})</p>
+                <button
+                  type="button"
+                  onClick={addMapLink}
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Connection
+                </button>
+              </div>
+              <div className="mt-2 grid gap-3">
+                {(globalMobility.mapLinks ?? []).map((link, i) => (
+                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Connection {i + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => removeMapLink(i)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <label className={labelClass}>From</label>
+                        <select
+                          value={link.from ?? ""}
+                          onChange={(e) => updateMapLink(i, "from", e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">— select location —</option>
+                          {(globalMobility.mapNodes ?? []).map((n, j) => (
+                            <option key={j} value={n.id}>{n.label || n.id}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>To</label>
+                        <select
+                          value={link.to ?? ""}
+                          onChange={(e) => updateMapLink(i, "to", e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">— select location —</option>
+                          {(globalMobility.mapNodes ?? []).map((n, j) => (
+                            <option key={j} value={n.id}>{n.label || n.id}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>Curve</label>
+                        <input
+                          type="number"
+                          value={link.curve ?? ""}
+                          onChange={(e) => updateMapLink(i, "curve", e.target.value === "" ? "" : Number(e.target.value))}
+                          className={inputClass}
+                        />
+                        <p className="mt-1 text-[11px] text-slate-400">arc bend: negative = up, positive = down</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </CollapsibleSection>
 

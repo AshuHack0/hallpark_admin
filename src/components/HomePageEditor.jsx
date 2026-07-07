@@ -645,6 +645,29 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleStoreIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `storeLink-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateStoreLink(i, "icon", url);
+      setSuccess("Store icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleBlackBannerImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -2037,15 +2060,16 @@ export default function HomePageEditor() {
                   </button>
                 </div>
                 <div className="grid gap-2">
-                  <input
+                  <MediaField
+                    label="Store Icon"
                     value={link.icon ?? ""}
-                    onChange={(e) => updateStoreLink(i, "icon", e.target.value)}
-                    maxLength={FIELD_LIMITS.link}
-                    className={inputClass}
-                    placeholder="Icon path"
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`storeLink-${i}-icon`] !== undefined}
+                    progress={uploadProgress[`storeLink-${i}-icon`]}
+                    onChange={(v) => updateStoreLink(i, "icon", v)}
+                    onUpload={(file) => handleStoreIconUpload(i, file)}
                   />
-                  <CharCount value={link.icon ?? ""} max={FIELD_LIMITS.link} />
-                  <FieldError error={validateUrl(link.icon ?? "")} />
                   <input
                     value={link.alt ?? ""}
                     onChange={(e) => updateStoreLink(i, "alt", e.target.value)}
@@ -2055,6 +2079,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={link.alt ?? ""} max={FIELD_LIMITS.label} />
                   <input
+                    value={link.eyebrow ?? ""}
+                    onChange={(e) => updateStoreLink(i, "eyebrow", e.target.value)}
+                    maxLength={FIELD_LIMITS.label}
+                    className={inputClass}
+                    placeholder="Small text above name (e.g., Download Now On)"
+                  />
+                  <CharCount value={link.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Eyebrow" kind="label" value={link.ar?.eyebrow} onChange={(v) => updateStoreLink(i, "ar", { ...(link.ar ?? {}), eyebrow: v })} />
+                  <input
                     value={link.label ?? ""}
                     onChange={(e) => updateStoreLink(i, "label", e.target.value)}
                     maxLength={FIELD_LIMITS.label}
@@ -2063,6 +2096,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={link.label ?? ""} max={FIELD_LIMITS.label} />
                   <ArInput label="Label" kind="label" value={link.ar?.label} onChange={(v) => updateStoreLink(i, "ar", { ...(link.ar ?? {}), label: v })} />
+                  <input
+                    value={link.href ?? ""}
+                    onChange={(e) => updateStoreLink(i, "href", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
+                    className={inputClass}
+                    placeholder="Store page URL (https://…) — makes the badge clickable"
+                  />
+                  <CharCount value={link.href ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(link.href ?? "")} />
                 </div>
               </div>
             ))}

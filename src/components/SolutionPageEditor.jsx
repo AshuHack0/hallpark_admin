@@ -3,31 +3,76 @@ import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon 
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { FRONTEND_PAGES } from "../constants/pages.js";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
 
+// Reusable page-link picker for CTA link fields. Renders a <select> of the
+// configured FRONTEND_PAGES paths plus an "Other…" option that reveals a free
+// text input — so existing custom/non-listed links are preserved and editable.
+// eslint-disable-next-line react/prop-types
+function PageLinkSelect({ value, onChange }) {
+  const val = value ?? "";
+  const pagePaths = FRONTEND_PAGES.map((p) => p.path);
+  const isKnown = val === "" || pagePaths.includes(val);
+  const [custom, setCustom] = useState(!isKnown);
+  const handleSelect = (e) => {
+    const next = e.target.value;
+    if (next === "__other__") {
+      setCustom(true);
+      return;
+    }
+    setCustom(false);
+    onChange(next);
+  };
+  return (
+    <div className="space-y-2">
+      <select value={custom ? "__other__" : val} onChange={handleSelect} className={inputClass}>
+        <option value="">— Select a page —</option>
+        {FRONTEND_PAGES.map((p) => (
+          <option key={p.slug} value={p.path}>{p.name} ({p.path})</option>
+        ))}
+        <option value="__other__">Other… (custom URL)</option>
+      </select>
+      {custom && (
+        <>
+          <input
+            value={val}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClass}
+            placeholder="/custom-path or https://…"
+            maxLength={FIELD_LIMITS.link}
+          />
+          <FieldError error={validateUrl(val)} />
+        </>
+      )}
+    </div>
+  );
+}
+
 const DEFAULT_HERO = {
-  title: "Intelligent Parking Experiences",
-  titleAccent: "Built for the Future",
-  subtitle: "HalaPark delivers an AI-powered smart parking ecosystem designed for large-scale residential, commercial, and mixed-use developments across the UAE, enabling seamless mobility, automation, and real-time operational control.",
-  ctaLabel: "Get In Touch",
-  ctaLink: "/contact",
-  videoUrl: "/Halapark Hero Page-Ai.mp4",
+  title: "",
+  titleAccent: "",
+  subtitle: "",
+  ctaLabel: "",
+  ctaLink: "",
+  mediaType: "video",
+  image: "",
+  videoUrl: "",
+  ar: {},
 };
 
 const DEFAULT_CHALLENGES = {
-  heading: "Parking Challenges",
-  headingGradient: "Challenges",
-  subtitle: "Solving Parking Inefficiencies Through Smart Mobility",
-  description: "Traditional parking systems are manual, fragmented, and lack real-time visibility, causing congestion, operational inefficiencies, and poor user experience. HalaPark transforms parking into a connected ecosystem powered by automation, AI, and real-time control.",
-  items: [
-    "Limited real-time parking visibility",
-    "Manual vehicle entry and exit processes",
-    "Inefficient space utilization",
-    "Friction at access and payment points",
-  ],
-  ctaLabel: "View App Features",
+  heading: "",
+  headingGradient: "",
+  subtitle: "",
+  description: "",
+  image: "",
+  items: [],
+  ctaLabel: "",
+  ctaLink: "",
+  ar: {},
 };
 
 const DEFAULT_SOLUTIONS = {
@@ -495,8 +540,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
-              <input value={draft.ctaLink ?? ""} onChange={(e) => setField("ctaLink", e.target.value)} className={inputClass} placeholder="/contact" maxLength={FIELD_LIMITS.link} />
-              <FieldError error={validateUrl(draft.ctaLink ?? "")} />
+              <PageLinkSelect value={draft.ctaLink} onChange={(v) => setField("ctaLink", v)} />
             </div>
           </div>
 
@@ -811,6 +855,48 @@ export default function SolutionPageEditor() {
     }
   }
 
+  async function handleHeroImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "hero-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setHero((p) => ({ ...p, image: url }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  async function handleChallengesImageUpload(file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = "challenges-image";
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setChallenges((p) => ({ ...p, image: url }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(section, cardIndex, file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -944,16 +1030,51 @@ export default function SolutionPageEditor() {
             </div>
             <div>
               <label className={labelClass}>CTA Link</label>
+              <PageLinkSelect value={hero.ctaLink} onChange={(v) => setHero((p) => ({ ...p, ctaLink: v }))} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Media Type</label>
+            <select
+              value={hero.mediaType ?? "video"}
+              onChange={(e) => setHero((p) => ({ ...p, mediaType: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+            <p className="mt-1 text-[11px] text-slate-400">Controls whether the website shows the hero image or video.</p>
+          </div>
+          <div>
+            <label className={labelClass}>Hero Image</label>
+            <div className="flex gap-2">
               <input
-                value={hero.ctaLink ?? ""}
-                onChange={(e) => setHero((p) => ({ ...p, ctaLink: e.target.value }))}
+                value={hero.image ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, image: e.target.value }))}
                 className={inputClass}
-                placeholder="/contact"
+                placeholder="/path/to/image.png"
                 maxLength={FIELD_LIMITS.link}
               />
-              <CharCount value={hero.ctaLink ?? ""} max={FIELD_LIMITS.link} />
-              <FieldError error={validateUrl(hero.ctaLink ?? "")} />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                {uploadProgress["hero-image"] !== undefined ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress["hero-image"]}%</>
+                ) : (
+                  <><Upload className="h-3.5 w-3.5" /> Upload</>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadProgress["hero-image"] !== undefined}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleHeroImageUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
             </div>
+            <FieldError error={validateUrl(hero.image ?? "")} />
           </div>
           <div>
             <label className={labelClass}>Video URL</label>
@@ -1040,6 +1161,39 @@ export default function SolutionPageEditor() {
             <ArInput label="Description" kind="description" multiline value={challenges.ar?.description} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
           </div>
 
+          {/* Challenges Image */}
+          <div>
+            <label className={labelClass}>Challenges Image</label>
+            <div className="flex gap-2">
+              <input
+                value={challenges.image ?? ""}
+                onChange={(e) => setChallenges((p) => ({ ...p, image: e.target.value }))}
+                className={inputClass}
+                placeholder="/path/to/image.png"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                {uploadProgress["challenges-image"] !== undefined ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress["challenges-image"]}%</>
+                ) : (
+                  <><Upload className="h-3.5 w-3.5" /> Upload</>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadProgress["challenges-image"] !== undefined}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleChallengesImageUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            <FieldError error={validateUrl(challenges.image ?? "")} />
+          </div>
+
           {/* Points list */}
           <div>
             <div className="mb-2 flex items-center justify-between">
@@ -1089,15 +1243,7 @@ export default function SolutionPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Button Link</label>
-              <input
-                value={challenges.ctaLink ?? ""}
-                onChange={(e) => setChallenges((p) => ({ ...p, ctaLink: e.target.value }))}
-                className={inputClass}
-                placeholder="/app"
-                maxLength={FIELD_LIMITS.link}
-              />
-              <CharCount value={challenges.ctaLink ?? ""} max={FIELD_LIMITS.link} />
-              <FieldError error={validateUrl(challenges.ctaLink ?? "")} />
+              <PageLinkSelect value={challenges.ctaLink} onChange={(v) => setChallenges((p) => ({ ...p, ctaLink: v }))} />
             </div>
           </div>
         </div>

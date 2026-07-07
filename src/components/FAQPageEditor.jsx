@@ -36,6 +36,24 @@ const DEFAULT_HERO = {
   image: "/hf_20260327_061900_db12a62e-2867-44b6-83f0-ea7f1a5442ef.png",
 };
 
+const DEFAULT_SEARCH_HEADER = {
+  heading: "",
+  headingAccent: "",
+  subtitle: "",
+  searchPlaceholder: "",
+  ar: {},
+};
+
+const DEFAULT_BOTTOM_CTA = {
+  heading: "",
+  description: "",
+  contactLabel: "",
+  contactHref: "",
+  whatsappLabel: "",
+  whatsappHref: "",
+  ar: {},
+};
+
 const FAQ_ICON_OPTIONS = [
   { value: "Building2", label: "Building" },
   { value: "CalendarCheck2", label: "Booking Calendar" },
@@ -102,19 +120,22 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
 export default function FAQPageEditor() {
   const [page, setPage] = useState(null);
   const [hero, setHero] = useState(DEFAULT_HERO);
+  const [searchHeader, setSearchHeader] = useState(DEFAULT_SEARCH_HEADER);
+  const [bottomCta, setBottomCta] = useState(DEFAULT_BOTTOM_CTA);
   const [faqCategories, setFaqCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
-  const [openSections, setOpenSections] = useState({ hero: true, faqs: true });
+  const [openSections, setOpenSections] = useState({ hero: true, faqs: true, searchHeader: true, bottomCta: true });
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [questionModalOpen, setQuestionModalOpen] = useState(false);
   const [editCategoryIndex, setEditCategoryIndex] = useState(null);
   const [editQuestionIndex, setEditQuestionIndex] = useState(null);
   const [questionModalCategoryIndex, setQuestionModalCategoryIndex] = useState(null);
-  const [newCategoryForm, setNewCategoryForm] = useState({ title: "", icon: "Building2" });
+  const [newCategoryForm, setNewCategoryForm] = useState({ title: "", icon: "Building2", iconImage: "" });
+  const [categoryError, setCategoryError] = useState("");
   const [newQuestionForm, setNewQuestionForm] = useState({ question: "", answer: "", videoUrl: "", videos: [] });
 
   const faqCount = useMemo(
@@ -131,6 +152,12 @@ export default function FAQPageEditor() {
         setPage(data);
         if (data.page?.sections?.hero) {
           setHero(data.page.sections.hero);
+        }
+        if (data.page?.sections?.searchHeader) {
+          setSearchHeader(data.page.sections.searchHeader);
+        }
+        if (data.page?.sections?.bottomCta) {
+          setBottomCta(data.page.sections.bottomCta);
         }
         if (data.page?.sections?.faqCategories) {
           setFaqCategories(data.page.sections.faqCategories);
@@ -151,6 +178,8 @@ export default function FAQPageEditor() {
         sections: {
           hero,
           faqCategories,
+          searchHeader,
+          bottomCta,
         },
       });
       setSuccess("FAQ page saved successfully!");
@@ -184,39 +213,53 @@ export default function FAQPageEditor() {
     }
   }
 
-  async function handleVideoUpload(categoryIndex, itemIndex, videoIndex, file) {
+  // Uploads a video for the question modal and writes the URL into the modal's
+  // OWN form state (newQuestionForm.videos) — never directly into faqCategories.
+  // The change only lands on the real question when the user hits Save, and is
+  // fully discarded on Cancel.
+  async function handleModalVideoUpload(videoIndex, file) {
     if (!file) return;
     const err = validateVideoFile(file);
     if (err) { setError(err); return; }
-    const key = `${categoryIndex}-${itemIndex}-${videoIndex}`;
+    const key = `modal-video-${videoIndex}`;
+    setError("");
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadVideoToCloudinary(file, (pct) =>
         setUploadProgress((p) => ({ ...p, [key]: pct }))
       );
-      setFaqCategories((prev) =>
-        prev.map((category, cIndex) =>
-          cIndex === categoryIndex
-            ? {
-                ...category,
-                items: (category.items ?? []).map((item, iIndex) =>
-                  iIndex === itemIndex
-                    ? {
-                        ...item,
-                        videos: (Array.isArray(item.videos) ? item.videos : []).map((v, vIndex) =>
-                          vIndex === videoIndex ? url : v
-                        ),
-                      }
-                    : item,
-                ),
-              }
-            : category,
-        )
-      );
+      setNewQuestionForm((prev) => ({
+        ...prev,
+        videos: (Array.isArray(prev.videos) ? prev.videos : []).map((v, vIndex) =>
+          vIndex === videoIndex ? url : v
+        ),
+      }));
       setSuccess("Video uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError("Video upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // Uploads an optional icon image for the category modal into the modal's form
+  // state. Persisted onto the category (as `iconImage`) only on Save.
+  async function handleCategoryIconUpload(file) {
+    if (!file) return;
+    const err = validateImageFile(file);
+    if (err) { setCategoryError(err); return; }
+    const key = "cat-icon";
+    setCategoryError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setNewCategoryForm((prev) => ({ ...prev, iconImage: url }));
+    } catch (err) {
+      setCategoryError("Icon image upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -241,18 +284,32 @@ export default function FAQPageEditor() {
   const addCategory = () => {
     const title = newCategoryForm.title.trim() || "New Category";
     const icon = newCategoryForm.icon.trim() || "Building2";
+    const iconImage = (newCategoryForm.iconImage ?? "").trim();
+    // Master-data guard: category titles are unique (case-insensitive). Blocks
+    // both creating a duplicate and renaming a category onto an existing one
+    // (the category being edited is excluded from the check).
+    const isDuplicate = faqCategories.some(
+      (category, index) =>
+        index !== editCategoryIndex &&
+        (category.title ?? "").trim().toLowerCase() === title.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setCategoryError(`A category named "${title}" already exists — questions should be added under it instead.`);
+      return;
+    }
     const id = toSlug(title) || `category-${Date.now()}`;
     setFaqCategories((prev) => {
       const next = editCategoryIndex === null
-        ? [...prev, { id, title, icon, items: [] }]
+        ? [...prev, { id, title, icon, iconImage, items: [] }]
         : prev.map((category, index) =>
             index === editCategoryIndex
-              ? { ...category, title, icon }
+              ? { ...category, title, icon, iconImage }
               : category,
           );
       return next;
     });
-    setNewCategoryForm({ title: "", icon: "Building2" });
+    setNewCategoryForm({ title: "", icon: "Building2", iconImage: "" });
+    setCategoryError("");
     setEditCategoryIndex(null);
     setCategoryModalOpen(false);
   };
@@ -272,7 +329,10 @@ export default function FAQPageEditor() {
   const addQuestion = (categoryIndex) => {
     const question = newQuestionForm.question.trim() || "New question";
     const answer = newQuestionForm.answer.trim() || "New answer";
-    const videos = Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [];
+    // Persist the modal's own video list; drop rows the user left blank.
+    const videos = (Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [])
+      .map((v) => (v ?? "").trim())
+      .filter(Boolean);
     const ar = newQuestionForm.ar; // Arabic translations ride along with the item.
     const id = toSlug(question) || `q-${Date.now()}`;
     setFaqCategories((prev) =>
@@ -333,7 +393,9 @@ export default function FAQPageEditor() {
     setNewCategoryForm({
       title: category.title ?? "",
       icon: category.icon ?? "Building2",
+      iconImage: category.iconImage ?? "",
     });
+    setCategoryError("");
     setCategoryModalOpen(true);
   };
 
@@ -357,70 +419,6 @@ export default function FAQPageEditor() {
       videos: Array.isArray(item.videos) ? item.videos : [],
     });
     setQuestionModalOpen(true);
-  };
-
-  const removeVideoSlot = (categoryIndex, itemIndex, videoIndex) => {
-    setFaqCategories((prev) =>
-      prev.map((category, cIndex) =>
-        cIndex === categoryIndex
-          ? {
-              ...category,
-              items: (category.items ?? []).map((item, iIndex) =>
-                iIndex === itemIndex
-                  ? {
-                      ...item,
-                      videos: (Array.isArray(item.videos) ? item.videos : []).filter(
-                        (_, vIndex) => vIndex !== videoIndex
-                      ),
-                    }
-                  : item,
-              ),
-            }
-          : category,
-      ),
-    );
-  };
-
-  const addVideoSlot = (categoryIndex, itemIndex) => {
-    setFaqCategories((prev) =>
-      prev.map((category, cIndex) =>
-        cIndex === categoryIndex
-          ? {
-              ...category,
-              items: (category.items ?? []).map((item, iIndex) =>
-                iIndex === itemIndex
-                  ? {
-                      ...item,
-                      videos: [...(Array.isArray(item.videos) ? item.videos : []), ""],
-                    }
-                  : item,
-              ),
-            }
-          : category,
-      ),
-    );
-  };
-
-  const updateVideoSlot = (categoryIndex, itemIndex, videoIndex, value) => {
-    setFaqCategories((prev) =>
-      prev.map((category, cIndex) =>
-        cIndex === categoryIndex
-          ? {
-              ...category,
-              items: (category.items ?? []).map((item, iIndex) =>
-                iIndex === itemIndex
-                  ? {
-                      ...item,
-                      videos: (Array.isArray(item.videos) ? item.videos : []).map((v, vIndex) =>
-                        vIndex === videoIndex ? value : v
-                      ),
-                    }
-                  : item,
-              ),
-            }
-          : category,
-      ),
-    );
   };
 
   if (loading) {
@@ -545,7 +543,8 @@ export default function FAQPageEditor() {
                 type="button"
                 onClick={() => {
                   setEditCategoryIndex(null);
-                  setNewCategoryForm({ title: "", icon: "Building2" });
+                  setNewCategoryForm({ title: "", icon: "Building2", iconImage: "" });
+                  setCategoryError("");
                   setCategoryModalOpen(true);
                 }}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
@@ -656,6 +655,147 @@ export default function FAQPageEditor() {
             ))}
           </div>
         </CollapsibleSection>
+
+        {/* Search Header Section */}
+        <CollapsibleSection
+          title="3. Search Header (What would you like to know?)"
+          isOpen={openSections.searchHeader}
+          onToggle={() => toggleSection("searchHeader")}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                type="text"
+                value={searchHeader.heading ?? ""}
+                onChange={(e) => setSearchHeader({ ...searchHeader, heading: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+              />
+              <CharCount value={searchHeader.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Heading" kind="heading" value={searchHeader.ar?.heading} onChange={(v) => setSearchHeader({ ...searchHeader, ar: { ...(searchHeader.ar ?? {}), heading: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Accent (highlighted part)</label>
+              <input
+                type="text"
+                value={searchHeader.headingAccent ?? ""}
+                onChange={(e) => setSearchHeader({ ...searchHeader, headingAccent: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+              />
+              <CharCount value={searchHeader.headingAccent ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Heading Accent" kind="label" value={searchHeader.ar?.headingAccent} onChange={(v) => setSearchHeader({ ...searchHeader, ar: { ...(searchHeader.ar ?? {}), headingAccent: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Subtitle</label>
+              <input
+                type="text"
+                value={searchHeader.subtitle ?? ""}
+                onChange={(e) => setSearchHeader({ ...searchHeader, subtitle: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <CharCount value={searchHeader.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput label="Subtitle" kind="subtitle" value={searchHeader.ar?.subtitle} onChange={(v) => setSearchHeader({ ...searchHeader, ar: { ...(searchHeader.ar ?? {}), subtitle: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Search Placeholder</label>
+              <input
+                type="text"
+                value={searchHeader.searchPlaceholder ?? ""}
+                onChange={(e) => setSearchHeader({ ...searchHeader, searchPlaceholder: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+              />
+              <CharCount value={searchHeader.searchPlaceholder ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Search Placeholder" kind="label" value={searchHeader.ar?.searchPlaceholder} onChange={(v) => setSearchHeader({ ...searchHeader, ar: { ...(searchHeader.ar ?? {}), searchPlaceholder: v } })} />
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        {/* Bottom CTA Section */}
+        <CollapsibleSection
+          title="4. Still Have Questions? (Bottom CTA)"
+          isOpen={openSections.bottomCta}
+          onToggle={() => toggleSection("bottomCta")}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                type="text"
+                value={bottomCta.heading ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, heading: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+              />
+              <CharCount value={bottomCta.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Heading" kind="heading" value={bottomCta.ar?.heading} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), heading: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={bottomCta.description ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, description: e.target.value })}
+                className={inputClass}
+                rows={3}
+                maxLength={FIELD_LIMITS.description}
+              />
+              <CharCount value={bottomCta.description ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput label="Description" kind="description" multiline value={bottomCta.ar?.description} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), description: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Contact Button Label</label>
+              <input
+                type="text"
+                value={bottomCta.contactLabel ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, contactLabel: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.button}
+              />
+              <CharCount value={bottomCta.contactLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="Contact Button Label" kind="button" value={bottomCta.ar?.contactLabel} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), contactLabel: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Contact Link</label>
+              <input
+                type="text"
+                value={bottomCta.contactHref ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, contactHref: e.target.value })}
+                className={inputClass}
+                placeholder="e.g., /contact or https://..."
+                maxLength={FIELD_LIMITS.link}
+              />
+              <FieldError error={validateUrl(bottomCta.contactHref)} />
+            </div>
+            <div>
+              <label className={labelClass}>WhatsApp Button Label</label>
+              <input
+                type="text"
+                value={bottomCta.whatsappLabel ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, whatsappLabel: e.target.value })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.button}
+              />
+              <CharCount value={bottomCta.whatsappLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="WhatsApp Button Label" kind="button" value={bottomCta.ar?.whatsappLabel} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), whatsappLabel: v } })} />
+            </div>
+            <div>
+              <label className={labelClass}>WhatsApp Link</label>
+              <input
+                type="text"
+                value={bottomCta.whatsappHref ?? ""}
+                onChange={(e) => setBottomCta({ ...bottomCta, whatsappHref: e.target.value })}
+                className={inputClass}
+                placeholder="e.g. https://wa.me/9714..."
+                maxLength={FIELD_LIMITS.link}
+              />
+              <p className="mt-1 text-[11px] text-slate-400">e.g. https://wa.me/9714...</p>
+              <FieldError error={validateUrl(bottomCta.whatsappHref)} />
+            </div>
+          </div>
+        </CollapsibleSection>
       </div>
 
       {/* Category Modal */}
@@ -671,7 +811,10 @@ export default function FAQPageEditor() {
                 <input
                   type="text"
                   value={newCategoryForm.title}
-                  onChange={(e) => setNewCategoryForm({ ...newCategoryForm, title: e.target.value })}
+                  onChange={(e) => {
+                    setNewCategoryForm({ ...newCategoryForm, title: e.target.value });
+                    if (categoryError) setCategoryError("");
+                  }}
                   className={inputClass}
                   placeholder="Category title"
                   maxLength={FIELD_LIMITS.heading}
@@ -692,12 +835,67 @@ export default function FAQPageEditor() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategoryForm.iconImage ?? ""}
+                    onChange={(e) => setNewCategoryForm({ ...newCategoryForm, iconImage: e.target.value })}
+                    className={inputClass}
+                    placeholder="e.g., /icon.png or https://..."
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
+                    uploadProgress["cat-icon"] !== undefined
+                      ? "cursor-not-allowed border-slate-200 text-slate-400"
+                      : "cursor-pointer border-[#0088FF]/30 bg-[#EEF6FF] text-[#0088FF] hover:bg-[#dcecff]"
+                  }`}>
+                    {uploadProgress["cat-icon"] !== undefined ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        {uploadProgress["cat-icon"]}%
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3.5 w-3.5" />
+                        Upload
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadProgress["cat-icon"] !== undefined}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) handleCategoryIconUpload(file);
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(newCategoryForm.iconImage)} />
+                {(newCategoryForm.iconImage ?? "").trim() !== "" && (
+                  <img
+                    src={newCategoryForm.iconImage}
+                    alt="Category icon preview"
+                    className="mt-2 h-10 w-10 rounded-lg border border-slate-200 object-cover"
+                  />
+                )}
+              </div>
+              {categoryError && (
+                <p className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs font-medium text-red-700">
+                  {categoryError}
+                </p>
+              )}
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={() => {
                     setCategoryModalOpen(false);
                     setEditCategoryIndex(null);
-                    setNewCategoryForm({ title: "", icon: "Building2" });
+                    setNewCategoryForm({ title: "", icon: "Building2", iconImage: "" });
+                    setCategoryError("");
                   }}
                   className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
@@ -754,7 +952,12 @@ export default function FAQPageEditor() {
                   <p className="text-xs font-semibold uppercase text-slate-600">Videos</p>
                   <button
                     type="button"
-                    onClick={() => addVideoSlot(questionModalCategoryIndex, editQuestionIndex ?? 0)}
+                    onClick={() =>
+                      setNewQuestionForm((prev) => ({
+                        ...prev,
+                        videos: [...(Array.isArray(prev.videos) ? prev.videos : []), ""],
+                      }))
+                    }
                     className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110"
                   >
                     <Plus className="h-3.5 w-3.5" />
@@ -763,7 +966,7 @@ export default function FAQPageEditor() {
                 </div>
                 <div className="space-y-2">
                   {(Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : []).map((video, videoIndex) => {
-                    const uploadKey = `${questionModalCategoryIndex}-0-${videoIndex}`;
+                    const uploadKey = `modal-video-${videoIndex}`;
                     const progress = uploadProgress[uploadKey];
                     const uploading = progress !== undefined;
                     return (
@@ -807,7 +1010,7 @@ export default function FAQPageEditor() {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               e.target.value = "";
-                              if (file) handleVideoUpload(questionModalCategoryIndex, editQuestionIndex ?? 0, videoIndex, file);
+                              if (file) handleModalVideoUpload(videoIndex, file);
                             }}
                           />
                         </label>

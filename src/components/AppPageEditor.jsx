@@ -245,6 +245,29 @@ export default function AppPageEditor() {
     }));
   };
 
+  // "Show this section on the website" toggle. The flag lives on the section's
+  // object (for array-backed sections it lives on the paired *Header object).
+  // A section is hidden on the site only when enabled === false.
+  function renderEnabledToggle(sectionKey) {
+    const enabled = sections[sectionKey]?.enabled !== false;
+    return (
+      <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) =>
+            setSections((prev) => ({
+              ...prev,
+              [sectionKey]: { ...prev[sectionKey], enabled: e.target.checked },
+            }))
+          }
+          className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+        />
+        Show this section on the website
+      </label>
+    );
+  }
+
   async function handleImageUpload(section, field, file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -407,6 +430,7 @@ export default function AppPageEditor() {
           isOpen={openSections.hero}
           onToggle={() => toggleSection("hero")}
         >
+          {renderEnabledToggle("hero")}
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Eyebrow (small badge above title)</label>
@@ -808,6 +832,7 @@ export default function AppPageEditor() {
           isOpen={openSections.platform}
           onToggle={() => toggleSection("platform")}
         >
+          {renderEnabledToggle("platform")}
           <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-[#050A13]">Main Content</h3>
@@ -1176,6 +1201,7 @@ export default function AppPageEditor() {
           isOpen={openSections.serviceTabs}
           onToggle={() => toggleSection("serviceTabs")}
         >
+          {renderEnabledToggle("serviceTabs")}
           <ArrayItemEditor
             items={sections.serviceTabs?.tabs || []}
             onItemsChange={(items) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, tabs: items } })}
@@ -1399,6 +1425,7 @@ export default function AppPageEditor() {
           isOpen={openSections.screenshots}
           onToggle={() => toggleSection("screenshots")}
         >
+          {renderEnabledToggle("screenshotsHeader")}
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -1591,6 +1618,7 @@ export default function AppPageEditor() {
           isOpen={openSections.currency}
           onToggle={() => toggleSection("currency")}
         >
+          {renderEnabledToggle("currency")}
           <div className="space-y-6">
             <div className="space-y-4">
               <div>
@@ -1801,6 +1829,7 @@ export default function AppPageEditor() {
           isOpen={openSections.featureCards}
           onToggle={() => toggleSection("featureCards")}
         >
+          {renderEnabledToggle("featureCardsHeader")}
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -1958,6 +1987,7 @@ export default function AppPageEditor() {
           isOpen={openSections.halapark}
           onToggle={() => toggleSection("halapark")}
         >
+          {renderEnabledToggle("halapark")}
           <div className="space-y-6">
             <div className="space-y-4">
               <div>
@@ -2089,6 +2119,7 @@ export default function AppPageEditor() {
           isOpen={openSections.ctaFooter}
           onToggle={() => toggleSection("ctaFooter")}
         >
+          {renderEnabledToggle("ctaFooter")}
           <div className="space-y-6">
             <div className="space-y-4">
               <div>

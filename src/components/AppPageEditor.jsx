@@ -21,15 +21,22 @@ const DEFAULT_HERO = {
 };
 
 const DEFAULT_PLATFORM = {
-  title: "HalaPark Online App",
-  subtitle: "Your parking, in your hands.",
+  title: "",
+  subtitle: "",
   description: "",
-  appFeatures: [
-    { title: "Manage with ease", description: "Access your account and manage parking anytime, anywhere." },
-  ],
-  websiteFeatures: [
-    { title: "Simple & intuitive", description: "A clean, smooth experience designed for quick access." },
-  ],
+  appSuffix: "",
+  webSuffix: "",
+  appBrand: "",
+  appBrandAccent: "",
+  webBrand: "",
+  webBrandAccent: "",
+  appScreen: "",
+  appButtonLabel: "",
+  appButtonLink: "",
+  webButtonLabel: "",
+  webButtonLink: "",
+  appFeatures: [],
+  websiteFeatures: [],
 };
 
 const DEFAULT_SERVICE_TABS = {
@@ -180,6 +187,16 @@ export default function AppPageEditor() {
     if (!sections.hero?.title?.trim()) {
       setError("Hero Title is required — please fill it in before saving.");
       setOpenSections((prev) => ({ ...prev, hero: true }));
+      return;
+    }
+    const plat = sections.platform || {};
+    const platHasContent =
+      (plat.appFeatures?.length || 0) > 0 ||
+      (plat.websiteFeatures?.length || 0) > 0 ||
+      !!plat.description?.trim();
+    if (platHasContent && !plat.appBrand?.trim() && !plat.webBrand?.trim()) {
+      setError("App Platform section needs at least an App or Website brand title.");
+      setOpenSections((prev) => ({ ...prev, platform: true }));
       return;
     }
     setSaving(true);
@@ -771,9 +788,72 @@ export default function AppPageEditor() {
           <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-[#050A13]">Main Content</h3>
+
+              {/* Brand titles — App card */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>App Heading (after &quot;Halapark&quot;)</label>
+                  <label className={labelClass}>App Card — Brand</label>
+                  <input
+                    type="text"
+                    value={sections.platform.appBrand ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appBrand: e.target.value } })}
+                    className={inputClass}
+                    placeholder="HalaPark"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.appBrand ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="App Card — Brand" kind="label" value={sections.platform.ar?.appBrand} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appBrand: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>App Card — Brand Accent</label>
+                  <input
+                    type="text"
+                    value={sections.platform.appBrandAccent ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appBrandAccent: e.target.value } })}
+                    className={inputClass}
+                    placeholder="App"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.appBrandAccent ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="App Card — Brand Accent" kind="label" value={sections.platform.ar?.appBrandAccent} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appBrandAccent: v } } })} />
+                </div>
+              </div>
+
+              {/* Brand titles — Website card */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Website Card — Brand</label>
+                  <input
+                    type="text"
+                    value={sections.platform.webBrand ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webBrand: e.target.value } })}
+                    className={inputClass}
+                    placeholder="HalaPark"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.webBrand ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Website Card — Brand" kind="label" value={sections.platform.ar?.webBrand} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webBrand: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Website Card — Brand Accent</label>
+                  <input
+                    type="text"
+                    value={sections.platform.webBrandAccent ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webBrandAccent: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Website"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.platform.webBrandAccent ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Website Card — Brand Accent" kind="label" value={sections.platform.ar?.webBrandAccent} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webBrandAccent: v } } })} />
+                </div>
+              </div>
+              <p className="text-xs text-slate-500">Renders as &quot;Brand Accent&quot; e.g. HalaPark App</p>
+
+              {/* Legacy heading suffixes (kept for backward compatibility) */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>App Heading (legacy)</label>
                   <input
                     type="text"
                     value={sections.platform.appSuffix ?? ""}
@@ -783,10 +863,11 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={sections.platform.appSuffix ?? ""} max={FIELD_LIMITS.label} />
+                  <p className="text-xs text-slate-400 mt-1">Legacy — use App Card Brand / Brand Accent above instead.</p>
                   <ArInput label="App Heading" kind="label" value={sections.platform.ar?.appSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appSuffix: v } } })} />
                 </div>
                 <div>
-                  <label className={labelClass}>Website Heading (after &quot;Halapark&quot;)</label>
+                  <label className={labelClass}>Website Heading (legacy)</label>
                   <input
                     type="text"
                     value={sections.platform.webSuffix ?? ""}
@@ -796,6 +877,7 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.label}
                   />
                   <CharCount value={sections.platform.webSuffix ?? ""} max={FIELD_LIMITS.label} />
+                  <p className="text-xs text-slate-400 mt-1">Legacy — use Website Card Brand / Brand Accent above instead.</p>
                   <ArInput label="Website Heading" kind="label" value={sections.platform.ar?.webSuffix} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webSuffix: v } } })} />
                 </div>
               </div>
@@ -829,11 +911,99 @@ export default function AppPageEditor() {
                   value={sections.platform.description}
                   onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, description: e.target.value } })}
                   className={inputClass}
-                  rows={2}
-                  maxLength={FIELD_LIMITS.description}
+                  rows={5}
                 />
-                <CharCount value={sections.platform.description} max={FIELD_LIMITS.description} />
-                <ArInput label="Description" kind="description" value={sections.platform.ar?.description} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })} multiline={true} />
+                <ArInput label="Description" kind="description" limit={100000} value={sections.platform.ar?.description} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })} multiline={true} />
+              </div>
+
+              {/* Phone screenshot */}
+              <div>
+                <label className={labelClass}>App Phone Screenshot</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.platform.appScreen ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appScreen: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    {uploadProgress["platform-appScreen"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["platform-appScreen"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload</>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload("platform", "appScreen", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(sections.platform.appScreen)} />
+              </div>
+
+              {/* App card button */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>App Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.platform.appButtonLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appButtonLabel: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Get the App"
+                    maxLength={FIELD_LIMITS.button}
+                  />
+                  <CharCount value={sections.platform.appButtonLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="App Button Label" kind="button" value={sections.platform.ar?.appButtonLabel} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), appButtonLabel: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>App Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.platform.appButtonLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, appButtonLink: e.target.value } })}
+                    className={inputClass}
+                    placeholder="https://…"
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <FieldError error={validateUrl(sections.platform.appButtonLink)} />
+                </div>
+              </div>
+
+              {/* Website card button */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Website Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.platform.webButtonLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webButtonLabel: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Visit Website"
+                    maxLength={FIELD_LIMITS.button}
+                  />
+                  <CharCount value={sections.platform.webButtonLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="Website Button Label" kind="button" value={sections.platform.ar?.webButtonLabel} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), webButtonLabel: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Website Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.platform.webButtonLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webButtonLink: e.target.value } })}
+                    className={inputClass}
+                    placeholder="https://…"
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <FieldError error={validateUrl(sections.platform.webButtonLink)} />
+                </div>
               </div>
             </div>
 
@@ -870,6 +1040,36 @@ export default function AppPageEditor() {
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
                       <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.iconImage ?? ""}
+                          onChange={(e) => update(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`platform-appfeat-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`platform-appfeat-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`platform-appfeat-${i}-icon`, update, i, "iconImage", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(item.iconImage)} />
                     </div>
                   </div>
                 )}
@@ -909,6 +1109,36 @@ export default function AppPageEditor() {
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
                       <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.iconImage ?? ""}
+                          onChange={(e) => update(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`platform-webfeat-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`platform-webfeat-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`platform-webfeat-${i}-icon`, update, i, "iconImage", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(item.iconImage)} />
                     </div>
                   </div>
                 )}

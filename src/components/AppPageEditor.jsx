@@ -46,30 +46,23 @@ const DEFAULT_SERVICE_TABS = {
   ar: { featureChips: [], ctaLabel: "" },
 };
 
-const DEFAULT_SCREENSHOTS = [
-  {
-    title: "Find",
-    description: "Set your location",
-    image: "/Map.png",
-  },
-];
+// No default copy — screenshots are DB-driven (source of truth). Editors add
+// their own items; nothing renders on the site until content is entered.
+const DEFAULT_SCREENSHOTS = [];
 
 const DEFAULT_CURRENCY = {
-  title: "HalaPark Payments",
-  subtitle: "Top up your wallet",
-  description: "Secure and flexible payment options for your parking sessions.",
-  cardFeatures: [
-    { title: "Top Up", subtitle: "your wallet" },
-  ],
+  title: "",
+  subtitle: "",
+  description: "",
+  image: "",
+  cardFeatures: [],
+  topUpLabel: "",
+  topUpSteps: [],
+  ar: { title: "", subtitle: "", description: "", topUpLabel: "" },
 };
 
-const DEFAULT_FEATURE_CARDS = [
-  {
-    title: "Real-Time Parking Rates",
-    description: "Always get the most accurate rates when booking.",
-    preview: "rates",
-  },
-];
+// No default copy — feature cards are DB-driven (source of truth).
+const DEFAULT_FEATURE_CARDS = [];
 
 const DEFAULT_HALAPARK_IN_ACTION = {
   title: "HalaPark In Action",
@@ -78,6 +71,13 @@ const DEFAULT_HALAPARK_IN_ACTION = {
     { icon: "/image--04.png", alt: "App Store", label: "App Store" },
     { icon: "/image 4.png", alt: "Play Store", label: "Play Store" },
   ],
+};
+
+const DEFAULT_CTA_FOOTER = {
+  heading: "",
+  description: "",
+  stores: [],
+  ar: { heading: "", description: "" },
 };
 
 function CollapsibleSection({ title, isOpen, onToggle, children }) {
@@ -151,6 +151,7 @@ export default function AppPageEditor() {
     currency: DEFAULT_CURRENCY,
     featureCards: DEFAULT_FEATURE_CARDS,
     halapark: DEFAULT_HALAPARK_IN_ACTION,
+    ctaFooter: DEFAULT_CTA_FOOTER,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1459,7 +1460,7 @@ export default function AppPageEditor() {
                 onItemsChange={(items) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, processSteps: items } })}
                 title="Step"
                 addButtonText="Add Step"
-                defaultItem={{ title: "Step", text: "" }}
+                defaultItem={{ title: "", text: "", iconImage: "" }}
                 renderItem={(item, i, update) => (
                   <div className="space-y-3">
                     <div>
@@ -1475,16 +1476,45 @@ export default function AppPageEditor() {
                       <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
-                      <label className={labelClass}>Text</label>
-                      <input
-                        type="text"
+                      <label className={labelClass}>Text (description)</label>
+                      <textarea
                         value={item.text ?? ""}
                         onChange={(e) => update(i, { text: e.target.value })}
                         className={inputClass}
-                        maxLength={FIELD_LIMITS.subtitle}
+                        rows={2}
                       />
-                      <CharCount value={item.text ?? ""} max={FIELD_LIMITS.subtitle} />
-                      <ArInput label="Text" kind="subtitle" value={item.ar?.text} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), text: v } })} />
+                      <ArInput label="Text" kind="subtitle" value={item.ar?.text} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), text: v } })} multiline={true} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image (optional)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.iconImage ?? ""}
+                          onChange={(e) => update(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`scr-step-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`scr-step-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`scr-step-${i}-icon`, update, i, "iconImage", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <CharCount value={item.iconImage ?? ""} max={FIELD_LIMITS.link} />
+                      <FieldError error={validateUrl(item.iconImage)} />
                     </div>
                   </div>
                 )}
@@ -1496,37 +1526,35 @@ export default function AppPageEditor() {
             onItemsChange={(items) => setSections({ ...sections, screenshots: items })}
             title="Screenshot"
             addButtonText="Add Screenshot"
-            defaultItem={{ title: "New Screenshot", description: "", image: "/screenshot.png" }}
+            defaultItem={{ title: "", description: "", image: "" }}
             renderItem={(item, i, update) => (
               <div className="space-y-4">
                 <div>
                   <label className={labelClass}>Title</label>
                   <input
                     type="text"
-                    value={item.title}
+                    value={item.title ?? ""}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
                     maxLength={FIELD_LIMITS.heading}
                   />
-                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
+                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
                   <textarea
-                    value={item.description}
+                    value={item.description ?? ""}
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
-                    maxLength={FIELD_LIMITS.description}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                 </div>
                 <div>
                   <label className={labelClass}>Screenshot Image URL</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={item.image}
+                      value={item.image ?? ""}
                       onChange={(e) => update(i, { image: e.target.value })}
                       className={inputClass}
                       maxLength={FIELD_LIMITS.link}
@@ -1549,7 +1577,7 @@ export default function AppPageEditor() {
                       />
                     </label>
                   </div>
-                  <CharCount value={item.image} max={FIELD_LIMITS.link} />
+                  <CharCount value={item.image ?? ""} max={FIELD_LIMITS.link} />
                   <FieldError error={validateUrl(item.image)} />
                 </div>
               </div>
@@ -1592,14 +1620,42 @@ export default function AppPageEditor() {
               <div>
                 <label className={labelClass}>Description</label>
                 <textarea
-                  value={sections.currency?.description}
+                  value={sections.currency?.description ?? ""}
                   onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, description: e.target.value } })}
                   className={inputClass}
-                  rows={2}
-                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
                 />
-                <CharCount value={sections.currency?.description} max={FIELD_LIMITS.description} />
                 <ArInput label="Description" kind="description" value={sections.currency?.ar?.description} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })} multiline={true} />
+              </div>
+              <div>
+                <label className={labelClass}>Section Image (phone screen)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.currency?.image ?? ""}
+                    onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, image: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    {uploadProgress["currency-image"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["currency-image"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload</>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload("currency", "image", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(sections.currency?.image)} />
               </div>
             </div>
 
@@ -1610,14 +1666,111 @@ export default function AppPageEditor() {
                 onItemsChange={(items) => setSections({ ...sections, currency: { ...sections.currency, cardFeatures: items } })}
                 title="Feature"
                 addButtonText="Add Feature"
-                defaultItem={{ title: "Feature", subtitle: "subtitle" }}
+                defaultItem={{ title: "", subtitle: "", icon: "WalletCards" }}
                 renderItem={(item, i, update) => (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Title</label>
+                        <input
+                          type="text"
+                          value={item.title ?? ""}
+                          onChange={(e) => update(i, { title: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                        <CharCount value={item.title} max={FIELD_LIMITS.label} />
+                        <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Subtitle</label>
+                        <input
+                          type="text"
+                          value={item.subtitle ?? ""}
+                          onChange={(e) => update(i, { subtitle: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                        <CharCount value={item.subtitle} max={FIELD_LIMITS.label} />
+                        <ArInput label="Subtitle" kind="label" value={item.ar?.subtitle} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), subtitle: v } })} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon</label>
+                      <select
+                        value={item.icon ?? "WalletCards"}
+                        onChange={(e) => update(i, { icon: e.target.value })}
+                        className={inputClass}
+                      >
+                        <option value="WalletCards">WalletCards</option>
+                        <option value="ParkingCircle">ParkingCircle</option>
+                        <option value="MapPinned">MapPinned</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.iconImage ?? ""}
+                          onChange={(e) => update(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`currency-card-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`currency-card-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`currency-card-${i}-icon`, update, i, "iconImage", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(item.iconImage)} />
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Top Up Button Label</label>
+              <input
+                type="text"
+                value={sections.currency?.topUpLabel ?? ""}
+                onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, topUpLabel: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+              />
+              <CharCount value={sections.currency?.topUpLabel} max={FIELD_LIMITS.label} />
+              <ArInput label="Top Up Button Label" kind="label" value={sections.currency?.ar?.topUpLabel} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), topUpLabel: v } } })} />
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-[#050A13] mb-1">Top Up Steps</h3>
+              <p className="mb-4 text-xs text-slate-500">Shown in the &quot;How to top up&quot; popup.</p>
+              <ArrayItemEditor
+                items={sections.currency?.topUpSteps || []}
+                onItemsChange={(items) => setSections({ ...sections, currency: { ...sections.currency, topUpSteps: items } })}
+                title="Step"
+                addButtonText="Add Step"
+                defaultItem={{ title: "", description: "" }}
+                renderItem={(item, i, update) => (
+                  <div className="space-y-4">
                     <div>
                       <label className={labelClass}>Title</label>
                       <input
                         type="text"
-                        value={item.title}
+                        value={item.title ?? ""}
                         onChange={(e) => update(i, { title: e.target.value })}
                         className={inputClass}
                         maxLength={FIELD_LIMITS.label}
@@ -1626,16 +1779,14 @@ export default function AppPageEditor() {
                       <ArInput label="Title" kind="label" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                     </div>
                     <div>
-                      <label className={labelClass}>Subtitle</label>
-                      <input
-                        type="text"
-                        value={item.subtitle}
-                        onChange={(e) => update(i, { subtitle: e.target.value })}
+                      <label className={labelClass}>Description</label>
+                      <textarea
+                        value={item.description ?? ""}
+                        onChange={(e) => update(i, { description: e.target.value })}
                         className={inputClass}
-                        maxLength={FIELD_LIMITS.label}
+                        rows={3}
                       />
-                      <CharCount value={item.subtitle} max={FIELD_LIMITS.label} />
-                      <ArInput label="Subtitle" kind="label" value={item.ar?.subtitle} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), subtitle: v } })} />
+                      <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                     </div>
                   </div>
                 )}
@@ -1697,44 +1848,104 @@ export default function AppPageEditor() {
             onItemsChange={(items) => setSections({ ...sections, featureCards: items })}
             title="Feature Card"
             addButtonText="Add Card"
-            defaultItem={{ title: "New Feature", description: "", preview: "rates" }}
+            defaultItem={{ title: "", description: "", preview: "", iconImage: "", image: "" }}
             renderItem={(item, i, update) => (
               <div className="space-y-4">
                 <div>
                   <label className={labelClass}>Title</label>
                   <input
                     type="text"
-                    value={item.title}
+                    value={item.title ?? ""}
                     onChange={(e) => update(i, { title: e.target.value })}
                     className={inputClass}
                     maxLength={FIELD_LIMITS.heading}
                   />
-                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
+                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
                   <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} />
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
                   <textarea
-                    value={item.description}
+                    value={item.description ?? ""}
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
                     rows={2}
-                    maxLength={FIELD_LIMITS.description}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
                   <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
-                  <label className={labelClass}>Preview Type</label>
+                  <label className={labelClass}>Icon Image (optional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.iconImage ?? ""}
+                      onChange={(e) => update(i, { iconImage: e.target.value })}
+                      className={inputClass}
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`feat-card-${i}-icon`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`feat-card-${i}-icon`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleArrayImageUpload(`feat-card-${i}-icon`, update, i, "iconImage", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <CharCount value={item.iconImage ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(item.iconImage)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Card Image (optional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.image ?? ""}
+                      onChange={(e) => update(i, { image: e.target.value })}
+                      className={inputClass}
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`feat-card-${i}-img`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`feat-card-${i}-img`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleArrayImageUpload(`feat-card-${i}-img`, update, i, "image", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <CharCount value={item.image ?? ""} max={FIELD_LIMITS.link} />
+                  <FieldError error={validateUrl(item.image)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Preview Type (fallback visual when no Card Image)</label>
                   <input
                     type="text"
-                    value={item.preview}
+                    value={item.preview ?? ""}
                     onChange={(e) => update(i, { preview: e.target.value })}
                     className={inputClass}
                     placeholder="e.g., rates, summary, payment"
                     maxLength={FIELD_LIMITS.label}
                   />
-                  <CharCount value={item.preview} max={FIELD_LIMITS.label} />
+                  <CharCount value={item.preview ?? ""} max={FIELD_LIMITS.label} />
                 </div>
               </div>
             )}
@@ -1782,7 +1993,7 @@ export default function AppPageEditor() {
                 onItemsChange={(items) => setSections({ ...sections, halapark: { ...sections.halapark, storeLinks: items } })}
                 title="Store Link"
                 addButtonText="Add Store"
-                defaultItem={{ icon: "/icon.png", alt: "Store Name", label: "Store Label" }}
+                defaultItem={{ icon: "/icon.png", alt: "Store Name", eyebrow: "Download Now On", label: "Store Label", href: "" }}
                 renderItem={(item, i, update) => (
                   <div className="space-y-4">
                     <div>
@@ -1828,6 +2039,19 @@ export default function AppPageEditor() {
                       <CharCount value={item.alt} max={FIELD_LIMITS.label} />
                     </div>
                     <div>
+                      <label className={labelClass}>Eyebrow (small text above name)</label>
+                      <input
+                        type="text"
+                        value={item.eyebrow ?? ""}
+                        onChange={(e) => update(i, { eyebrow: e.target.value })}
+                        className={inputClass}
+                        placeholder="Download Now On"
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                      <CharCount value={item.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput label="Eyebrow" kind="label" value={item.ar?.eyebrow} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), eyebrow: v } })} />
+                    </div>
+                    <div>
                       <label className={labelClass}>Label</label>
                       <input
                         type="text"
@@ -1838,6 +2062,133 @@ export default function AppPageEditor() {
                       />
                       <CharCount value={item.label} max={FIELD_LIMITS.label} />
                       <ArInput label="Label" kind="label" value={item.ar?.label} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Store Page URL (makes the badge clickable)</label>
+                      <input
+                        type="text"
+                        value={item.href ?? ""}
+                        onChange={(e) => update(i, { href: e.target.value })}
+                        className={inputClass}
+                        placeholder="https://…"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <CharCount value={item.href ?? ""} max={FIELD_LIMITS.link} />
+                      <FieldError error={validateUrl(item.href ?? "")} />
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        {/* 8. App CTA Footer */}
+        <CollapsibleSection
+          title="8. App CTA Footer"
+          isOpen={openSections.ctaFooter}
+          onToggle={() => toggleSection("ctaFooter")}
+        >
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>Heading</label>
+                <input
+                  type="text"
+                  value={sections.ctaFooter?.heading ?? ""}
+                  onChange={(e) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, heading: e.target.value } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.heading}
+                />
+                <CharCount value={sections.ctaFooter?.heading ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Heading" kind="heading" value={sections.ctaFooter?.ar?.heading} onChange={(v) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, ar: { ...(sections.ctaFooter?.ar ?? {}), heading: v } } })} />
+              </div>
+              <div>
+                <label className={labelClass}>Description</label>
+                <textarea
+                  value={sections.ctaFooter?.description ?? ""}
+                  onChange={(e) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, description: e.target.value } })}
+                  className={inputClass}
+                  rows={5}
+                />
+                <ArInput label="Description" kind="description" limit={100000} value={sections.ctaFooter?.ar?.description} onChange={(v) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, ar: { ...(sections.ctaFooter?.ar ?? {}), description: v } } })} multiline={true} />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-[#050A13] mb-4">Store Badges</h3>
+              <ArrayItemEditor
+                items={sections.ctaFooter?.stores || []}
+                onItemsChange={(items) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, stores: items } })}
+                title="Store"
+                addButtonText="Add Store"
+                defaultItem={{ key: "appstore", label: "", icon: "", href: "" }}
+                renderItem={(item, i, update) => (
+                  <div className="space-y-4">
+                    <div>
+                      <label className={labelClass}>Store — controls default handling</label>
+                      <select
+                        value={item.key ?? "appstore"}
+                        onChange={(e) => update(i, { key: e.target.value })}
+                        className={inputClass}
+                      >
+                        <option value="appstore">App Store</option>
+                        <option value="playstore">Play Store</option>
+                        <option value="huawei">Huawei AppGallery</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Label</label>
+                      <input
+                        type="text"
+                        value={item.label ?? ""}
+                        onChange={(e) => update(i, { label: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                      <CharCount value={item.label ?? ""} max={FIELD_LIMITS.label} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item.icon ?? ""}
+                          onChange={(e) => update(i, { icon: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`ctafooter-store-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`ctafooter-store-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleArrayImageUpload(`ctafooter-store-${i}-icon`, update, i, "icon", file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(item.icon)} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Store URL</label>
+                      <input
+                        type="text"
+                        value={item.href ?? ""}
+                        onChange={(e) => update(i, { href: e.target.value })}
+                        className={inputClass}
+                        placeholder="https://…"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <FieldError error={validateUrl(item.href ?? "")} />
                     </div>
                   </div>
                 )}

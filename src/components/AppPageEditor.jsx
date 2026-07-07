@@ -40,14 +40,10 @@ const DEFAULT_PLATFORM = {
 };
 
 const DEFAULT_SERVICE_TABS = {
-  tabs: [
-    {
-      key: "public",
-      label: "Public Parking",
-      description: "Find and book public parking spaces easily",
-      steps: ["Search", "Book", "Pay"],
-    },
-  ],
+  tabs: [],
+  featureChips: [],
+  ctaLabel: "",
+  ar: { featureChips: [], ctaLabel: "" },
 };
 
 const DEFAULT_SCREENSHOTS = [
@@ -199,11 +195,37 @@ export default function AppPageEditor() {
       setOpenSections((prev) => ({ ...prev, platform: true }));
       return;
     }
+    // --- Service Tabs: validate labels, filter blank feature chips ---
+    const svc = sections.serviceTabs || {};
+    const svcTabs = Array.isArray(svc.tabs) ? svc.tabs : [];
+    for (let i = 0; i < svcTabs.length; i++) {
+      const t = svcTabs[i] || {};
+      const hasContent =
+        (Array.isArray(t.steps) && t.steps.some((s) => s?.trim())) ||
+        !!t.screen?.trim() ||
+        !!t.description?.trim();
+      if (hasContent && !t.label?.trim()) {
+        setError(`Service Tab ${i + 1} needs a Label before saving.`);
+        setOpenSections((prev) => ({ ...prev, serviceTabs: true }));
+        return;
+      }
+    }
+    // Never persist blank ("") feature chips — the reported empty-chip bug.
+    const filterChips = (arr) =>
+      (Array.isArray(arr) ? arr : []).map((s) => (s ?? "").trim()).filter(Boolean);
+    const cleanedSections = {
+      ...sections,
+      serviceTabs: {
+        ...svc,
+        featureChips: filterChips(svc.featureChips),
+        ar: { ...(svc.ar ?? {}), featureChips: filterChips(svc.ar?.featureChips) },
+      },
+    };
     setSaving(true);
     setError("");
     try {
       await api.updatePage("app", {
-        sections,
+        sections: cleanedSections,
       });
       setSuccess("App page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -1159,10 +1181,15 @@ export default function AppPageEditor() {
             title="Service Tab"
             addButtonText="Add Tab"
             defaultItem={{
-              key: "new-service",
-              label: "New Service",
-              description: "Service description",
-              steps: ["Step 1", "Step 2", "Step 3"],
+              key: "",
+              label: "",
+              description: "",
+              builtFor: "",
+              cardKicker: "",
+              cta: "",
+              steps: [],
+              screen: "",
+              iconImage: "",
             }}
             renderItem={(item, i, update) => (
               <div className="space-y-4">
@@ -1193,14 +1220,12 @@ export default function AppPageEditor() {
                 <div>
                   <label className={labelClass}>Description</label>
                   <textarea
-                    value={item.description}
+                    value={item.description ?? ""}
                     onChange={(e) => update(i, { description: e.target.value })}
                     className={inputClass}
-                    rows={2}
-                    maxLength={FIELD_LIMITS.description}
+                    rows={4}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <ArInput label="Description" kind="description" limit={100000} value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
                   <label className={labelClass}>Steps (comma-separated)</label>
@@ -1256,12 +1281,72 @@ export default function AppPageEditor() {
                     value={item.builtFor ?? ""}
                     onChange={(e) => update(i, { builtFor: e.target.value })}
                     className={inputClass}
-                    rows={2}
+                    rows={4}
                     placeholder="City Access Pass is built for fast entry, helping users move from Search to Pay with fewer taps."
-                    maxLength={FIELD_LIMITS.description}
                   />
-                  <CharCount value={item.builtFor ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Built For" kind="description" multiline value={item.ar?.builtFor} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), builtFor: v } })} />
+                  <ArInput label="Built For" kind="description" limit={100000} multiline value={item.ar?.builtFor} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), builtFor: v } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Phone Screen Image</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.screen ?? ""}
+                      onChange={(e) => update(i, { screen: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://… or /screen.png"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`svc-tab-${i}-screen`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`svc-tab-${i}-screen`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleArrayImageUpload(`svc-tab-${i}-screen`, update, i, "screen", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(item.screen)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Tab Icon (optional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.iconImage ?? ""}
+                      onChange={(e) => update(i, { iconImage: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://… or /icon.png"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`svc-tab-${i}-icon`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`svc-tab-${i}-icon`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleArrayImageUpload(`svc-tab-${i}-icon`, update, i, "iconImage", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(item.iconImage)} />
                 </div>
               </div>
             )}
@@ -1274,7 +1359,7 @@ export default function AppPageEditor() {
               <input
                 type="text"
                 value={Array.isArray(sections.serviceTabs?.featureChips) ? sections.serviceTabs.featureChips.join(", ") : ""}
-                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, featureChips: e.target.value.split(",").map((s) => s.trim()) } })}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, featureChips: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } })}
                 className={inputClass}
                 placeholder="Real-time updates, Seamless checkout, Mobile-first flow"
                 maxLength={FIELD_LIMITS.subtitle}
@@ -1284,11 +1369,12 @@ export default function AppPageEditor() {
                 type="text"
                 dir="rtl"
                 value={Array.isArray(sections.serviceTabs?.ar?.featureChips) ? sections.serviceTabs.ar.featureChips.join("، ") : ""}
-                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), featureChips: e.target.value.split(/،|,/).map((s) => s.trim()) } } })}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), featureChips: e.target.value.split(/،|,/).map((s) => s.trim()).filter(Boolean) } } })}
                 className={inputClass}
                 style={{ borderColor: "#16a34a" }}
                 maxLength={FIELD_LIMITS.subtitle}
               />
+              <p className="mt-1 text-[11px] text-slate-400">Empty chips are ignored.</p>
             </div>
             <div>
               <label className={labelClass}>Main CTA Button</label>

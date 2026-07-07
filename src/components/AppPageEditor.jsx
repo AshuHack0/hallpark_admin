@@ -8,10 +8,16 @@ const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 p
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
 
 const DEFAULT_HERO = {
-  title: "Find Parking in Seconds Across UAE",
+  eyebrow: "",
+  title: "",
   subtitle: "",
-  description: "Find nearby parking, reserve instantly, and pay cashless, all in one seamless app experience.",
-  image: "/j3.png",
+  description: "",
+  image: "",
+  phoneImage: "",
+  ctaLabel: "",
+  ctaHref: "",
+  stats: [],
+  cards: [],
 };
 
 const DEFAULT_PLATFORM = {
@@ -171,6 +177,11 @@ export default function AppPageEditor() {
 
   async function handleSave() {
     if (!page) return;
+    if (!sections.hero?.title?.trim()) {
+      setError("Hero Title is required — please fill it in before saving.");
+      setOpenSections((prev) => ({ ...prev, hero: true }));
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -240,6 +251,71 @@ export default function AppPageEditor() {
     }
   }
 
+  // --- Hero stats helpers (spread-preserve: never drop ar/other keys) ---
+  function updateHeroStat(i, updates) {
+    setSections((prev) => {
+      const stats = [...(prev.hero.stats || [])];
+      stats[i] = { ...stats[i], ...updates };
+      return { ...prev, hero: { ...prev.hero, stats } };
+    });
+  }
+  function addHeroStat() {
+    setSections((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, stats: [...(prev.hero.stats || []), { value: "", label: "", icon: "Star" }] },
+    }));
+  }
+  function removeHeroStat(i) {
+    setSections((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, stats: (prev.hero.stats || []).filter((_, idx) => idx !== i) },
+    }));
+  }
+
+  // --- Hero floating cards helpers (spread-preserve) ---
+  function updateHeroCard(i, updates) {
+    setSections((prev) => {
+      const cards = [...(prev.hero.cards || [])];
+      cards[i] = { ...cards[i], ...updates };
+      return { ...prev, hero: { ...prev.hero, cards } };
+    });
+  }
+  function addHeroCard() {
+    setSections((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, cards: [...(prev.hero.cards || []), { icon: "ParkingCircle", title: "", subtitle: "" }] },
+    }));
+  }
+  function removeHeroCard(i) {
+    setSections((prev) => ({
+      ...prev,
+      hero: { ...prev.hero, cards: (prev.hero.cards || []).filter((_, idx) => idx !== i) },
+    }));
+  }
+
+  // Upload an icon image for a hero stat/card row (writes item.iconImage).
+  async function handleHeroItemIconUpload(kind, i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `hero-${kind}-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      if (kind === "stat") updateHeroStat(i, { iconImage: url });
+      else updateHeroCard(i, { iconImage: url });
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (e) {
+      setError("Image upload failed");
+      console.error(e);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -293,7 +369,19 @@ export default function AppPageEditor() {
         >
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Title</label>
+              <label className={labelClass}>Eyebrow (small badge above title)</label>
+              <input
+                type="text"
+                value={sections.hero.eyebrow ?? ""}
+                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, eyebrow: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <CharCount value={sections.hero.eyebrow ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput label="Eyebrow" kind="subtitle" value={sections.hero.ar?.eyebrow} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), eyebrow: v } } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Title <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={sections.hero.title}
@@ -322,14 +410,43 @@ export default function AppPageEditor() {
                 value={sections.hero.description}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, description: e.target.value } })}
                 className={inputClass}
-                rows={3}
-                maxLength={FIELD_LIMITS.description}
+                rows={5}
               />
-              <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
+              <ArInput label="Description" kind="description" limit={100000} value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
             </div>
+
+            {/* CTA */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>CTA Button Label</label>
+                <input
+                  type="text"
+                  value={sections.hero.ctaLabel ?? ""}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaLabel: e.target.value } })}
+                  className={inputClass}
+                  placeholder="Get the App"
+                  maxLength={FIELD_LIMITS.button}
+                />
+                <CharCount value={sections.hero.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+                <ArInput label="CTA Button Label" kind="button" value={sections.hero.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), ctaLabel: v } } })} />
+              </div>
+              <div>
+                <label className={labelClass}>CTA Button Link</label>
+                <input
+                  type="text"
+                  value={sections.hero.ctaHref ?? ""}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaHref: e.target.value } })}
+                  className={inputClass}
+                  placeholder="https://…"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(sections.hero.ctaHref)} />
+              </div>
+            </div>
+
+            {/* Images */}
             <div>
-              <label className={labelClass}>Hero Image URL</label>
+              <label className={labelClass}>Hero Image (right side)</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -339,8 +456,11 @@ export default function AppPageEditor() {
                   maxLength={FIELD_LIMITS.link}
                 />
                 <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
-                  <Upload className="h-3.5 w-3.5" />
-                  Upload
+                  {uploadProgress["hero-image"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["hero-image"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload</>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
@@ -354,6 +474,290 @@ export default function AppPageEditor() {
                 </label>
               </div>
               <FieldError error={validateUrl(sections.hero.image)} />
+            </div>
+            <div>
+              <label className={labelClass}>Phone Screenshot (inside the frame)</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sections.hero.phoneImage ?? ""}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, phoneImage: e.target.value } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  {uploadProgress["hero-phoneImage"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["hero-phoneImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload("hero", "phoneImage", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+              <FieldError error={validateUrl(sections.hero.phoneImage)} />
+            </div>
+
+            {/* Stats editor */}
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-700">Stats ({(sections.hero.stats || []).length})</p>
+                <button
+                  onClick={addHeroStat}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Stat
+                </button>
+              </div>
+              {(sections.hero.stats || []).map((stat, i) => (
+                <div key={i} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-semibold text-slate-700">Stat {i + 1}</p>
+                    <button
+                      onClick={() => removeHeroStat(i)}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-2">
+                        <label className={labelClass}>Value</label>
+                        <input
+                          type="text"
+                          value={stat.value ?? ""}
+                          onChange={(e) => updateHeroStat(i, { value: e.target.value })}
+                          className={inputClass}
+                          placeholder="10K"
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Suffix</label>
+                        <input
+                          type="text"
+                          value={stat.suffix ?? ""}
+                          onChange={(e) => updateHeroStat(i, { suffix: e.target.value })}
+                          className={inputClass}
+                          placeholder="+"
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Label</label>
+                      <input
+                        type="text"
+                        value={stat.label ?? ""}
+                        onChange={(e) => updateHeroStat(i, { label: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                      <CharCount value={stat.label ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput label="Label" kind="label" value={stat.ar?.label} onChange={(v) => updateHeroStat(i, { ar: { ...(stat.ar ?? {}), label: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon</label>
+                      <select
+                        value={stat.icon ?? "Star"}
+                        onChange={(e) => updateHeroStat(i, { icon: e.target.value })}
+                        className={inputClass}
+                      >
+                        <option value="Star">Star</option>
+                        <option value="Car">Car</option>
+                        <option value="Users">Users</option>
+                      </select>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={!!stat.showStars}
+                        onChange={(e) => updateHeroStat(i, { showStars: e.target.checked })}
+                        className="h-4 w-4 rounded border-slate-300 text-[#0088FF] focus:ring-[#0088FF]/30"
+                      />
+                      Show ★★★★★ line
+                    </label>
+                    <div>
+                      <label className={labelClass}>Icon Image (overrides the built-in icon)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={stat.iconImage ?? ""}
+                          onChange={(e) => updateHeroStat(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`hero-stat-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`hero-stat-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleHeroItemIconUpload("stat", i, file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(stat.iconImage)} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Floating Cards editor */}
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-700">Floating Cards ({(sections.hero.cards || []).length}) — only the first 3 show on the site</p>
+                <button
+                  onClick={addHeroCard}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Card
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500">Note: the design has 3 slots — only the first 3 cards render on the website.</p>
+              {(sections.hero.cards || []).map((card, i) => (
+                <div key={i} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
+                    <button
+                      onClick={() => removeHeroCard(i)}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className={labelClass}>Icon</label>
+                      <select
+                        value={card.icon ?? "ParkingCircle"}
+                        onChange={(e) => updateHeroCard(i, { icon: e.target.value })}
+                        className={inputClass}
+                      >
+                        <option value="ParkingCircle">ParkingCircle</option>
+                        <option value="Clock">Clock</option>
+                        <option value="Check">Check</option>
+                        <option value="MapPin">MapPin</option>
+                        <option value="Car">Car</option>
+                        <option value="Star">Star</option>
+                        <option value="Users">Users</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Title</label>
+                      <input
+                        type="text"
+                        value={card.title ?? ""}
+                        onChange={(e) => updateHeroCard(i, { title: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.label}
+                      />
+                      <CharCount value={card.title ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput label="Title" kind="label" value={card.ar?.title} onChange={(v) => updateHeroCard(i, { ar: { ...(card.ar ?? {}), title: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Subtitle</label>
+                      <input
+                        type="text"
+                        value={card.subtitle ?? ""}
+                        onChange={(e) => updateHeroCard(i, { subtitle: e.target.value })}
+                        className={inputClass}
+                        maxLength={FIELD_LIMITS.subtitle}
+                      />
+                      <CharCount value={card.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+                      <ArInput label="Subtitle" kind="subtitle" value={card.ar?.subtitle} onChange={(v) => updateHeroCard(i, { ar: { ...(card.ar ?? {}), subtitle: v } })} />
+                    </div>
+                    <div className="rounded-lg border border-dashed border-slate-200 p-3">
+                      <p className="mb-2 text-[11px] text-slate-500">Optional — session/payment style extras</p>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className={labelClass}>Timer</label>
+                          <input
+                            type="text"
+                            value={card.timer ?? ""}
+                            onChange={(e) => updateHeroCard(i, { timer: e.target.value })}
+                            className={inputClass}
+                            placeholder="02:15"
+                            maxLength={FIELD_LIMITS.label}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Amount</label>
+                          <input
+                            type="text"
+                            value={card.amount ?? ""}
+                            onChange={(e) => updateHeroCard(i, { amount: e.target.value })}
+                            className={inputClass}
+                            placeholder="AED 12"
+                            maxLength={FIELD_LIMITS.label}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Button Label</label>
+                          <input
+                            type="text"
+                            value={card.buttonLabel ?? ""}
+                            onChange={(e) => updateHeroCard(i, { buttonLabel: e.target.value })}
+                            className={inputClass}
+                            placeholder="Pay"
+                            maxLength={FIELD_LIMITS.button}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Icon Image (overrides the built-in icon)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={card.iconImage ?? ""}
+                          onChange={(e) => updateHeroCard(i, { iconImage: e.target.value })}
+                          className={inputClass}
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                          {uploadProgress[`hero-card-${i}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`hero-card-${i}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" />Upload</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleHeroItemIconUpload("card", i, file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <FieldError error={validateUrl(card.iconImage)} />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </CollapsibleSection>

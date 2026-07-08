@@ -4,6 +4,8 @@ import {
   FileText,
   Briefcase,
   MessageSquare,
+  FileSignature,
+  CalendarClock,
   LogOut,
   Globe,
   ChevronDown,
@@ -54,6 +56,14 @@ export default function AdminLayout() {
           <NavLink to="/contacts" className={navLinkClass}>
             <MessageSquare className="h-4 w-4" />
             Contact Submissions
+          </NavLink>
+          <NavLink to="/proposals" className={navLinkClass}>
+            <FileSignature className="h-4 w-4" />
+            Proposals
+          </NavLink>
+          <NavLink to="/consultations" className={navLinkClass}>
+            <CalendarClock className="h-4 w-4" />
+            Consultations
           </NavLink>
           <NavLink to="/job-applications" className={navLinkClass}>
             <Briefcase className="h-4 w-4" />

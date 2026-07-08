@@ -89,6 +89,20 @@ export const api = {
     }),
   deleteContact: (id) =>
     request(`/api/admin/contacts/${id}`, { method: "DELETE" }),
+  proposals: () => request("/api/admin/proposals"),
+  updateProposalStatus: (id, status) =>
+    request(`/api/admin/proposals/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deleteProposal: (id) => request(`/api/admin/proposals/${id}`, { method: "DELETE" }),
+  consultations: () => request("/api/admin/consultations"),
+  updateConsultationStatus: (id, status) =>
+    request(`/api/admin/consultations/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deleteConsultation: (id) => request(`/api/admin/consultations/${id}`, { method: "DELETE" }),
 };
 
 /**

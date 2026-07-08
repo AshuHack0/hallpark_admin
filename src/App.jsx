@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage.jsx";
 import QuotesPage from "./pages/QuotesPage.jsx";
 import JobApplicationsPage from "./pages/JobApplicationsPage.jsx";
 import ContactsPage from "./pages/ContactsPage.jsx";
+import ProposalsPage from "./pages/ProposalsPage.jsx";
+import ConsultationsPage from "./pages/ConsultationsPage.jsx";
 import PageEditorPage from "./pages/PageEditorPage.jsx";
 
 export default function App() {
@@ -26,6 +28,8 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="quotes" element={<QuotesPage />} />
           <Route path="contacts" element={<ContactsPage />} />
+          <Route path="proposals" element={<ProposalsPage />} />
+          <Route path="consultations" element={<ConsultationsPage />} />
           <Route path="job-applications" element={<JobApplicationsPage />} />
           <Route path="pages/:slug" element={<PageEditorPage />} />
         </Route>

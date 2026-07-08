@@ -367,6 +367,7 @@ export default function BusinessPageEditor() {
             // built-in defaults.
             solutions: Array.isArray(dbSections.solutions) ? dbSections.solutions : [],
             whyChoose: Array.isArray(dbSections.whyChoose) ? dbSections.whyChoose : [],
+            whoWeWork: Array.isArray(dbSections.whoWeWork) ? dbSections.whoWeWork : [],
           }));
         }
         setLoading(false);
@@ -408,6 +409,39 @@ export default function BusinessPageEditor() {
       [key]: { ...(prev[key] ?? {}), enabled: nextEnabled },
     }));
   };
+
+  // Hero popup helpers — write text config under hero.<formKey>.<field> (+ ar),
+  // and the selectable option arrays under hero.<optKey>.
+  const setHeroForm = (formKey, field, value) => {
+    setSections((prev) => ({ ...prev, hero: { ...prev.hero, [formKey]: { ...(prev.hero?.[formKey] ?? {}), [field]: value } } }));
+  };
+  const setHeroFormAr = (formKey, field, value) => {
+    setSections((prev) => ({ ...prev, hero: { ...prev.hero, [formKey]: { ...(prev.hero?.[formKey] ?? {}), ar: { ...(prev.hero?.[formKey]?.ar ?? {}), [field]: value } } } }));
+  };
+  const setHeroOptions = (optKey, nextArr) => {
+    setSections((prev) => ({ ...prev, hero: { ...prev.hero, [optKey]: nextArr } }));
+  };
+
+  // Upload a hero deck image → hero.deckImages[index].img
+  async function handleDeckImageUpload(index, file) {
+    const validationError = validateImageFile(file);
+    if (validationError) { setError(validationError); return; }
+    const key = `hero-deck-${index}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })));
+      setSections((prev) => ({
+        ...prev,
+        hero: { ...prev.hero, deckImages: (prev.hero?.deckImages ?? []).map((s, i) => (i === index ? { ...s, img: url } : s)) },
+      }));
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
 
   async function handleImageUpload(section, field, file, itemIndex = null) {
     const validationError = validateImageFile(file);
@@ -555,6 +589,154 @@ export default function BusinessPageEditor() {
               />
               <CharCount value={sections.hero?.ctaSecondary ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="Cta Secondary" kind="button" value={sections.hero?.ar?.ctaSecondary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaSecondary: v } } })} />
+              <p className="mt-1 text-[11px] text-slate-400">These two buttons open the Proposal / Consultation popups below (they no longer link to Contact Us).</p>
+            </div>
+
+            {/* ── Right-side image deck (multi-image) ── */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <label className={labelClass}>Hero Images (deck) ({(sections.hero?.deckImages ?? []).length})</label>
+                <button
+                  type="button"
+                  onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: [...(sections.hero?.deckImages ?? []), { img: "", label: "" }] } })}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Image
+                </button>
+              </div>
+              <p className="mb-2 text-[11px] text-slate-400">The rotating photo cards on the right of the hero. Add 3–4 for the best effect. Leave empty to use the built-in images.</p>
+              <div className="space-y-2">
+                {(sections.hero?.deckImages ?? []).map((slide, di) => (
+                  <div key={di} className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                      {slide.img ? <img src={slide.img} alt="" className="h-full w-full object-cover" /> : <span className="text-[9px] text-slate-300">—</span>}
+                    </div>
+                    <input
+                      value={slide.img ?? ""}
+                      onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).map((s, idx) => idx === di ? { ...s, img: e.target.value } : s) } })}
+                      className={inputClass}
+                      placeholder="Image URL or /path"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <input
+                      value={slide.label ?? ""}
+                      onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).map((s, idx) => idx === di ? { ...s, label: e.target.value } : s) } })}
+                      className="w-32 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white"
+                      placeholder="Caption"
+                      maxLength={FIELD_LIMITS.label}
+                    />
+                    <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                      {uploadProgress[`hero-deck-${di}`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`hero-deck-${di}`]}%</>
+                      ) : (<Upload className="h-3.5 w-3.5" />)}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeckImageUpload(di, f); e.target.value = ""; }} />
+                    </label>
+                    <button type="button" onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).filter((_, idx) => idx !== di) } })} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Get Proposal popup ── */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Get Proposal Popup</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Popup Heading</label>
+                  <input value={sections.hero?.proposalForm?.heading ?? ""} onChange={(e) => setHeroForm("proposalForm", "heading", e.target.value)} className={inputClass} placeholder="Get a Proposal" maxLength={FIELD_LIMITS.heading} />
+                  <ArInput label="Heading" kind="heading" value={sections.hero?.proposalForm?.ar?.heading} onChange={(v) => setHeroFormAr("proposalForm", "heading", v)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Options Label</label>
+                  <input value={sections.hero?.proposalForm?.optionsLabel ?? ""} onChange={(e) => setHeroForm("proposalForm", "optionsLabel", e.target.value)} className={inputClass} placeholder="Required Solutions" maxLength={FIELD_LIMITS.label} />
+                  <ArInput label="Options Label" kind="label" value={sections.hero?.proposalForm?.ar?.optionsLabel} onChange={(v) => setHeroFormAr("proposalForm", "optionsLabel", v)} />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label className={labelClass}>Subtitle</label>
+                <textarea value={sections.hero?.proposalForm?.subtitle ?? ""} onChange={(e) => setHeroForm("proposalForm", "subtitle", e.target.value)} className={inputClass} rows={2} maxLength={FIELD_LIMITS.subtitle} />
+                <ArInput label="Subtitle" kind="subtitle" multiline value={sections.hero?.proposalForm?.ar?.subtitle} onChange={(v) => setHeroFormAr("proposalForm", "subtitle", v)} />
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Success Title</label>
+                  <input value={sections.hero?.proposalForm?.successTitle ?? ""} onChange={(e) => setHeroForm("proposalForm", "successTitle", e.target.value)} className={inputClass} placeholder="Request Received!" maxLength={FIELD_LIMITS.heading} />
+                  <ArInput label="Success Title" kind="heading" value={sections.hero?.proposalForm?.ar?.successTitle} onChange={(v) => setHeroFormAr("proposalForm", "successTitle", v)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Success Message</label>
+                  <textarea value={sections.hero?.proposalForm?.successMessage ?? ""} onChange={(e) => setHeroForm("proposalForm", "successMessage", e.target.value)} className={inputClass} rows={2} maxLength={FIELD_LIMITS.description} />
+                  <ArInput label="Success Message" kind="description" multiline value={sections.hero?.proposalForm?.ar?.successMessage} onChange={(v) => setHeroFormAr("proposalForm", "successMessage", v)} />
+                </div>
+              </div>
+              {/* Selectable solutions */}
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className={labelClass}>Selectable Solutions ({(sections.hero?.proposalOptions ?? []).length})</label>
+                  <button type="button" onClick={() => setHeroOptions("proposalOptions", [...(sections.hero?.proposalOptions ?? []), { label: "", ar: "" }])} className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"><Plus className="h-3.5 w-3.5" /> Add Option</button>
+                </div>
+                <div className="space-y-2">
+                  {(sections.hero?.proposalOptions ?? []).map((opt, oi) => (
+                    <div key={oi} className="flex items-center gap-2">
+                      <input value={opt.label ?? ""} onChange={(e) => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).map((o, idx) => idx === oi ? { ...o, label: e.target.value } : o))} className={inputClass} placeholder="Solution name (English)" maxLength={FIELD_LIMITS.item} />
+                      <input dir="rtl" value={opt.ar ?? ""} onChange={(e) => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).map((o, idx) => idx === oi ? { ...o, ar: e.target.value } : o))} className={inputClass} style={{ borderColor: "#16a34a" }} placeholder="بالعربية" maxLength={FIELD_LIMITS.item} />
+                      <button type="button" onClick={() => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).filter((_, idx) => idx !== oi))} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Book a Free Consultation popup ── */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Book a Free Consultation Popup</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Popup Heading</label>
+                  <input value={sections.hero?.consultationForm?.heading ?? ""} onChange={(e) => setHeroForm("consultationForm", "heading", e.target.value)} className={inputClass} placeholder="Book a Free Consultation" maxLength={FIELD_LIMITS.heading} />
+                  <ArInput label="Heading" kind="heading" value={sections.hero?.consultationForm?.ar?.heading} onChange={(v) => setHeroFormAr("consultationForm", "heading", v)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Options Label</label>
+                  <input value={sections.hero?.consultationForm?.optionsLabel ?? ""} onChange={(e) => setHeroForm("consultationForm", "optionsLabel", e.target.value)} className={inputClass} placeholder="Discussion Topics" maxLength={FIELD_LIMITS.label} />
+                  <ArInput label="Options Label" kind="label" value={sections.hero?.consultationForm?.ar?.optionsLabel} onChange={(v) => setHeroFormAr("consultationForm", "optionsLabel", v)} />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label className={labelClass}>Subtitle</label>
+                <textarea value={sections.hero?.consultationForm?.subtitle ?? ""} onChange={(e) => setHeroForm("consultationForm", "subtitle", e.target.value)} className={inputClass} rows={2} maxLength={FIELD_LIMITS.subtitle} />
+                <ArInput label="Subtitle" kind="subtitle" multiline value={sections.hero?.consultationForm?.ar?.subtitle} onChange={(v) => setHeroFormAr("consultationForm", "subtitle", v)} />
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Success Title</label>
+                  <input value={sections.hero?.consultationForm?.successTitle ?? ""} onChange={(e) => setHeroForm("consultationForm", "successTitle", e.target.value)} className={inputClass} placeholder="Request Received!" maxLength={FIELD_LIMITS.heading} />
+                  <ArInput label="Success Title" kind="heading" value={sections.hero?.consultationForm?.ar?.successTitle} onChange={(v) => setHeroFormAr("consultationForm", "successTitle", v)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Success Message</label>
+                  <textarea value={sections.hero?.consultationForm?.successMessage ?? ""} onChange={(e) => setHeroForm("consultationForm", "successMessage", e.target.value)} className={inputClass} rows={2} maxLength={FIELD_LIMITS.description} />
+                  <ArInput label="Success Message" kind="description" multiline value={sections.hero?.consultationForm?.ar?.successMessage} onChange={(v) => setHeroFormAr("consultationForm", "successMessage", v)} />
+                </div>
+              </div>
+              {/* Selectable topics */}
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className={labelClass}>Discussion Topics ({(sections.hero?.consultationTopics ?? []).length})</label>
+                  <button type="button" onClick={() => setHeroOptions("consultationTopics", [...(sections.hero?.consultationTopics ?? []), { label: "", ar: "" }])} className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"><Plus className="h-3.5 w-3.5" /> Add Topic</button>
+                </div>
+                <div className="space-y-2">
+                  {(sections.hero?.consultationTopics ?? []).map((opt, oi) => (
+                    <div key={oi} className="flex items-center gap-2">
+                      <input value={opt.label ?? ""} onChange={(e) => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).map((o, idx) => idx === oi ? { ...o, label: e.target.value } : o))} className={inputClass} placeholder="Topic (English)" maxLength={FIELD_LIMITS.item} />
+                      <input dir="rtl" value={opt.ar ?? ""} onChange={(e) => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).map((o, idx) => idx === oi ? { ...o, ar: e.target.value } : o))} className={inputClass} style={{ borderColor: "#16a34a" }} placeholder="بالعربية" maxLength={FIELD_LIMITS.item} />
+                      <button type="button" onClick={() => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).filter((_, idx) => idx !== oi))} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -578,6 +760,20 @@ export default function BusinessPageEditor() {
               />
               <CharCount value={sections.builtForSpace.title} max={FIELD_LIMITS.heading} />
               <ArInput label="Title" kind="heading" value={sections.builtForSpace.ar?.title} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), title: v } } })} multiline={false} />
+            </div>
+            <div>
+              <label className={labelClass}>Title Gradient (second line, highlighted)</label>
+              <input
+                type="text"
+                value={sections.builtForSpace.titleGradient ?? ""}
+                onChange={(e) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, titleGradient: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="Every Space"
+              />
+              <p className="mt-1 text-[11px] text-slate-400">Shows on the second line in the blue gradient. Leave blank to auto-use the last two words of the Title.</p>
+              <CharCount value={sections.builtForSpace.titleGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Title Gradient" kind="heading" value={sections.builtForSpace.ar?.titleGradient} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), titleGradient: v } } })} multiline={false} />
             </div>
             <div>
               <label className={labelClass}>Description</label>
@@ -1013,6 +1209,18 @@ export default function BusinessPageEditor() {
               <CharCount value={sections.whoWeWorkHeader?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="CTA Label" kind="button" value={sections.whoWeWorkHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ar: { ...(sections.whoWeWorkHeader?.ar ?? {}), ctaLabel: v } } })} />
             </div>
+            <div>
+              <label className={labelClass}>Learn More Link (URL)</label>
+              <input
+                value={sections.whoWeWorkHeader?.ctaLink ?? ""}
+                onChange={(e) => setSections({ ...sections, whoWeWorkHeader: { ...sections.whoWeWorkHeader, ctaLink: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.link}
+                placeholder="/contact-us or https://..."
+              />
+              <FieldError error={validateUrl(sections.whoWeWorkHeader?.ctaLink ?? "")} />
+              <p className="mt-1 text-[11px] text-slate-400">Where the Learn More button links. Leave blank for a non-navigating button.</p>
+            </div>
           </div>
           <ArrayItemEditor
             items={sections.whoWeWork}
@@ -1022,7 +1230,8 @@ export default function BusinessPageEditor() {
             defaultItem={{
               title: "New Partner",
               description: "Description here",
-              image: "/image.png",
+              image: "",
+              icon: "",
               benefits: ["Benefit 1", "Benefit 2"],
             }}
             renderItem={(item, i, update) => (
@@ -1052,17 +1261,20 @@ export default function BusinessPageEditor() {
                   <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
                 <div>
-                  <label className={labelClass}>Image URL</label>
+                  <label className={labelClass}>Image</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={item.image}
+                      value={item.image ?? ""}
                       onChange={(e) => update(i, { image: e.target.value })}
                       className={inputClass}
+                      placeholder="Image URL or /path (leave blank for no image)"
                       maxLength={FIELD_LIMITS.link}
                     />
                     <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
-                      <Upload className="h-3.5 w-3.5" />
+                      {uploadProgress[`whoWeWork-image`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`whoWeWork-image`]}%</>
+                      ) : (<Upload className="h-3.5 w-3.5" />)}
                       <input
                         type="file"
                         accept="image/*"
@@ -1075,7 +1287,38 @@ export default function BusinessPageEditor() {
                       />
                     </label>
                   </div>
-                  <FieldError error={validateUrl(item.image)} />
+                  <FieldError error={validateUrl(item.image ?? "")} />
+                  <p className="mt-1 text-[11px] text-slate-400">Shown on the right side of the partner card. Leave blank to render no photo.</p>
+                </div>
+                <div>
+                  <label className={labelClass}>Icon</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.icon ?? ""}
+                      onChange={(e) => update(i, { icon: e.target.value })}
+                      className={inputClass}
+                      placeholder="Icon URL or /path (leave blank for no icon)"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`whoWeWork-icon`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`whoWeWork-icon`]}%</>
+                      ) : (<Upload className="h-3.5 w-3.5" />)}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("whoWeWork", "icon", file, i);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(item.icon ?? "")} />
+                  <p className="mt-1 text-[11px] text-slate-400">Small badge shown next to the partner category label.</p>
                 </div>
                 <div>
                   <label className={labelClass}>Benefits (comma-separated)</label>
@@ -1087,6 +1330,15 @@ export default function BusinessPageEditor() {
                     maxLength={FIELD_LIMITS.item}
                   />
                   <CharCount value={Array.isArray(item.benefits) ? item.benefits.join(", ") : ""} max={FIELD_LIMITS.item} />
+                  <label className={labelClass} style={{ marginTop: 6 }}>Benefits — Arabic (comma-separated, same order)</label>
+                  <input dir="rtl"
+                    type="text"
+                    value={Array.isArray(item.ar?.benefits) ? item.ar.benefits.join("، ") : ""}
+                    onChange={(e) => update(i, { ar: { ...(item.ar ?? {}), benefits: e.target.value.split(/،|,/).map((b) => b.trim()) } })}
+                    className={inputClass}
+                    style={{ borderColor: "#16a34a" }}
+                    maxLength={FIELD_LIMITS.item}
+                  />
                 </div>
               </div>
             )}
@@ -1217,6 +1469,31 @@ export default function BusinessPageEditor() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <label className={labelClass}>CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerCtaLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.button}
+                    placeholder="Start Earning with HalaPark"
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="Parking Partner Cta Label" kind="button" value={sections.transformParking.ar?.parkingPartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerCtaLabel: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerCtaLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLink: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                    placeholder="/contact"
+                  />
+                  <FieldError error={validateUrl(sections.transformParking.parkingPartnerCtaLink ?? "")} />
+                </div>
               </div>
             </div>
 
@@ -1304,6 +1581,31 @@ export default function BusinessPageEditor() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <label className={labelClass}>CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerCtaLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.button}
+                    placeholder="Partner With Us Today"
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="Service Partner Cta Label" kind="button" value={sections.transformParking.ar?.servicePartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerCtaLabel: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerCtaLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLink: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                    placeholder="/contact"
+                  />
+                  <FieldError error={validateUrl(sections.transformParking.servicePartnerCtaLink ?? "")} />
+                </div>
               </div>
             </div>
           </div>
@@ -1383,9 +1685,9 @@ export default function BusinessPageEditor() {
           />
         </CollapsibleSection>
 
-        {/* 8.5. Partners Showcase */}
+        {/* 8.5. Partner Showcase */}
         <CollapsibleSection
-          title="8.5. PartnersShowcase"
+          title="8.5. Partner Showcase"
           isOpen={openSections.partnersShowcase}
           onToggle={() => toggleSection("partnersShowcase")}
         >
@@ -1529,10 +1831,32 @@ export default function BusinessPageEditor() {
                 <CharCount value={sections.partnersShowcase.ctaLabel} max={FIELD_LIMITS.button} />
                 <ArInput label="CTA Label" kind="button" value={sections.partnersShowcase.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), ctaLabel: v } } })} multiline={false} />
               </div>
+              <div>
+                <label className={labelClass}>CTA Link</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.ctaLink ?? ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaLink: e.target.value } })}
+                  className={inputClass}
+                  placeholder="/contact"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(sections.partnersShowcase.ctaLink)} />
+              </div>
             </div>
+          </div>
+        </CollapsibleSection>
 
+        {/* 8.6. Partner Carousel */}
+        <CollapsibleSection
+          title="8.6. Partner Carousel"
+          isOpen={openSections.partnerCarousel}
+          onToggle={() => toggleSection("partnerCarousel")}
+        >
+          <EnabledToggle enabled={sections.partnersShowcase?.carousel?.enabled} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, carousel: { ...(sections.partnersShowcase?.carousel ?? {}), enabled: v } } })} />
+          <div className="space-y-6">
             {/* Partners Carousel Section */}
-            <div className="space-y-4 border-t border-slate-200 pt-4">
+            <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-700">Partners Carousel</h3>
               <div>
                 <label className={labelClass}>Carousel Heading</label>
@@ -1639,6 +1963,39 @@ export default function BusinessPageEditor() {
                         }}
                         className="w-16 h-10 rounded-lg cursor-pointer shrink-0"
                       />
+                      {partner.logo ? (
+                        <img src={partner.logo} alt={partner.name} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-200" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: partner.color }}>{partner.initials}</div>
+                      )}
+                      <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                        {uploadProgress[`partnersShowcase-row1-logo-${i}`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`partnersShowcase-row1-logo-${i}`]}%</>
+                        ) : (<Upload className="h-3.5 w-3.5" />)}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const err = validateImageFile(file);
+                              if (err) { setError(err); e.target.value = ""; return; }
+                              const key = `partnersShowcase-row1-logo-${i}`;
+                              setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
+                              uploadMediaToCloudinary(file, "image", (progress) => {
+                                setUploadProgress((prev) => ({ ...prev, [key]: progress }));
+                              }).then((url) => {
+                                setSections((prevSections) => ({ ...prevSections, partnersShowcase: { ...prevSections.partnersShowcase, partners: { ...prevSections.partnersShowcase.partners, row1: prevSections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, logo: url } : p) } } }));
+                                setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
+                              }).catch(() => {
+                                setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
                       <button
                         onClick={() => {
                           const updated = sections.partnersShowcase.partners.row1.filter((_, idx) => idx !== i);
@@ -1717,6 +2074,39 @@ export default function BusinessPageEditor() {
                         }}
                         className="w-16 h-10 rounded-lg cursor-pointer shrink-0"
                       />
+                      {partner.logo ? (
+                        <img src={partner.logo} alt={partner.name} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-200" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: partner.color }}>{partner.initials}</div>
+                      )}
+                      <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                        {uploadProgress[`partnersShowcase-row2-logo-${i}`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`partnersShowcase-row2-logo-${i}`]}%</>
+                        ) : (<Upload className="h-3.5 w-3.5" />)}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const err = validateImageFile(file);
+                              if (err) { setError(err); e.target.value = ""; return; }
+                              const key = `partnersShowcase-row2-logo-${i}`;
+                              setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
+                              uploadMediaToCloudinary(file, "image", (progress) => {
+                                setUploadProgress((prev) => ({ ...prev, [key]: progress }));
+                              }).then((url) => {
+                                setSections((prevSections) => ({ ...prevSections, partnersShowcase: { ...prevSections.partnersShowcase, partners: { ...prevSections.partnersShowcase.partners, row2: prevSections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, logo: url } : p) } } }));
+                                setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
+                              }).catch(() => {
+                                setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
                       <button
                         onClick={() => {
                           const updated = sections.partnersShowcase.partners.row2.filter((_, idx) => idx !== i);
@@ -1741,9 +2131,19 @@ export default function BusinessPageEditor() {
                 </button>
               </div>
             </div>
+          </div>
+        </CollapsibleSection>
 
+        {/* 8.7. Partner CTA (Get in Touch) */}
+        <CollapsibleSection
+          title="8.7. Partner CTA (Get in Touch)"
+          isOpen={openSections.partnerCta}
+          onToggle={() => toggleSection("partnerCta")}
+        >
+          <EnabledToggle enabled={sections.partnersShowcase?.ctaSection?.enabled} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...(sections.partnersShowcase?.ctaSection ?? {}), enabled: v } } })} />
+          <div className="space-y-6">
             {/* CTA Section */}
-            <div className="space-y-4 border-t border-slate-200 pt-4">
+            <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-700">CTA Section</h3>
               <div>
                 <label className={labelClass}>CTA Title</label>
@@ -1782,6 +2182,18 @@ export default function BusinessPageEditor() {
                 />
                 <CharCount value={sections.partnersShowcase?.ctaSectionLabel ?? ""} max={FIELD_LIMITS.button} />
                 <ArInput label="Cta Section Label" kind="button" value={sections.partnersShowcase?.ar?.ctaSectionLabel} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), ctaSectionLabel: v } } })} />
+              </div>
+              <div>
+                <label className={labelClass}>CTA Link</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.ctaSectionLink ?? ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSectionLink: e.target.value } })}
+                  className={inputClass}
+                  placeholder="/contact"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(sections.partnersShowcase.ctaSectionLink)} />
               </div>
               <div>
                 <label className={labelClass}>CTA Section Image URL</label>

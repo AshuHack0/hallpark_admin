@@ -190,6 +190,21 @@ export default function CareersPageEditor() {
     }
   }
 
+  // ── "Show this section on the website" toggle ──────────────────────────────
+  // Writes `enabled` on the given content sub-section and persists immediately.
+  // The website hides a section only when enabled === false.
+  function toggleSectionEnabled(sectionKey, nextEnabled) {
+    const next = {
+      ...content,
+      [sectionKey]: { ...(content[sectionKey] ?? {}), enabled: nextEnabled },
+    };
+    setContent(next);
+    void persistSections(
+      next,
+      nextEnabled ? "Section shown on website." : "Section hidden from website.",
+    );
+  }
+
   // ── Hero mosaic images (hero.images[]) ─────────────────────────────────────
   function updateHeroImage(i, value) {
     setContent((prev) => ({
@@ -609,6 +624,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Hero banner</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.hero?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("hero", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <button type="button" onClick={openHeroModal} className={btnOutline}>
               <Pencil className="h-3.5 w-3.5" />
               Edit
@@ -699,6 +723,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Building smarter mobility</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.building?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("building", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <button type="button" onClick={openBuildingModal} className={btnOutline}>
               <Pencil className="h-3.5 w-3.5" />
               Edit title
@@ -765,6 +798,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Opportunities Section Heading</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.opportunitiesHeader?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("opportunitiesHeader", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <button
               type="button"
               onClick={() => persistSections(content, "Opportunities heading saved.")}
@@ -924,6 +966,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Open Positions</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.openPositions?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("openPositions", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={openOpenPositionsModal} className={btnOutline}>
                 <Pencil className="h-3.5 w-3.5" />
@@ -1033,6 +1084,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Why join us</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.whyJoin?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("whyJoin", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <button type="button" onClick={openWhyJoinModal} className={btnOutline}>
               <Pencil className="h-3.5 w-3.5" />
               Edit section
@@ -1090,6 +1150,15 @@ export default function CareersPageEditor() {
               </div>
               <p className="text-sm font-semibold text-[#050A13]">Bottom call to action</p>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.cta?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("cta", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
             <button type="button" onClick={openCtaModal} className={btnOutline}>
               <Pencil className="h-3.5 w-3.5" />
               Edit

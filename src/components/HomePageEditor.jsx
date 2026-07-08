@@ -280,6 +280,25 @@ function CollapsibleSection({ title, children, defaultOpen = false }) {
   );
 }
 
+// "Show this section on the website" toggle. Writes `enabled` on the section
+// object; the website hides a section only when enabled === false.
+/* eslint-disable-next-line react/prop-types */
+function EnabledToggle({ section, setSection }) {
+  // eslint-disable-next-line react/prop-types
+  const enabled = section?.enabled !== false;
+  return (
+    <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={(e) => setSection((p) => ({ ...p, enabled: e.target.checked }))}
+        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+      />
+      Show this section on the website
+    </label>
+  );
+}
+
 export default function HomePageEditor() {
   const slug = "home";
   const [page, setPage] = useState(null);
@@ -1039,6 +1058,7 @@ export default function HomePageEditor() {
 
         {/* WHO WE ARE SECTION */}
         <CollapsibleSection title="Who We Are Section">
+          <EnabledToggle section={whoWeAre} setSection={setWhoWeAre} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading</label>
@@ -1137,6 +1157,7 @@ export default function HomePageEditor() {
 
         {/* WHY HALAPARK SECTION */}
         <CollapsibleSection title="Why Halapark Section">
+          <EnabledToggle section={whyHalapark} setSection={setWhyHalapark} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first word plain, rest gradient)</label>
@@ -1268,6 +1289,7 @@ export default function HomePageEditor() {
 
         {/* AI POWERED PARKING SERVICE */}
         <CollapsibleSection title="AI Powered Parking Service Section">
+          <EnabledToggle section={aiPoweredParking} setSection={setAiPoweredParking} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first part)</label>
@@ -1385,6 +1407,7 @@ export default function HomePageEditor() {
 
         {/* HOW IT WORKS */}
         <CollapsibleSection title="How It Works Section">
+          <EnabledToggle section={howItWorks} setSection={setHowItWorks} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first part)</label>
@@ -1505,6 +1528,7 @@ export default function HomePageEditor() {
 
         {/* BLACK BANNER */}
         <CollapsibleSection title="AI-Powered Smart Parking Solutions (Box Section)">
+          <EnabledToggle section={blackBanner} setSection={setBlackBanner} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Title</label>
@@ -1575,6 +1599,7 @@ export default function HomePageEditor() {
 
         {/* GOOD LOOKING SERVICES */}
         <CollapsibleSection title="Services Section">
+          <EnabledToggle section={goodLookingServices} setSection={setGoodLookingServices} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Section heading</label>
@@ -1736,6 +1761,7 @@ export default function HomePageEditor() {
 
         {/* SOLUTION INTEGRATION */}
         <CollapsibleSection title="Solution Integration Section">
+          <EnabledToggle section={solutionIntegration} setSection={setSolutionIntegration} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first part)</label>
@@ -1804,6 +1830,7 @@ export default function HomePageEditor() {
 
         {/* TECHNOLOGY SECTION */}
         <CollapsibleSection title="Technology Section">
+          <EnabledToggle section={technologySection} setSection={setTechnologySection} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first part)</label>
@@ -1844,6 +1871,7 @@ export default function HomePageEditor() {
 
         {/* CLIENTS & PARTNERS */}
         <CollapsibleSection title="Clients & Partners Section">
+          <EnabledToggle section={clientsPartners} setSection={setClientsPartners} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading (first part)</label>
@@ -1971,6 +1999,7 @@ export default function HomePageEditor() {
 
         {/* GLOBAL MOBILITY NETWORK */}
         <CollapsibleSection title="Global Mobility Network Section">
+          <EnabledToggle section={globalMobility} setSection={setGlobalMobility} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading</label>
@@ -2319,6 +2348,7 @@ export default function HomePageEditor() {
 
         {/* HALAPARK IN ACTION */}
         <CollapsibleSection title="HalaPark In Action Section">
+          <EnabledToggle section={halaParkInAction} setSection={setHalaParkInAction} />
           <div className="grid gap-3">
             <div>
               <label className={labelClass}>Heading</label>
@@ -2418,6 +2448,7 @@ export default function HomePageEditor() {
         </CollapsibleSection>
 
         <CollapsibleSection title="Get In Touch / Contact Section">
+          <EnabledToggle section={supportCta} setSection={setSupportCta} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Eyebrow</label>

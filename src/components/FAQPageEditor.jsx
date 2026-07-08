@@ -117,6 +117,25 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
   );
 }
 
+// "Show this section on the website" toggle. Writes `enabled` on the section
+// object; the website hides a section only when enabled === false.
+/* eslint-disable-next-line react/prop-types */
+function EnabledToggle({ section, setSection }) {
+  // eslint-disable-next-line react/prop-types
+  const enabled = section?.enabled !== false;
+  return (
+    <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={(e) => setSection((p) => ({ ...p, enabled: e.target.checked }))}
+        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+      />
+      Show this section on the website
+    </label>
+  );
+}
+
 export default function FAQPageEditor() {
   const [page, setPage] = useState(null);
   const [hero, setHero] = useState(DEFAULT_HERO);
@@ -472,6 +491,7 @@ export default function FAQPageEditor() {
           isOpen={openSections.hero}
           onToggle={() => toggleSection("hero")}
         >
+          <EnabledToggle section={hero} setSection={setHero} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Title</label>
@@ -662,6 +682,7 @@ export default function FAQPageEditor() {
           isOpen={openSections.searchHeader}
           onToggle={() => toggleSection("searchHeader")}
         >
+          <EnabledToggle section={searchHeader} setSection={setSearchHeader} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Heading</label>
@@ -720,6 +741,7 @@ export default function FAQPageEditor() {
           isOpen={openSections.bottomCta}
           onToggle={() => toggleSection("bottomCta")}
         >
+          <EnabledToggle section={bottomCta} setSection={setBottomCta} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Heading</label>

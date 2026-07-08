@@ -1079,15 +1079,15 @@ export default function AppPageEditor() {
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
-                      <input
-                        type="text"
+                      <textarea
+                        rows={3}
                         value={item.description}
                         onChange={(e) => update(i, { description: e.target.value })}
                         className={inputClass}
                         maxLength={FIELD_LIMITS.summary}
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <ArInput label="Description" kind="summary" multiline value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
@@ -1148,15 +1148,15 @@ export default function AppPageEditor() {
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
-                      <input
-                        type="text"
+                      <textarea
+                        rows={3}
                         value={item.description}
                         onChange={(e) => update(i, { description: e.target.value })}
                         className={inputClass}
                         maxLength={FIELD_LIMITS.summary}
                       />
                       <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput label="Description" kind="summary" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <ArInput label="Description" kind="summary" multiline value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
                     </div>
                     <div>
                       <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>

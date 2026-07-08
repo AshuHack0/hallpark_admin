@@ -11,17 +11,25 @@
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 
-// Generous caps by field role. Tweak here to change every editor at once.
+// Caps by field role. Tweak here to change every editor at once.
+//
+// Short structural fields (label/button/heading/subtitle) keep a small cap so
+// the public layout can't be broken by runaway text. Long-text roles used for
+// paragraphs, descriptions, details and card summaries are effectively
+// UNLIMITED — per request, the admin must be able to enter as much copy as
+// needed. The huge ceiling is only a runaway-paste backstop, not a real limit;
+// the live counter still shows how much has been typed.
+const UNLIMITED = 100000;
 export const FIELD_LIMITS = {
   label: 40,        // tiny labels, eyebrows, tags, badges
   button: 30,       // CTA button text
   link: 200,        // URLs / hrefs
   heading: 80,      // section headings / titles
   subtitle: 160,    // subtitles / taglines
-  item: 120,        // list items, bullet points, capability labels
-  summary: 280,     // card summaries / short blurbs
-  description: 600, // body paragraphs / descriptions
-  long: 1200,       // long-form rich text / full descriptions
+  item: UNLIMITED,        // list items, bullet points, capability labels
+  summary: UNLIMITED,     // card summaries / short blurbs
+  description: UNLIMITED, // body paragraphs / descriptions
+  long: UNLIMITED,        // long-form rich text / full descriptions
 };
 
 function resolveLimit(kind, limit) {
@@ -36,14 +44,17 @@ function resolveLimit(kind, limit) {
  */
 export function CharCount({ value, max }) {
   const len = (value ?? "").length;
-  const near = len > max * 0.9;
+  // "Unlimited" fields (paragraphs/descriptions) use a huge sentinel cap — show
+  // just the running count, not "142 / 100000", so it doesn't read as a limit.
+  const unlimited = max >= 100000;
+  const near = !unlimited && len > max * 0.9;
   return (
     <span
       className={`pointer-events-none mt-1 block text-right text-[10px] font-medium tabular-nums ${
-        len >= max ? "text-red-500" : near ? "text-amber-500" : "text-slate-400"
+        !unlimited && len >= max ? "text-red-500" : near ? "text-amber-500" : "text-slate-400"
       }`}
     >
-      {len} / {max}
+      {unlimited ? `${len} characters` : `${len} / ${max}`}
     </span>
   );
 }

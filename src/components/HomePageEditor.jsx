@@ -1120,18 +1120,17 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              {/* Who We Are main description gets a larger cap (1500) — the
-                  layout has no clamp, the paragraph just flows down. */}
+              {/* No character limit — the paragraph flows down the layout. */}
               <textarea
                 value={whoWeAre.audiences?.business?.body ?? ""}
                 onChange={(e) => updateWhoAudience("business", "body", e.target.value)}
-                maxLength={1500}
+                maxLength={FIELD_LIMITS.description}
                 className={inputClass}
                 rows={6}
                 placeholder="Section description shown on the website"
               />
-              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={1500} />
-              <ArInput label="Body" kind="description" limit={1500} multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
+              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={FIELD_LIMITS.description} />
+              <ArInput label="Body" kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
             </div>
 
             <div className="mt-1 flex items-center justify-between">
@@ -1751,18 +1750,17 @@ export default function HomePageEditor() {
                     />
                     <CharCount value={card.name ?? ""} max={FIELD_LIMITS.label} />
                     <ArInput label="Name" kind="label" value={card.ar?.name} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), name: v })} />
-                    {/* Card description gets a larger cap (600) than the default
-                        summary limit — the card layout flows the text down. */}
+                    {/* No character limit — the card layout flows the text down. */}
                     <textarea
                       value={card.summary ?? ""}
                       onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
-                      maxLength={600}
+                      maxLength={FIELD_LIMITS.summary}
                       className={inputClass}
                       rows={3}
                       placeholder="Description shown on the card"
                     />
-                    <CharCount value={card.summary ?? ""} max={600} />
-                    <ArInput label="Summary" kind="summary" limit={600} multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
+                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.summary} />
+                    <ArInput label="Summary" kind="summary" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>

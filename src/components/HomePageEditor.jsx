@@ -192,6 +192,20 @@ const DEFAULT_HALAPARK_IN_ACTION = {
   ],
 };
 
+// Dynamic offer/ad pop-up shown over the home page. Structural default only —
+// empty strings so the DB (single source of truth) drives the actual content.
+const DEFAULT_PROMO_POPUP = {
+  enabled: false, // off by default — admin turns it on when an offer is ready
+  mediaType: "image", // "image" | "video"
+  image: "",
+  video: "",
+  heading: "",
+  description: "",
+  ctaLabel: "",
+  ctaHref: "",
+  ar: { heading: "", description: "", ctaLabel: "" },
+};
+
 function emptySlide() {
   return {
     id: Date.now(),
@@ -314,6 +328,7 @@ export default function HomePageEditor() {
   const [clientsPartners, setClientsPartners] = useState(DEFAULT_CLIENTS_PARTNERS);
   const [globalMobility, setGlobalMobility] = useState(DEFAULT_GLOBAL_MOBILITY);
   const [halaParkInAction, setHalaParkInAction] = useState(DEFAULT_HALAPARK_IN_ACTION);
+  const [promoPopup, setPromoPopup] = useState(DEFAULT_PROMO_POPUP);
   const [supportCta, setSupportCta] = useState({});
   const [sectionsObj, setSectionsObj] = useState({});
   const [loading, setLoading] = useState(true);
@@ -349,6 +364,11 @@ export default function HomePageEditor() {
         setClientsPartners({ ...DEFAULT_CLIENTS_PARTNERS, ...(sections.clientsPartners ?? {}) });
         setGlobalMobility({ ...DEFAULT_GLOBAL_MOBILITY, ...(sections.globalMobility ?? {}) });
         setHalaParkInAction({ ...DEFAULT_HALAPARK_IN_ACTION, ...(sections.halaParkInAction ?? {}) });
+        setPromoPopup({
+          ...DEFAULT_PROMO_POPUP,
+          ...(sections.promoPopup ?? {}),
+          ar: { ...DEFAULT_PROMO_POPUP.ar, ...(sections.promoPopup?.ar ?? {}) },
+        });
         setSupportCta(sections.supportCta ?? {});
       })
       .catch((err) => setError(err.message))
@@ -719,6 +739,31 @@ export default function HomePageEditor() {
     }
   }
 
+  // Pop-up media upload (image or video → Cloudinary).
+  async function handlePromoUpload(file, resourceType) {
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setError(err); return; }
+    const field = resourceType === "video" ? "video" : "image";
+    const key = `promo-${field}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, resourceType, (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setPromoPopup((prev) => ({ ...prev, [field]: url }));
+      setSuccess("Pop-up media uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleCapIconUpload(i, file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -860,6 +905,7 @@ export default function HomePageEditor() {
         clientsPartners,
         globalMobility,
         halaParkInAction,
+        promoPopup,
         supportCta,
       };
       const data = await api.updatePage(slug, { sections });
@@ -2526,6 +2572,134 @@ export default function HomePageEditor() {
               onChange={(v) => setSupportCta((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleSupportImageUpload(file)}
             />
+          </div>
+        </CollapsibleSection>
+
+        {/* ── PROMOTIONAL / OFFER POP-UP ─────────────────────────────────── */}
+        <CollapsibleSection title="Promotional Pop-up (Offers / Ads)">
+          <EnabledToggle section={promoPopup} setSection={setPromoPopup} />
+          <p className="mb-4 text-xs text-slate-400">
+            A pop-up shown over the home page to advertise a new service, offer, or solution. It
+            appears only when this is enabled AND media or a heading is set. Leave it disabled or
+            clear the fields to remove it — no code changes needed.
+          </p>
+
+          <div className="grid gap-3">
+            {/* Media: image OR video */}
+            <div>
+              <label className={labelClass}>Pop-up Media</label>
+              <div className="mb-2 inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold">
+                {["image", "video"].map((type) => {
+                  const active = (promoPopup.mediaType === "video" ? "video" : "image") === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setPromoPopup((prev) => ({ ...prev, mediaType: type }))}
+                      className={`rounded-md px-4 py-1.5 capitalize transition ${
+                        active ? "bg-white text-[#0088FF] shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  );
+                })}
+              </div>
+              {promoPopup.mediaType === "video" ? (
+                <MediaField
+                  label="Video"
+                  value={promoPopup.video}
+                  accept="video/*"
+                  resourceType="video"
+                  uploading={uploadProgress["promo-video"] !== undefined}
+                  progress={uploadProgress["promo-video"]}
+                  onChange={(v) => setPromoPopup((prev) => ({ ...prev, video: v }))}
+                  onUpload={(file, rt) => handlePromoUpload(file, rt)}
+                />
+              ) : (
+                <MediaField
+                  label="Image"
+                  value={promoPopup.image}
+                  accept="image/*"
+                  resourceType="image"
+                  uploading={uploadProgress["promo-image"] !== undefined}
+                  progress={uploadProgress["promo-image"]}
+                  onChange={(v) => setPromoPopup((prev) => ({ ...prev, image: v }))}
+                  onUpload={(file, rt) => handlePromoUpload(file, rt)}
+                />
+              )}
+            </div>
+
+            {/* Heading */}
+            <div>
+              <label className={labelClass}>Heading</label>
+              <input
+                value={promoPopup.heading ?? ""}
+                onChange={(e) => setPromoPopup((prev) => ({ ...prev, heading: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
+                className={inputClass}
+                placeholder="e.g. Introducing Valet On Demand"
+              />
+              <CharCount value={promoPopup.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput
+                label="Heading"
+                kind="heading"
+                value={promoPopup.ar?.heading}
+                onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), heading: v } }))}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                value={promoPopup.description ?? ""}
+                onChange={(e) => setPromoPopup((prev) => ({ ...prev, description: e.target.value }))}
+                className={inputClass}
+                rows={4}
+                placeholder="Short message about the offer or new service"
+              />
+              <ArInput
+                label="Description"
+                kind="description"
+                multiline
+                value={promoPopup.ar?.description}
+                onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), description: v } }))}
+              />
+            </div>
+
+            {/* CTA button */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Button Label</label>
+                <input
+                  value={promoPopup.ctaLabel ?? ""}
+                  onChange={(e) => setPromoPopup((prev) => ({ ...prev, ctaLabel: e.target.value }))}
+                  maxLength={FIELD_LIMITS.label}
+                  className={inputClass}
+                  placeholder="e.g. Learn More"
+                />
+                <CharCount value={promoPopup.ctaLabel ?? ""} max={FIELD_LIMITS.label} />
+                <ArInput
+                  label="Button Label"
+                  kind="label"
+                  value={promoPopup.ar?.ctaLabel}
+                  onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), ctaLabel: v } }))}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Button Link</label>
+                <input
+                  value={promoPopup.ctaHref ?? ""}
+                  onChange={(e) => setPromoPopup((prev) => ({ ...prev, ctaHref: e.target.value }))}
+                  maxLength={FIELD_LIMITS.link}
+                  className={inputClass}
+                  placeholder="/services or https://…"
+                />
+                <FieldError error={validateUrl(promoPopup.ctaHref)} />
+                <p className="mt-1 text-[10px] text-slate-400">The button only shows when both label and link are set.</p>
+              </div>
+            </div>
           </div>
         </CollapsibleSection>
       </div>

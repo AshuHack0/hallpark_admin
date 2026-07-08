@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
-import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { validateUrl, validateImageFile } from "../lib/validators";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -57,9 +57,6 @@ const DEFAULT_HERO = {
   subtitle: "",
   ctaLabel: "",
   ctaLink: "",
-  mediaType: "video",
-  image: "",
-  videoUrl: "",
   ar: {},
 };
 
@@ -979,48 +976,6 @@ export default function SolutionPageEditor() {
     }
   }
 
-  async function handleVideoUpload(file) {
-    const err = validateVideoFile(file);
-    if (err) { setError(err); return; }
-    const key = "hero-video";
-    setError("");
-    setUploadProgress((p) => ({ ...p, [key]: 0 }));
-    try {
-      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
-        setUploadProgress((p) => ({ ...p, [key]: pct }))
-      );
-      setHero((p) => ({ ...p, videoUrl: url }));
-      setSuccess("Video uploaded successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError("Video upload failed");
-      console.error(err);
-    } finally {
-      setUploadProgress((p) => ({ ...p, [key]: undefined }));
-    }
-  }
-
-  async function handleHeroImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    const key = "hero-image";
-    setError("");
-    setUploadProgress((p) => ({ ...p, [key]: 0 }));
-    try {
-      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
-        setUploadProgress((p) => ({ ...p, [key]: pct }))
-      );
-      setHero((p) => ({ ...p, image: url }));
-      setSuccess("Image uploaded successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError("Image upload failed");
-      console.error(err);
-    } finally {
-      setUploadProgress((p) => ({ ...p, [key]: undefined }));
-    }
-  }
-
   // Hero showcase (the animated mosaic + badges shown when no hero image/video
   // is set). Text lives under hero.showcase; the two image columns are string
   // arrays hero.showcase.imagesA / imagesB.
@@ -1316,8 +1271,8 @@ export default function SolutionPageEditor() {
           <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
             <p className="text-sm font-semibold text-slate-700">Hero Showcase (animated mosaic + badges)</p>
             <p className="mt-1 mb-4 text-[11px] text-slate-400">
-              This is the default right-side visual (scrolling photo columns + the three floating badges). It shows
-              only when no Hero Image or Video is set above. Leave a badge field blank to use its built-in text.
+              The right-side visual on the Solutions hero: two scrolling photo columns and three floating badges.
+              Upload the mosaic images and edit the badge text below. Leave a badge blank to use its built-in text.
             </p>
 
             {/* Two image columns */}

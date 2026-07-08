@@ -2217,7 +2217,7 @@ export default function BusinessPageEditor() {
                           const err = validateImageFile(file);
                           if (err) { setError(err); e.target.value = ""; return; }
                           setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": 0 }));
-                          uploadMediaToCloudinary(file, (progress) => {
+                          uploadMediaToCloudinary(file, "image", (progress) => {
                             setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": progress }));
                           }).then((url) => {
                             setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, image: url } } });

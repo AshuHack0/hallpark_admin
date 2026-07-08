@@ -40,7 +40,8 @@ import SolutionPageEditor from "../components/SolutionPageEditor.jsx";
 import FAQPageEditor from "../components/FAQPageEditor.jsx";
 import ContactPageEditor from "../components/ContactPageEditor.jsx";
 import SettingsPageEditor from "../components/SettingsPageEditor.jsx";
-import { FRONTEND_PAGES } from "../constants/pages.js";
+import LegalPageEditor from "../components/LegalPageEditor.jsx";
+import { FRONTEND_PAGES, LEGAL_PAGE_SLUGS } from "../constants/pages.js";
 import { api, uploadVideoToCloudinary } from "../lib/api";
 
 const inputClass =
@@ -161,6 +162,10 @@ export default function PageEditorPage() {
 
   if (slug === "settings") {
     return <SettingsPageEditor />;
+  }
+
+  if (LEGAL_PAGE_SLUGS.includes(slug)) {
+    return <LegalPageEditor />;
   }
 
   const pageMeta = FRONTEND_PAGES.find((p) => p.slug === slug);

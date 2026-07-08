@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
-import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
+import { validateUrl, validateImageFile } from "../lib/validators";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -264,6 +264,23 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
   );
 }
 
+// "Show this section on the website" toggle. Writes `enabled` on the section
+// object; the website hides a section only when enabled === false.
+/* eslint-disable-next-line react/prop-types */
+function EnabledToggle({ enabled, onChange }) {
+  return (
+    <label className="mt-4 mb-2 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+      <input
+        type="checkbox"
+        checked={enabled !== false}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+      />
+      Show this section on the website
+    </label>
+  );
+}
+
 function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title, addButtonText = "Add Item" }) {
   const addItem = () => {
     onItemsChange([...items, defaultItem]);
@@ -372,6 +389,15 @@ export default function BusinessPageEditor() {
     }));
   };
 
+  // "Show this section on the website" — writes `enabled` on the given section
+  // (or its companion header object for array-based sections).
+  const setSectionEnabled = (key, nextEnabled) => {
+    setSections((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] ?? {}), enabled: nextEnabled },
+    }));
+  };
+
   async function handleImageUpload(section, field, file, itemIndex = null) {
     const validationError = validateImageFile(file);
     if (validationError) { setError(validationError); return; }
@@ -454,6 +480,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.hero}
           onToggle={() => toggleSection("hero")}
         >
+          <EnabledToggle enabled={sections.hero?.enabled} onChange={(v) => setSectionEnabled("hero", v)} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Title</label>
@@ -527,6 +554,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.builtForSpace}
           onToggle={() => toggleSection("builtForSpace")}
         >
+          <EnabledToggle enabled={sections.builtForSpace?.enabled} onChange={(v) => setSectionEnabled("builtForSpace", v)} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Title</label>
@@ -561,6 +589,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.whyChoose}
           onToggle={() => toggleSection("whyChoose")}
         >
+          <EnabledToggle enabled={sections.whyChooseHeader?.enabled} onChange={(v) => setSectionEnabled("whyChooseHeader", v)} />
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -674,6 +703,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.solutions}
           onToggle={() => toggleSection("solutions")}
         >
+          <EnabledToggle enabled={sections.solutionsHeader?.enabled} onChange={(v) => setSectionEnabled("solutionsHeader", v)} />
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -827,6 +857,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.whoWeWork}
           onToggle={() => toggleSection("whoWeWork")}
         >
+          <EnabledToggle enabled={sections.whoWeWorkHeader?.enabled} onChange={(v) => setSectionEnabled("whoWeWorkHeader", v)} />
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -987,6 +1018,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.transformParking}
           onToggle={() => toggleSection("transformParking")}
         >
+          <EnabledToggle enabled={sections.transformParking?.enabled} onChange={(v) => setSectionEnabled("transformParking", v)} />
           <div className="space-y-6">
             {/* Main Section */}
             <div className="border-b border-slate-200 pb-6">
@@ -1202,6 +1234,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.advantage}
           onToggle={() => toggleSection("advantage")}
         >
+          <EnabledToggle enabled={sections.advantageHeader?.enabled} onChange={(v) => setSectionEnabled("advantageHeader", v)} />
           <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
             <div>
@@ -1275,6 +1308,7 @@ export default function BusinessPageEditor() {
           isOpen={openSections.partnersShowcase}
           onToggle={() => toggleSection("partnersShowcase")}
         >
+          <EnabledToggle enabled={sections.partnersShowcase?.enabled} onChange={(v) => setSectionEnabled("partnersShowcase", v)} />
           <div className="space-y-6">
             <div className="space-y-4 border-b border-slate-200 pb-4">
               <div>
@@ -1710,258 +1744,13 @@ export default function BusinessPageEditor() {
           </div>
         </CollapsibleSection>
 
-        {/* 8.6 Value Props */}
-        <CollapsibleSection
-          title="8.6. ValueProps"
-          isOpen={openSections.valueProps}
-          onToggle={() => toggleSection("valueProps")}
-        >
-          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-            <div>
-              <label className={labelClass}>Eyebrow (small label)</label>
-              <input
-                type="text"
-                value={sections.valueProps?.eyebrow ?? ""}
-                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, eyebrow: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.label}
-                placeholder="How It Works"
-              />
-              <CharCount value={sections.valueProps?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput label="Eyebrow" kind="label" value={sections.valueProps?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), eyebrow: v } } })} multiline={false} />
-            </div>
-            <div>
-              <label className={labelClass}>Heading</label>
-              <input
-                type="text"
-                value={sections.valueProps?.heading ?? ""}
-                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, heading: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.heading}
-                placeholder="Why Businesses Choose HalaPark"
-              />
-              <CharCount value={sections.valueProps?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput label="Heading" kind="heading" value={sections.valueProps?.ar?.heading} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), heading: v } } })} multiline={false} />
-            </div>
-            <div>
-              <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.valueProps?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, valueProps: { ...sections.valueProps, description: e.target.value } })}
-                className={inputClass}
-                rows={2}
-                maxLength={FIELD_LIMITS.description}
-              />
-              <CharCount value={sections.valueProps?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.valueProps?.ar?.description} onChange={(v) => setSections({ ...sections, valueProps: { ...sections.valueProps, ar: { ...(sections.valueProps?.ar ?? {}), description: v } } })} multiline={true} />
-            </div>
-          </div>
-          <ArrayItemEditor
-            items={sections.valueProps?.items ?? []}
-            onItemsChange={(items) => setSections({ ...sections, valueProps: { ...sections.valueProps, items } })}
-            title="Value Card"
-            addButtonText="Add Card"
-            defaultItem={{ title: "New Card", description: "" }}
-            renderItem={(item, i, update) => (
-              <div className="space-y-3">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={item.title ?? ""}
-                    onChange={(e) => update(i, { title: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <textarea
-                    value={item.description ?? ""}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
-                    maxLength={FIELD_LIMITS.description}
-                  />
-                  <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
-                </div>
-              </div>
-            )}
-          />
-        </CollapsibleSection>
-
-        {/* 8.7 Who It's For */}
-        <CollapsibleSection
-          title="8.7. WhoItsFor"
-          isOpen={openSections.whoItsFor}
-          onToggle={() => toggleSection("whoItsFor")}
-        >
-          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-            <div>
-              <label className={labelClass}>Eyebrow (Who It's For)</label>
-              <input
-                value={sections.whoItsFor?.eyebrow ?? ""}
-                onChange={(e) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, eyebrow: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.label}
-                placeholder="Who It's For"
-              />
-              <CharCount value={sections.whoItsFor?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput label="Eyebrow" kind="label" value={sections.whoItsFor?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), eyebrow: v } } })} />
-            </div>
-            <div>
-              <label className={labelClass}>Heading</label>
-              <input
-                type="text"
-                value={sections.whoItsFor?.heading ?? ""}
-                onChange={(e) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, heading: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.heading}
-                placeholder="Who It's For"
-              />
-              <CharCount value={sections.whoItsFor?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput label="Heading" kind="heading" value={sections.whoItsFor?.ar?.heading} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), heading: v } } })} multiline={false} />
-            </div>
-            <div>
-              <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.whoItsFor?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, description: e.target.value } })}
-                className={inputClass}
-                rows={3}
-                maxLength={FIELD_LIMITS.description}
-              />
-              <CharCount value={sections.whoItsFor?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.whoItsFor?.ar?.description} onChange={(v) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, ar: { ...(sections.whoItsFor?.ar ?? {}), description: v } } })} multiline={true} />
-            </div>
-          </div>
-          <ArrayItemEditor
-            items={sections.whoItsFor?.items ?? []}
-            onItemsChange={(items) => setSections({ ...sections, whoItsFor: { ...sections.whoItsFor, items } })}
-            title="Segment"
-            addButtonText="Add Segment"
-            defaultItem={{ title: "New Segment" }}
-            renderItem={(item, i, update) => (
-              <div>
-                <label className={labelClass}>Title</label>
-                <input
-                  type="text"
-                  value={item.title ?? ""}
-                  onChange={(e) => update(i, { title: e.target.value })}
-                  className={inputClass}
-                  maxLength={FIELD_LIMITS.item}
-                />
-                <CharCount value={item.title ?? ""} max={FIELD_LIMITS.item} />
-                <ArInput label="Title" kind="item" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
-              </div>
-            )}
-          />
-        </CollapsibleSection>
-
-        {/* 8.8 How To Get Started */}
-        <CollapsibleSection
-          title="8.8. HowToGetStarted"
-          isOpen={openSections.howToGetStarted}
-          onToggle={() => toggleSection("howToGetStarted")}
-        >
-          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-            <div>
-              <label className={labelClass}>Eyebrow (small label)</label>
-              <input
-                type="text"
-                value={sections.howToGetStarted?.eyebrow ?? ""}
-                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, eyebrow: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.label}
-                placeholder="How It Works"
-              />
-              <CharCount value={sections.howToGetStarted?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput label="Eyebrow" kind="label" value={sections.howToGetStarted?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), eyebrow: v } } })} multiline={false} />
-            </div>
-            <div>
-              <label className={labelClass}>Heading</label>
-              <input
-                type="text"
-                value={sections.howToGetStarted?.heading ?? ""}
-                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, heading: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.heading}
-                placeholder="How to Get Started"
-              />
-              <CharCount value={sections.howToGetStarted?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput label="Heading" kind="heading" value={sections.howToGetStarted?.ar?.heading} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), heading: v } } })} multiline={false} />
-            </div>
-            <div>
-              <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.howToGetStarted?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, description: e.target.value } })}
-                className={inputClass}
-                rows={2}
-                maxLength={FIELD_LIMITS.description}
-              />
-              <CharCount value={sections.howToGetStarted?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.howToGetStarted?.ar?.description} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), description: v } } })} multiline={true} />
-            </div>
-            <div>
-              <label className={labelClass}>CTA Button (Book a Consultation)</label>
-              <input
-                value={sections.howToGetStarted?.ctaLabel ?? ""}
-                onChange={(e) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ctaLabel: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.button}
-                placeholder="Book a Consultation"
-              />
-              <CharCount value={sections.howToGetStarted?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
-              <ArInput label="CTA Label" kind="button" value={sections.howToGetStarted?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, ar: { ...(sections.howToGetStarted?.ar ?? {}), ctaLabel: v } } })} />
-            </div>
-          </div>
-          <ArrayItemEditor
-            items={sections.howToGetStarted?.steps ?? []}
-            onItemsChange={(steps) => setSections({ ...sections, howToGetStarted: { ...sections.howToGetStarted, steps } })}
-            title="Step"
-            addButtonText="Add Step"
-            defaultItem={{ title: "New Step", description: "" }}
-            renderItem={(item, i, update) => (
-              <div className="space-y-3">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={item.title ?? ""}
-                    onChange={(e) => update(i, { title: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={item.title ?? ""} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description (optional)</label>
-                  <textarea
-                    value={item.description ?? ""}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
-                    maxLength={FIELD_LIMITS.description}
-                  />
-                  <CharCount value={item.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
-                </div>
-              </div>
-            )}
-          />
-        </CollapsibleSection>
-
         {/* 9. Business CTA */}
         <CollapsibleSection
           title="9. BusinessCTA"
           isOpen={openSections.cta}
           onToggle={() => toggleSection("cta")}
         >
+          <EnabledToggle enabled={sections.cta?.enabled} onChange={(v) => setSectionEnabled("cta", v)} />
           <div className="space-y-4">
             <div>
               <label className={labelClass}>Heading (first part)</label>

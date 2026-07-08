@@ -118,6 +118,25 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
   );
 }
 
+// "Show this section on the website" toggle. Writes `enabled` on the section
+// object; the website hides a section only when enabled === false.
+/* eslint-disable-next-line react/prop-types */
+function EnabledToggle({ enabled, onChange }) {
+  return (
+    <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+      <input
+        type="checkbox"
+        /* eslint-disable-next-line react/prop-types */
+        checked={enabled !== false}
+        /* eslint-disable-next-line react/prop-types */
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+      />
+      Show this section on the website
+    </label>
+  );
+}
+
 export default function ContactPageEditor() {
   const slug = "contact";
   const [page, setPage] = useState(null);
@@ -145,6 +164,14 @@ export default function ContactPageEditor() {
 
   const toggleSection = (name) =>
     setOpenSections((prev) => ({ ...prev, [name]: !prev[name] }));
+
+  // "Show this section on the website" — writes `enabled` on the given section.
+  function setSectionEnabled(key, nextEnabled) {
+    setSections((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] ?? {}), enabled: nextEnabled },
+    }));
+  }
 
   function setHero(fn) {
     setSections((prev) => ({ ...prev, hero: typeof fn === "function" ? fn(prev.hero) : fn }));
@@ -293,6 +320,7 @@ export default function ContactPageEditor() {
           isOpen={!!openSections.hero}
           onToggle={() => toggleSection("hero")}
         >
+          <EnabledToggle enabled={sections.hero?.enabled} onChange={(v) => setSectionEnabled("hero", v)} />
           <div className="grid gap-4">
             <div>
               <label className={labelClass}>Eyebrow</label>
@@ -357,6 +385,7 @@ export default function ContactPageEditor() {
           isOpen={!!openSections.details}
           onToggle={() => toggleSection("details")}
         >
+          <EnabledToggle enabled={sections.details?.enabled} onChange={(v) => setSectionEnabled("details", v)} />
           {/* Panel header copy (section-level, not the items) */}
           <div className="mb-6 grid gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -545,6 +574,7 @@ export default function ContactPageEditor() {
           isOpen={!!openSections.form}
           onToggle={() => toggleSection("form")}
         >
+          <EnabledToggle enabled={sections.form?.enabled} onChange={(v) => setSectionEnabled("form", v)} />
           <div className="grid gap-4">
             <div>
               <label className={labelClass}>Eyebrow</label>
@@ -649,6 +679,7 @@ export default function ContactPageEditor() {
           isOpen={!!openSections.whatsappCta}
           onToggle={() => toggleSection("whatsappCta")}
         >
+          <EnabledToggle enabled={sections.whatsappCta?.enabled} onChange={(v) => setSectionEnabled("whatsappCta", v)} />
           <div className="grid gap-4">
             <div>
               <label className={labelClass}>Eyebrow</label>
@@ -755,6 +786,7 @@ export default function ContactPageEditor() {
           isOpen={!!openSections.map}
           onToggle={() => toggleSection("map")}
         >
+          <EnabledToggle enabled={sections.map?.enabled} onChange={(v) => setSectionEnabled("map", v)} />
           <div className="grid gap-4">
             <div>
               <label className={labelClass}>Heading</label>

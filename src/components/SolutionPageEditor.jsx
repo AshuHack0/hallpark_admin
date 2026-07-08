@@ -1021,6 +1021,47 @@ export default function SolutionPageEditor() {
     }
   }
 
+  // Hero showcase (the animated mosaic + badges shown when no hero image/video
+  // is set). Text lives under hero.showcase; the two image columns are string
+  // arrays hero.showcase.imagesA / imagesB.
+  function setShowcase(patch) {
+    setHero((p) => ({ ...p, showcase: { ...(p.showcase ?? {}), ...patch } }));
+  }
+  function setShowcaseAr(key, value) {
+    setHero((p) => ({ ...p, showcase: { ...(p.showcase ?? {}), ar: { ...(p.showcase?.ar ?? {}), [key]: value } } }));
+  }
+  function updateShowcaseImage(col, idx, value) {
+    setHero((p) => {
+      const list = [...((p.showcase?.[col]) ?? [])];
+      list[idx] = value;
+      return { ...p, showcase: { ...(p.showcase ?? {}), [col]: list } };
+    });
+  }
+  function addShowcaseImage(col) {
+    setHero((p) => ({ ...p, showcase: { ...(p.showcase ?? {}), [col]: [...((p.showcase?.[col]) ?? []), ""] } }));
+  }
+  function removeShowcaseImage(col, idx) {
+    setHero((p) => ({ ...p, showcase: { ...(p.showcase ?? {}), [col]: ((p.showcase?.[col]) ?? []).filter((_, i) => i !== idx) } }));
+  }
+  async function handleShowcaseImageUpload(col, idx, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `showcase-${col}-${idx}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })));
+      updateShowcaseImage(col, idx, url);
+      setSuccess("Showcase image uploaded. Remember to Save.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleChallengesImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -1340,6 +1381,109 @@ export default function SolutionPageEditor() {
               </label>
             </div>
             <FieldError error={validateUrl(hero.videoUrl ?? "")} />
+          </div>
+
+          {/* Hero Showcase (mosaic + badges) — shown when no Image/Video above is set */}
+          <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+            <p className="text-sm font-semibold text-slate-700">Hero Showcase (animated mosaic + badges)</p>
+            <p className="mt-1 mb-4 text-[11px] text-slate-400">
+              This is the default right-side visual (scrolling photo columns + the three floating badges). It shows
+              only when no Hero Image or Video is set above. Leave a badge field blank to use its built-in text.
+            </p>
+
+            {/* Two image columns */}
+            {["imagesA", "imagesB"].map((col) => (
+              <div key={col} className="mb-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className={labelClass}>{col === "imagesA" ? "Left Column Images" : "Right Column Images"} ({(hero.showcase?.[col] ?? []).length})</label>
+                  <button type="button" onClick={() => addShowcaseImage(col)} className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                    <Plus className="h-3.5 w-3.5" /> Add Image
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(hero.showcase?.[col] ?? []).map((img, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <span className="text-[9px] text-slate-300">—</span>}
+                      </div>
+                      <input
+                        value={img ?? ""}
+                        onChange={(e) => updateShowcaseImage(col, idx, e.target.value)}
+                        className={inputClass}
+                        placeholder="Image URL or /path"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                        {uploadProgress[`showcase-${col}-${idx}`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`showcase-${col}-${idx}`]}%</>
+                        ) : (
+                          <><Upload className="h-3.5 w-3.5" /></>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleShowcaseImageUpload(col, idx, f); e.target.value = ""; }} />
+                      </label>
+                      <button type="button" onClick={() => removeShowcaseImage(col, idx)} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {(hero.showcase?.[col] ?? []).length === 0 && (
+                    <p className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-400">No images — the built-in default photos are shown.</p>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Center badge */}
+            <div className="mb-3 grid gap-2 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>Center Title (line 1)</label>
+                <input value={hero.showcase?.centerTitle ?? ""} onChange={(e) => setShowcase({ centerTitle: e.target.value })} className={inputClass} placeholder="One Connected" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Center Title" kind="label" value={hero.showcase?.ar?.centerTitle} onChange={(v) => setShowcaseAr("centerTitle", v)} />
+              </div>
+              <div>
+                <label className={labelClass}>Center Title (line 2, accent)</label>
+                <input value={hero.showcase?.centerTitleAccent ?? ""} onChange={(e) => setShowcase({ centerTitleAccent: e.target.value })} className={inputClass} placeholder="Platform" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Center Accent" kind="label" value={hero.showcase?.ar?.centerTitleAccent} onChange={(v) => setShowcaseAr("centerTitleAccent", v)} />
+              </div>
+              <div>
+                <label className={labelClass}>Center Badge (pill)</label>
+                <input value={hero.showcase?.centerBadge ?? ""} onChange={(e) => setShowcase({ centerBadge: e.target.value })} className={inputClass} placeholder="Unified" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Center Badge" kind="label" value={hero.showcase?.ar?.centerBadge} onChange={(v) => setShowcaseAr("centerBadge", v)} />
+              </div>
+            </div>
+
+            {/* Plate chip */}
+            <div className="mb-3 grid gap-2 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Plate Chip — Title</label>
+                <input value={hero.showcase?.plateTitle ?? ""} onChange={(e) => setShowcase({ plateTitle: e.target.value })} className={inputClass} placeholder="Plate Recognized" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Plate Title" kind="label" value={hero.showcase?.ar?.plateTitle} onChange={(v) => setShowcaseAr("plateTitle", v)} />
+              </div>
+              <div>
+                <label className={labelClass}>Plate Chip — Value</label>
+                <input value={hero.showcase?.plateValue ?? ""} onChange={(e) => setShowcase({ plateValue: e.target.value })} className={inputClass} placeholder="DXB · A 48291" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Plate Value" kind="label" value={hero.showcase?.ar?.plateValue} onChange={(v) => setShowcaseAr("plateValue", v)} />
+              </div>
+            </div>
+
+            {/* EV chip */}
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>EV Chip — Title</label>
+                <input value={hero.showcase?.evTitle ?? ""} onChange={(e) => setShowcase({ evTitle: e.target.value })} className={inputClass} placeholder="EV Bay · 12" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="EV Title" kind="label" value={hero.showcase?.ar?.evTitle} onChange={(v) => setShowcaseAr("evTitle", v)} />
+              </div>
+              <div>
+                <label className={labelClass}>EV Chip — Value</label>
+                <input value={hero.showcase?.evValue ?? ""} onChange={(e) => setShowcase({ evValue: e.target.value })} className={inputClass} placeholder="7.4 kW" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="EV Value" kind="label" value={hero.showcase?.ar?.evValue} onChange={(v) => setShowcaseAr("evValue", v)} />
+              </div>
+              <div>
+                <label className={labelClass}>EV Chip — Note</label>
+                <input value={hero.showcase?.evNote ?? ""} onChange={(e) => setShowcase({ evNote: e.target.value })} className={inputClass} placeholder="charging · 4 active" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="EV Note" kind="label" value={hero.showcase?.ar?.evNote} onChange={(v) => setShowcaseAr("evNote", v)} />
+              </div>
+            </div>
           </div>
         </div>
       </CollapsibleSection>

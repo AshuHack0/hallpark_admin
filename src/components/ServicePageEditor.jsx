@@ -43,10 +43,42 @@ const DEFAULT_CTA_SECTION = {
   ctaLabel: "Get a Quote",
 };
 
+// The "Get a Quote" popup (opened by Get In Touch / CTA buttons). Structural
+// default only — empty strings, so the DB is the single source of truth and the
+// site falls back to its built-in copy only when a field is left blank.
+const DEFAULT_QUOTE_FORM = {
+  eyebrow: "",
+  heading: "",
+  intro: "",
+  successTitle: "",
+  successMessage: "",
+  ar: { eyebrow: "", heading: "", intro: "", successTitle: "", successMessage: "" },
+};
+
+// Icons available for Trust & Safety items. These map 1:1 to the icon set the
+// public site supports (TRUST_ICONS in ServicesListPage). To add a new icon,
+// add it here AND to that map on the frontend.
+const TRUST_ICON_OPTIONS = [
+  { value: "Shield", label: "Shield (Safety)" },
+  { value: "Camera", label: "Camera (Surveillance)" },
+  { value: "BadgeCheck", label: "Badge Check (Verified)" },
+  { value: "CreditCard", label: "Credit Card (Payments)" },
+  { value: "Lock", label: "Lock (Secure Access)" },
+];
+
+// Tab-bar categories for the public Services page. The website builds the tab
+// bar dynamically from the categories actually used by the services.
+const CATEGORY_OPTIONS = [
+  { value: "parking", label: "Parking" },
+  { value: "valet", label: "Valet & Access" },
+  { value: "care", label: "Vehicle Care" },
+];
+
 const DEFAULT_SERVICE = {
   id: 1,
   slug: "",
   name: "",
+  category: "parking",
   mediaType: "image",
   mediaSrc: "",
   fullDesc: "",
@@ -132,6 +164,7 @@ export default function ServicePageEditor() {
   const [partnersSection, setPartnersSection] = useState(DEFAULT_PARTNERS_SECTION);
   const [trustSection, setTrustSection] = useState(DEFAULT_TRUST_SECTION);
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
+  const [quoteForm, setQuoteForm] = useState(DEFAULT_QUOTE_FORM);
   const [gridHeader, setGridHeader] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -156,6 +189,11 @@ export default function ServicePageEditor() {
         setPartnersSection(data.page.sections.partnersSection || DEFAULT_PARTNERS_SECTION);
         setTrustSection(data.page.sections.trustSection || DEFAULT_TRUST_SECTION);
         setCtaSection(data.page.sections.ctaSection || DEFAULT_CTA_SECTION);
+        setQuoteForm({
+          ...DEFAULT_QUOTE_FORM,
+          ...(data.page.sections.quoteForm ?? {}),
+          ar: { ...DEFAULT_QUOTE_FORM.ar, ...(data.page.sections.quoteForm?.ar ?? {}) },
+        });
         setGridHeader(data.page.sections.servicesGridHeader || {});
       }
     } catch (err) {
@@ -172,7 +210,7 @@ export default function ServicePageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("services", {
-        sections: { hero, services, partnersSection, trustSection, ctaSection, servicesGridHeader: gridHeader },
+        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader },
       });
       setSuccess("Service page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -212,11 +250,32 @@ export default function ServicePageEditor() {
     );
   }
 
+  // Arabic for a "What's Included" item lives in a parallel array on
+  // `service.ar.whatsIncluded` (Shape A). Blank AR falls back to nothing on the
+  // site (strict Arabic), never the English item.
+  function updateServiceIncludedAr(i, j, value) {
+    setServices((prev) =>
+      prev.map((srv, idx) => {
+        if (idx !== i) return srv;
+        const arList = Array.isArray(srv.ar?.whatsIncluded) ? [...srv.ar.whatsIncluded] : [];
+        while (arList.length <= j) arList.push("");
+        arList[j] = value;
+        return { ...srv, ar: { ...(srv.ar ?? {}), whatsIncluded: arList } };
+      })
+    );
+  }
+
   function removeServiceIncluded(i, j) {
     setServices((prev) =>
-      prev.map((srv, idx) =>
-        idx === i ? { ...srv, whatsIncluded: srv.whatsIncluded.filter((_, jdx) => jdx !== j) } : srv
-      )
+      prev.map((srv, idx) => {
+        if (idx !== i) return srv;
+        const arList = Array.isArray(srv.ar?.whatsIncluded) ? srv.ar.whatsIncluded.filter((_, jdx) => jdx !== j) : [];
+        return {
+          ...srv,
+          whatsIncluded: srv.whatsIncluded.filter((_, jdx) => jdx !== j),
+          ar: { ...(srv.ar ?? {}), whatsIncluded: arList },
+        };
+      })
     );
   }
 
@@ -468,6 +527,22 @@ export default function ServicePageEditor() {
               </div>
 
               <div>
+                <label className={labelClass}>Tab Bar Category</label>
+                <select
+                  value={service.category ?? "parking"}
+                  onChange={(e) => updateService(i, "category", e.target.value)}
+                  className={inputClass}
+                >
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  Which tab this service appears under on the website. Tabs show only when they have services.
+                </p>
+              </div>
+
+              <div>
                 <label className={labelClass}>Full Description</label>
                 <textarea
                   value={service.fullDesc ?? ""}
@@ -552,6 +627,13 @@ export default function ServicePageEditor() {
                       maxLength={FIELD_LIMITS.item}
                     />
                     <CharCount value={item ?? ""} max={FIELD_LIMITS.item} />
+                    <ArInput
+                      label="Included Item"
+                      kind="item"
+                      multiline
+                      value={service.ar?.whatsIncluded?.[j]}
+                      onChange={(v) => updateServiceIncludedAr(i, j, v)}
+                    />
                   </>
                 )}
               />
@@ -894,7 +976,6 @@ export default function ServicePageEditor() {
                 <Plus className="h-3.5 w-3.5" /> Add Item
               </button>
             </div>
-            <p className="mb-2 text-[11px] text-slate-400">Icon options: Camera, Shield, BadgeCheck, CreditCard, Lock</p>
             <div className="space-y-3">
               {(trustSection.items ?? []).map((item, i) => (
                 <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
@@ -922,14 +1003,16 @@ export default function ServicePageEditor() {
                       <ArInput label="Label" kind="item" value={item.ar?.label} onChange={(v) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, ar: { ...(it.ar ?? {}), label: v } } : it)) }))} />
                     </div>
                     <div>
-                      <label className={labelClass}>Icon name</label>
-                      <input
-                        value={item.icon ?? ""}
+                      <label className={labelClass}>Icon</label>
+                      <select
+                        value={item.icon ?? "Shield"}
                         onChange={(e) => setTrustSection((p) => ({ ...p, items: (p.items ?? []).map((it, idx) => (idx === i ? { ...it, icon: e.target.value } : it)) }))}
                         className={inputClass}
-                        placeholder="Shield"
-                        maxLength={FIELD_LIMITS.label}
-                      />
+                      >
+                        {TRUST_ICON_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -993,6 +1076,83 @@ export default function ServicePageEditor() {
             />
             <CharCount value={ctaSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             <ArInput label="CTA Label" kind="button" value={ctaSection.ar?.ctaLabel} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Get a Quote Popup (form + confirmation)" defaultOpen={false}>
+        <p className="mb-4 text-xs text-slate-400">
+          The pop-up opened by the &quot;Get In Touch&quot; / &quot;Get a Quote&quot; buttons. Leave a field blank to use the
+          built-in default text on the website.
+        </p>
+        <div className="grid gap-4">
+          <div>
+            <label className={labelClass}>Eyebrow (small label above heading)</label>
+            <input
+              value={quoteForm.eyebrow ?? ""}
+              onChange={(e) => setQuoteForm((p) => ({ ...p, eyebrow: e.target.value }))}
+              className={inputClass}
+              placeholder="Long-Term Parking"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={quoteForm.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput label="Eyebrow" kind="label" value={quoteForm.ar?.eyebrow} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), eyebrow: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Heading</label>
+            <input
+              value={quoteForm.heading ?? ""}
+              onChange={(e) => setQuoteForm((p) => ({ ...p, heading: e.target.value }))}
+              className={inputClass}
+              placeholder="Get a Quote"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={quoteForm.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Heading" kind="heading" value={quoteForm.ar?.heading} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Intro line</label>
+            <textarea
+              value={quoteForm.intro ?? ""}
+              onChange={(e) => setQuoteForm((p) => ({ ...p, intro: e.target.value }))}
+              className={inputClass}
+              rows={2}
+              placeholder="Fill in the details and our team will be in touch."
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={quoteForm.intro ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput label="Intro" kind="subtitle" multiline value={quoteForm.ar?.intro} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} />
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Confirmation message (after submit)</p>
+            <div className="grid gap-4">
+              <div>
+                <label className={labelClass}>Success Title</label>
+                <input
+                  value={quoteForm.successTitle ?? ""}
+                  onChange={(e) => setQuoteForm((p) => ({ ...p, successTitle: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Request Received!"
+                  maxLength={FIELD_LIMITS.heading}
+                />
+                <CharCount value={quoteForm.successTitle ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Success Title" kind="heading" value={quoteForm.ar?.successTitle} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), successTitle: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Success Message</label>
+                <textarea
+                  value={quoteForm.successMessage ?? ""}
+                  onChange={(e) => setQuoteForm((p) => ({ ...p, successMessage: e.target.value }))}
+                  className={inputClass}
+                  rows={3}
+                  placeholder="Our team will review your request and get back to you within 24 hours."
+                  maxLength={FIELD_LIMITS.description}
+                />
+                <CharCount value={quoteForm.successMessage ?? ""} max={FIELD_LIMITS.description} />
+                <ArInput label="Success Message" kind="description" multiline value={quoteForm.ar?.successMessage} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), successMessage: v } }))} />
+              </div>
+            </div>
           </div>
         </div>
       </CollapsibleSection>

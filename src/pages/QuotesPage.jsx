@@ -45,6 +45,7 @@ export default function QuotesPage() {
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Phone</th>
                 <th className="px-4 py-3">Service</th>
+                <th className="px-4 py-3">Attachments</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Date</th>
               </tr>
@@ -56,6 +57,26 @@ export default function QuotesPage() {
                   <td className="px-4 py-3 text-slate-600">{quote.email}</td>
                   <td className="px-4 py-3 text-slate-600">{quote.phone}</td>
                   <td className="px-4 py-3 text-slate-600">{quote.service}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {Array.isArray(quote.attachments) && quote.attachments.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {quote.attachments.map((file, index) => (
+                          <a
+                            key={`${file?.url}-${index}`}
+                            href={file?.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="max-w-[180px] truncate text-xs font-medium text-[#0088FF] hover:underline"
+                            title={file?.name || file?.url}
+                          >
+                            {file?.name || `File ${index + 1}`}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-[#EEF6FF] px-2.5 py-1 text-xs font-semibold text-[#0088FF]">
                       {quote.status}

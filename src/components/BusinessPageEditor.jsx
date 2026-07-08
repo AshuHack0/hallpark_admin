@@ -24,8 +24,9 @@ const DEFAULT_WHY_CHOOSE = [
   {
     title: "Increase Revenue",
     description: "Transform unused or underutilized parking spaces into new revenue opportunities.",
-    bgGradient: "from-[#0088FF] to-[#0066CC]",
-    accentColor: "bg-[#0088FF]",
+    image: "",
+    colorFrom: "#0088FF",
+    colorTo: "#0066CC",
   },
 ];
 
@@ -356,7 +357,17 @@ export default function BusinessPageEditor() {
       .then((data) => {
         setPage(data);
         if (data.page?.sections) {
-          setSections((prev) => ({ ...prev, ...data.page.sections }));
+          const dbSections = data.page.sections;
+          setSections((prev) => ({
+            ...prev,
+            ...dbSections,
+            // The DB is the single source of truth for these card arrays. Once
+            // the page has ever been saved, honour the stored array EXACTLY
+            // (including an empty one) so deleted cards never resurface from the
+            // built-in defaults.
+            solutions: Array.isArray(dbSections.solutions) ? dbSections.solutions : [],
+            whyChoose: Array.isArray(dbSections.whyChoose) ? dbSections.whyChoose : [],
+          }));
         }
         setLoading(false);
       })
@@ -637,8 +648,9 @@ export default function BusinessPageEditor() {
             defaultItem={{
               title: "New Reason",
               description: "Description here",
-              bgGradient: "from-[#0088FF] to-[#0066CC]",
-              accentColor: "bg-[#0088FF]",
+              image: "",
+              colorFrom: "#0088FF",
+              colorTo: "#0066CC",
             }}
             renderItem={(item, i, update) => (
               <div className="space-y-4">
@@ -666,30 +678,48 @@ export default function BusinessPageEditor() {
                   <CharCount value={item.description} max={FIELD_LIMITS.description} />
                   <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>
+                <div>
+                  <label className={labelClass}>Card Image</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.image ?? ""}
+                      onChange={(e) => update(i, { image: e.target.value })}
+                      className={inputClass}
+                      placeholder="Image URL or /path (leave blank to use the color gradient)"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("whyChoose", "image", file, i);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(item.image ?? "")} />
+                  <p className="mt-1 text-[11px] text-slate-400">Shown on the left side of the card. If left blank, the gradient colors below are used instead.</p>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass}>Background Gradient</label>
-                    <input
-                      type="text"
-                      value={item.bgGradient}
-                      onChange={(e) => update(i, { bgGradient: e.target.value })}
-                      className={inputClass}
-                      placeholder="e.g., from-[#0088FF] to-[#0066CC]"
-                      maxLength={FIELD_LIMITS.label}
-                    />
-                    <CharCount value={item.bgGradient} max={FIELD_LIMITS.label} />
+                    <label className={labelClass}>Gradient Color — From</label>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={item.colorFrom || "#0088FF"} onChange={(e) => update(i, { colorFrom: e.target.value })} className="h-10 w-16 shrink-0 cursor-pointer rounded-lg" />
+                      <input type="text" value={item.colorFrom ?? ""} onChange={(e) => update(i, { colorFrom: e.target.value })} className={inputClass} placeholder="#0088FF" maxLength="9" />
+                    </div>
                   </div>
                   <div>
-                    <label className={labelClass}>Accent Color Class</label>
-                    <input
-                      type="text"
-                      value={item.accentColor}
-                      onChange={(e) => update(i, { accentColor: e.target.value })}
-                      className={inputClass}
-                      placeholder="e.g., bg-[#0088FF]"
-                      maxLength={FIELD_LIMITS.label}
-                    />
-                    <CharCount value={item.accentColor} max={FIELD_LIMITS.label} />
+                    <label className={labelClass}>Gradient Color — To</label>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={item.colorTo || "#0066CC"} onChange={(e) => update(i, { colorTo: e.target.value })} className="h-10 w-16 shrink-0 cursor-pointer rounded-lg" />
+                      <input type="text" value={item.colorTo ?? ""} onChange={(e) => update(i, { colorTo: e.target.value })} className={inputClass} placeholder="#0066CC" maxLength="9" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -770,6 +800,18 @@ export default function BusinessPageEditor() {
               <CharCount value={sections.solutionsHeader?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="CTA Label" kind="button" value={sections.solutionsHeader?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), ctaLabel: v } } })} />
             </div>
+            <div>
+              <label className={labelClass}>CTA Button Link</label>
+              <input
+                value={sections.solutionsHeader?.ctaLink ?? ""}
+                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ctaLink: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.link}
+                placeholder="/solutions"
+              />
+              <p className="mt-1 text-[11px] text-slate-400">Where the &quot;Explore&quot; button goes (page path or full URL). Default: /solutions</p>
+              <FieldError error={validateUrl(sections.solutionsHeader?.ctaLink ?? "")} />
+            </div>
           </div>
           <ArrayItemEditor
             items={sections.solutions}
@@ -781,6 +823,8 @@ export default function BusinessPageEditor() {
               description: "Description here",
               image: "/image.png",
               icon: "🅿️",
+              link: "",
+              color: "#0088FF",
             }}
             renderItem={(item, i, update) => (
               <div className="space-y-4">
@@ -839,11 +883,48 @@ export default function BusinessPageEditor() {
                     <label className={labelClass}>Icon (emoji)</label>
                     <input
                       type="text"
-                      value={item.icon}
+                      value={item.icon ?? ""}
                       onChange={(e) => update(i, { icon: e.target.value })}
                       className={inputClass}
-                      maxLength="2"
+                      placeholder="🅿️"
+                      maxLength="4"
                     />
+                    <p className="mt-1 text-[11px] text-slate-400">Shown as a badge on the card image. Paste any emoji (e.g. 🅿️ 🏠 🏢 🛍️ 🤖 ⚡).</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>Link (redirect on click)</label>
+                    <input
+                      type="text"
+                      value={item.link ?? ""}
+                      onChange={(e) => update(i, { link: e.target.value })}
+                      className={inputClass}
+                      maxLength={FIELD_LIMITS.link}
+                      placeholder="/solutions/smart-public-parking"
+                    />
+                    <p className="mt-1 text-[11px] text-slate-400">Page path or URL the card opens. Leave blank to make the card non-clickable.</p>
+                    <FieldError error={validateUrl(item.link ?? "")} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Accent Color</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={item.color || "#0088FF"}
+                        onChange={(e) => update(i, { color: e.target.value })}
+                        className="h-10 w-16 shrink-0 cursor-pointer rounded-lg"
+                      />
+                      <input
+                        type="text"
+                        value={item.color ?? ""}
+                        onChange={(e) => update(i, { color: e.target.value })}
+                        className={inputClass}
+                        placeholder="#0088FF"
+                        maxLength="9"
+                      />
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-400">Card accent (icon badge, hover glow, underline).</p>
                   </div>
                 </div>
               </div>

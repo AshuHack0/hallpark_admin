@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Tag } from "lucide-react";
+import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Tag, Paperclip, FileText } from "lucide-react";
 import { api } from "../lib/api";
 
 const STATUS_OPTIONS = ["new", "read", "replied", "closed"];
@@ -164,6 +164,47 @@ function ContactDetail({ contact, onBack, onStatusChange, onDelete }) {
               <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#050A13]">{contact.message}</p>
             </div>
           </div>
+
+          {/* Attachments — full width */}
+          {Array.isArray(contact.attachments) && contact.attachments.length > 0 && (
+            <div className="flex items-start gap-3 sm:col-span-2">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF]">
+                <Paperclip className="h-4 w-4 text-[#0088FF]" strokeWidth={1.8} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  Attachments ({contact.attachments.length})
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {contact.attachments.map((file, index) => {
+                    const isImage = (file?.type ?? "").startsWith("image/");
+                    return (
+                      <li key={`${file?.url}-${index}`}>
+                        <a
+                          href={file?.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 transition hover:border-[#0088FF] hover:bg-[#EEF6FF]"
+                        >
+                          {isImage ? (
+                            <img src={file.url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                          ) : (
+                            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400">
+                              <FileText className="h-5 w-5" />
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#050A13]" title={file?.name}>
+                            {file?.name || file?.url}
+                          </span>
+                          <span className="shrink-0 text-xs font-semibold text-[#0088FF]">Open</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1760,32 +1760,42 @@ export default function BusinessPageEditor() {
                   Add Stat
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {(sections.partnersShowcase.stats ?? []).map((stat, i) => (
-                  <div key={i} className="flex gap-2 items-end">
-                    <input
-                      value={stat.value}
-                      onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, value: e.target.value } : s) } })}
-                      className={inputClass}
-                      placeholder="Value (e.g., 5th, 95%)"
-                      maxLength={FIELD_LIMITS.label}
-                    />
-                    <div className="flex-1">
-                      <input
-                        value={stat.label}
-                        onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s) } })}
-                        className={inputClass}
-                        placeholder="Label"
-                        maxLength={FIELD_LIMITS.label}
-                      />
-                      <ArInput label="Label" kind="label" value={stat.ar?.label} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, ar: { ...(s.ar ?? {}), label: v } } : s) } })} multiline={false} />
+                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Stat {i + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
-                      className="text-red-600 hover:bg-red-50 p-2 rounded transition shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+                      <div>
+                        <label className={labelClass}>Value</label>
+                        <input
+                          value={stat.value ?? ""}
+                          onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, value: e.target.value } : s) } })}
+                          className={inputClass}
+                          placeholder="e.g. 5th, 95%"
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Label</label>
+                        <input
+                          value={stat.label ?? ""}
+                          onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s) } })}
+                          className={inputClass}
+                          placeholder="Label"
+                          maxLength={FIELD_LIMITS.label}
+                        />
+                        <ArInput label="Label" kind="label" value={stat.ar?.label} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.map((s, idx) => idx === i ? { ...s, ar: { ...(s.ar ?? {}), label: v } } : s) } })} multiline={false} />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { getUser, logout } from "../lib/api";
+import ScrollToTop from "./ScrollToTop.jsx";
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
@@ -116,6 +117,8 @@ export default function AdminLayout() {
       <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <Outlet />
       </main>
+
+      <ScrollToTop />
     </div>
   );
 }

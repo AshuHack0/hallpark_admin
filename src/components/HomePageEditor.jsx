@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
 
 const inputClass =
@@ -811,6 +812,54 @@ export default function HomePageEditor() {
     }
   }
 
+  // Custom icon uploads for the Who We Are highlights + Why HalaPark items.
+  // A custom image (iconImage) overrides the preset lucide icon on the site.
+  async function handleWhoIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `who-hl-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateWhoHighlight(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
+  async function handleWhyIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `why-item-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateWhyItem(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleBlackBannerImageUpload(file) {
     const err = validateImageFile(file);
     if (err) { setError(err); return; }
@@ -1120,17 +1169,28 @@ export default function HomePageEditor() {
               <ArInput label="Heading" kind="heading" value={whoWeAre.audiences?.business?.ar?.heading} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), heading: v })} />
             </div>
             <div>
-              <label className={labelClass}>Description</label>
-              {/* No character limit — the paragraph flows down the layout. */}
+              <label className={labelClass}>Subheading (shown centered under the heading)</label>
               <textarea
-                value={whoWeAre.audiences?.business?.body ?? ""}
-                onChange={(e) => updateWhoAudience("business", "body", e.target.value)}
-                maxLength={FIELD_LIMITS.description}
+                value={whoWeAre.audiences?.business?.subheading ?? ""}
+                onChange={(e) => updateWhoAudience("business", "subheading", e.target.value)}
+                maxLength={FIELD_LIMITS.subtitle}
                 className={inputClass}
+                rows={2}
+                placeholder="A short sentence under the heading"
+              />
+              <CharCount value={whoWeAre.audiences?.business?.subheading ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput label="Subheading" kind="subtitle" multiline value={whoWeAre.audiences?.business?.ar?.subheading} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), subheading: v })} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+              <RichTextArea
+                value={whoWeAre.audiences?.business?.body ?? ""}
+                onChange={(v) => updateWhoAudience("business", "body", v)}
+                maxLength={FIELD_LIMITS.description}
                 rows={6}
                 placeholder="Section description shown on the website"
               />
-              <CharCount value={whoWeAre.audiences?.business?.body ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Body" kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
             </div>
 
@@ -1166,15 +1226,27 @@ export default function HomePageEditor() {
                 >
                   Delete
                 </button>
-                <select
-                  value={h.icon ?? "Layers"}
-                  onChange={(e) => updateWhoHighlight(i, "icon", e.target.value)}
-                  className={inputClass}
-                >
-                  {WHO_WE_ARE_ICONS.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
+                <div className="grid gap-2">
+                  <select
+                    value={h.icon ?? "Layers"}
+                    onChange={(e) => updateWhoHighlight(i, "icon", e.target.value)}
+                    className={inputClass}
+                  >
+                    {WHO_WE_ARE_ICONS.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <MediaField
+                    label="Custom Icon (optional — overrides the icon above)"
+                    value={h.iconImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`who-hl-${i}-icon`] !== undefined}
+                    progress={uploadProgress[`who-hl-${i}-icon`]}
+                    onChange={(v) => updateWhoHighlight(i, "iconImage", v)}
+                    onUpload={(file) => handleWhoIconUpload(i, file)}
+                  />
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={h.title ?? ""}
@@ -1250,16 +1322,28 @@ export default function HomePageEditor() {
                       <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>
                   </div>
-                  <div className="grid gap-2 sm:grid-cols-[140px_1fr]">
-                    <select
-                      value={it.icon ?? "Gauge"}
-                      onChange={(e) => updateWhyItem(i, "icon", e.target.value)}
-                      className={inputClass}
-                    >
-                      {WHY_ICONS.map((name) => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
-                    </select>
+                  <div className="grid gap-2 sm:grid-cols-[180px_1fr]">
+                    <div className="grid gap-2">
+                      <select
+                        value={it.icon ?? "Gauge"}
+                        onChange={(e) => updateWhyItem(i, "icon", e.target.value)}
+                        className={inputClass}
+                      >
+                        {WHY_ICONS.map((name) => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </select>
+                      <MediaField
+                        label="Custom Icon (optional — overrides above)"
+                        value={it.iconImage ?? ""}
+                        accept="image/*"
+                        resourceType="image"
+                        uploading={uploadProgress[`why-item-${i}-icon`] !== undefined}
+                        progress={uploadProgress[`why-item-${i}-icon`]}
+                        onChange={(v) => updateWhyItem(i, "iconImage", v)}
+                        onUpload={(file) => handleWhyIconUpload(i, file)}
+                      />
+                    </div>
                     <input
                       value={it.title ?? ""}
                       onChange={(e) => updateWhyItem(i, "title", e.target.value)}
@@ -1363,15 +1447,13 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={aiPoweredParking.description ?? ""}
-                onChange={(e) => setAiPoweredParking((p) => ({ ...p, description: e.target.value }))}
+                onChange={(v) => setAiPoweredParking((p) => ({ ...p, description: v }))}
                 maxLength={FIELD_LIMITS.description}
-                className={inputClass}
                 rows={3}
                 placeholder="Section description"
               />
-              <CharCount value={aiPoweredParking.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" multiline value={aiPoweredParking.ar?.description} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
 
@@ -1590,14 +1672,12 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={blackBanner.description ?? ""}
-                onChange={(e) => setBlackBanner((p) => ({ ...p, description: e.target.value }))}
+                onChange={(v) => setBlackBanner((p) => ({ ...p, description: v }))}
                 maxLength={FIELD_LIMITS.description}
-                className={inputClass}
                 rows={3}
               />
-              <CharCount value={blackBanner.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" multiline value={blackBanner.ar?.description} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
             <div>
@@ -2082,14 +2162,12 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description (second line)</label>
-              <textarea
+              <RichTextArea
                 value={globalMobility.description ?? ""}
-                onChange={(e) => setGlobalMobility((p) => ({ ...p, description: e.target.value }))}
+                onChange={(v) => setGlobalMobility((p) => ({ ...p, description: v }))}
                 maxLength={FIELD_LIMITS.description}
-                className={inputClass}
                 rows={2}
               />
-              <CharCount value={globalMobility.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" multiline value={globalMobility.ar?.description} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2517,8 +2595,7 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea value={supportCta.description ?? ""} onChange={(e) => setSupportCta((p) => ({ ...p, description: e.target.value }))} className={inputClass} rows={2} maxLength={FIELD_LIMITS.description} />
-              <CharCount value={supportCta.description ?? ""} max={FIELD_LIMITS.description} />
+              <RichTextArea value={supportCta.description ?? ""} onChange={(v) => setSupportCta((p) => ({ ...p, description: v }))} rows={2} maxLength={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" multiline value={supportCta.ar?.description} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">

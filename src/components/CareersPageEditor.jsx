@@ -31,6 +31,15 @@ const btnOutline =
 const btnDanger =
   "inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50";
 
+// Built-in icons for Opportunity cards — must match the `opportunityIcons` map
+// in the frontend CareersPage. Each card can also upload a custom icon image
+// (Icon Image field) which overrides this.
+const OPPORTUNITY_ICONS = [
+  "Briefcase", "Headset", "Building2", "Rocket", "Users", "GraduationCap",
+  "Heart", "TrendingUp", "Globe", "Lightbulb", "Code2", "Handshake",
+  "Target", "Award", "Clock", "Zap", "Sparkles", "MapPin",
+];
+
 function Modal({ open, title, children, onClose, footer }) {
   if (!open) return null;
   return (
@@ -891,9 +900,9 @@ export default function CareersPageEditor() {
                         onChange={(e) => updateOpportunity(i, "icon", e.target.value)}
                         className={inputClass}
                       >
-                        <option value="Briefcase">Briefcase</option>
-                        <option value="Headset">Headset</option>
-                        <option value="Building2">Building2</option>
+                        {OPPORTUNITY_ICONS.map((name) => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

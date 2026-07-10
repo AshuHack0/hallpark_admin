@@ -215,8 +215,21 @@ const DEFAULT_PROMO_POPUP = {
   description: "",
   ctaLabel: "",
   ctaHref: "",
+  socials: [], // [{ platform, url }] — round social icons under the text
   ar: { eyebrow: "", heading: "", description: "", ctaLabel: "" },
 };
+
+// Social platforms the popup can render (must match PromoPopup.jsx SOCIAL_ICONS).
+const PROMO_SOCIAL_PLATFORMS = [
+  { value: "instagram", label: "Instagram" },
+  { value: "facebook", label: "Facebook" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "x", label: "X (Twitter)" },
+  { value: "youtube", label: "YouTube" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "snapchat", label: "Snapchat" },
+];
 
 function emptySlide() {
   return {
@@ -2807,8 +2820,9 @@ export default function HomePageEditor() {
                 onChange={(e) => setPromoPopup((prev) => ({ ...prev, heading: e.target.value }))}
                 maxLength={FIELD_LIMITS.heading}
                 className={inputClass}
-                placeholder="e.g. Introducing Valet On Demand"
+                placeholder="e.g. Sign up today and take {{15%}} off"
               />
+              <p className="mt-1 text-[11px] text-slate-400">Wrap a word in {"{{ }}"} to give it a hand-drawn circle accent — e.g. Sign up and take {"{{"}15%{"}}"} off.</p>
               <CharCount value={promoPopup.heading ?? ""} max={FIELD_LIMITS.heading} />
               <ArInput
                 label="Heading"
@@ -2867,6 +2881,78 @@ export default function HomePageEditor() {
                 />
                 <FieldError error={validateUrl(promoPopup.ctaHref)} />
                 <p className="mt-1 text-[10px] text-slate-400">The button only shows when both label and link are set.</p>
+              </div>
+            </div>
+
+            {/* Social links — each shows as a round icon under the text. */}
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+              <div className="flex items-center justify-between">
+                <label className={labelClass}>Social Links</label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPromoPopup((prev) => ({
+                      ...prev,
+                      socials: [...(Array.isArray(prev.socials) ? prev.socials : []), { platform: "instagram", url: "" }],
+                    }))
+                  }
+                  className="rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-700"
+                >
+                  + Add
+                </button>
+              </div>
+              <p className="mb-2 mt-1 text-[10px] text-slate-400">
+                Pick a platform and paste its profile URL. Only rows with a link show on the popup.
+              </p>
+              <div className="space-y-2">
+                {(Array.isArray(promoPopup.socials) ? promoPopup.socials : []).map((s, i) => (
+                  <div key={i} className="grid grid-cols-[130px_1fr_auto] items-center gap-2">
+                    <select
+                      value={s?.platform ?? "instagram"}
+                      onChange={(e) =>
+                        setPromoPopup((prev) => {
+                          const next = [...(prev.socials ?? [])];
+                          next[i] = { ...next[i], platform: e.target.value };
+                          return { ...prev, socials: next };
+                        })
+                      }
+                      className={inputClass}
+                    >
+                      {PROMO_SOCIAL_PLATFORMS.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={s?.url ?? ""}
+                      onChange={(e) =>
+                        setPromoPopup((prev) => {
+                          const next = [...(prev.socials ?? [])];
+                          next[i] = { ...next[i], url: e.target.value };
+                          return { ...prev, socials: next };
+                        })
+                      }
+                      className={inputClass}
+                      placeholder="https://instagram.com/halapark"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPromoPopup((prev) => ({
+                          ...prev,
+                          socials: (prev.socials ?? []).filter((_, idx) => idx !== i),
+                        }))
+                      }
+                      className="rounded-md border border-slate-300 px-2 py-1.5 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                {(Array.isArray(promoPopup.socials) ? promoPopup.socials : []).length === 0 ? (
+                  <p className="text-[11px] text-slate-400">No social links yet.</p>
+                ) : null}
               </div>
             </div>
           </div>

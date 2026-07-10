@@ -510,36 +510,6 @@ export default function AppPageEditor() {
 
             {/* Images */}
             <div>
-              <label className={labelClass}>Hero Image (right side)</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={sections.hero.image}
-                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, image: e.target.value } })}
-                  className={inputClass}
-                  maxLength={FIELD_LIMITS.link}
-                />
-                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
-                  {uploadProgress["hero-image"] !== undefined ? (
-                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["hero-image"]}%</>
-                  ) : (
-                    <><Upload className="h-3.5 w-3.5" />Upload</>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload("hero", "image", file);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              </div>
-              <FieldError error={validateUrl(sections.hero.image)} />
-            </div>
-            <div>
               <label className={labelClass}>Phone Screenshot (inside the frame)</label>
               <div className="flex gap-2">
                 <input

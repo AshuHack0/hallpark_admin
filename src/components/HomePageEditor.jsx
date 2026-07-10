@@ -12,6 +12,16 @@ const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em]
 // Mirrors DEFAULT_HOME_CONTENT.whoWeAre on the frontend. Icon options match
 // the lucide icons mapped in WhoWeAre.jsx.
 const WHO_WE_ARE_ICONS = ["Layers", "TrendingUp", "Building2"];
+// Built-in icon ids for Solution Integration cards (must match the frontend
+// SolutionIcon map). A card can also upload a custom icon image (overrides).
+const SOLUTION_ICON_OPTIONS = [
+  { value: "barrier", label: "Barrier" },
+  { value: "camera", label: "Camera" },
+  { value: "systems", label: "Systems / Monitor" },
+  { value: "kiosk", label: "Kiosk / NFC" },
+  { value: "sensor", label: "Sensor / Radar" },
+  { value: "end-to-end", label: "End-to-End / Workflow" },
+];
 const DEFAULT_WHO_WE_ARE = {
   eyebrowHeading: "Who We Are",
   audiences: {
@@ -477,6 +487,31 @@ export default function HomePageEditor() {
       ...prev,
       solutionCards: prev.solutionCards.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)),
     }));
+  }
+
+  // Custom icon upload for a Solution Integration card. iconImage overrides the
+  // built-in icon selected in the dropdown.
+  async function handleSolutionCardIconUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `sol-card-${i}-icon`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateSolutionCard(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setError(err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
   }
 
   function updateCapability(i, field, value) {
@@ -1952,12 +1987,36 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={card.title ?? ""} max={FIELD_LIMITS.heading} />
                   <ArInput label="Title" kind="heading" value={card.ar?.title} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), title: v })} />
+
+                  {/* Icon: pick a built-in, or upload a custom image (overrides). */}
+                  <label className={labelClass}>Icon</label>
+                  <select
+                    value={card.id ?? "barrier"}
+                    onChange={(e) => updateSolutionCard(i, "id", e.target.value)}
+                    className={inputClass}
+                  >
+                    {SOLUTION_ICON_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <MediaField
+                    label="Custom Icon (optional — overrides the icon above)"
+                    value={card.iconImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`sol-card-${i}-icon`] !== undefined}
+                    progress={uploadProgress[`sol-card-${i}-icon`]}
+                    onChange={(v) => updateSolutionCard(i, "iconImage", v)}
+                    onUpload={(file) => handleSolutionCardIconUpload(i, file)}
+                  />
+
+                  <label className={labelClass}>Description</label>
                   <textarea
                     value={card.description ?? ""}
                     onChange={(e) => updateSolutionCard(i, "description", e.target.value)}
                     maxLength={FIELD_LIMITS.description}
                     className={inputClass}
-                    rows={2}
+                    rows={3}
                     placeholder="Description"
                   />
                   <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />

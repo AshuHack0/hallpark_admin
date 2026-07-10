@@ -275,6 +275,9 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
         </label>
       </div>
       <FieldError error={validateUrl(value)} />
+      {resourceType === "video" ? (
+        <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
+      ) : null}
     </div>
   );
 }

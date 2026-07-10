@@ -1050,6 +1050,7 @@ export default function FAQPageEditor() {
                         </button>
                       </div>
                       <FieldError error={validateUrl(video)} />
+                      <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
                       </div>
                     );
                   })}

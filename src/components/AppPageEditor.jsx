@@ -1833,15 +1833,14 @@ export default function AppPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+              <RichTextArea
                 value={sections.featureCardsHeader?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, description: e.target.value } })}
-                className={inputClass}
-                rows={2}
+                onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
                 placeholder="Powerful features designed to save you time, money, and effort."
               />
-              <CharCount value={sections.featureCardsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
               <ArInput label="Description" kind="description" value={sections.featureCardsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), description: v } } })} multiline={true} />
             </div>
           </div>
@@ -1867,11 +1866,12 @@ export default function AppPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
+                  {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+                  <RichTextArea
                     value={item.description ?? ""}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
+                    onChange={(v) => update(i, { description: v })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
                   />
                   <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
                 </div>

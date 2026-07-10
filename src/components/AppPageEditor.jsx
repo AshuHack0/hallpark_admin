@@ -3,6 +3,7 @@ import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -1617,11 +1618,13 @@ export default function AppPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Description</label>
-                <textarea
+                {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+                <RichTextArea
                   value={sections.currency?.description ?? ""}
-                  onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, description: e.target.value } })}
-                  className={inputClass}
-                  rows={3}
+                  onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, description: v } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={4}
+                  placeholder="Section description shown on the website"
                 />
                 <ArInput label="Description" kind="description" value={sections.currency?.ar?.description} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })} multiline={true} />
               </div>

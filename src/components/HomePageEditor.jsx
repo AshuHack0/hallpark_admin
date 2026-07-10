@@ -199,11 +199,12 @@ const DEFAULT_PROMO_POPUP = {
   mediaType: "image", // "image" | "video"
   image: "",
   video: "",
+  eyebrow: "",
   heading: "",
   description: "",
   ctaLabel: "",
   ctaHref: "",
-  ar: { heading: "", description: "", ctaLabel: "" },
+  ar: { eyebrow: "", heading: "", description: "", ctaLabel: "" },
 };
 
 function emptySlide() {
@@ -2626,6 +2627,25 @@ export default function HomePageEditor() {
                   onUpload={(file, rt) => handlePromoUpload(file, rt)}
                 />
               )}
+            </div>
+
+            {/* Eyebrow (small label above the heading) */}
+            <div>
+              <label className={labelClass}>Eyebrow (small label above heading)</label>
+              <input
+                value={promoPopup.eyebrow ?? ""}
+                onChange={(e) => setPromoPopup((prev) => ({ ...prev, eyebrow: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="e.g. FIRST ORDER? / LIMITED OFFER"
+              />
+              <CharCount value={promoPopup.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput
+                label="Eyebrow"
+                kind="label"
+                value={promoPopup.ar?.eyebrow}
+                onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), eyebrow: v } }))}
+              />
             </div>
 
             {/* Heading */}

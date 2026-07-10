@@ -1890,15 +1890,14 @@ export default function SolutionPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Subtitle</label>
-                <input
+                <textarea
                   value={integration.subtitle ?? ""}
                   onChange={(e) => setIntegration((p) => ({ ...p, subtitle: e.target.value }))}
                   className={inputClass}
+                  rows={2}
                   placeholder="End-to-End Integrated Parking Solution"
-                  maxLength={FIELD_LIMITS.subtitle}
                 />
-                <CharCount value={integration.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput label="Subtitle" kind="subtitle" value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+                <ArInput label="Subtitle" kind="subtitle" multiline value={integration.ar?.subtitle} onChange={(v) => setIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
               </div>
               <div>
                 <label className={labelClass}>Accent Color</label>
@@ -1990,15 +1989,15 @@ export default function SolutionPageEditor() {
                       variant="arabic"
                     />
                     <div className="flex gap-2">
-                      <input
+                      <textarea
                         value={card.image ?? ""}
                         onChange={(e) => setIntegration((p) => ({
                           ...p,
                           cards: p.cards.map((c, idx) => idx === i ? { ...c, image: e.target.value } : c)
                         }))}
                         className={inputClass}
-                        placeholder="Image URL"
-                        maxLength={FIELD_LIMITS.link}
+                        rows={2}
+                        placeholder="Image URL (or upload)"
                       />
                       <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
                         {uploadProgress[`integration-${i}`] ? (

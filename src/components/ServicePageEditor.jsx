@@ -9,10 +9,20 @@ const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
 
+// Structural default only — no hardcoded copy. Everything is CMS-driven; empty
+// fields render blank / hidden on the site (the DB is the single source of truth).
 const DEFAULT_SERVICE_HERO = {
-  title: "Smart Parking. Vehicle Care Partner.",
-  subtitle: "Smart parking and vehicle care built for convenience, safety, and innovation.",
-  ctaLabel: "Get a Quote",
+  title: "",
+  subtitle: "",
+  chips: [],
+  chipsMore: "",
+  ctaPrimary: "",
+  ctaPrimaryLink: "",
+  ctaSecondary: "",
+  slides: [],
+  floatCardTop: { title: "", subtitle: "" },
+  floatCardBottom: { title: "", value: "", caption: "", badge: "", percent: "" },
+  ar: {},
 };
 
 const DEFAULT_PARTNERS_SECTION = {
@@ -225,6 +235,53 @@ export default function ServicePageEditor() {
 
   function updateHero(field, value) {
     setHero((p) => ({ ...p, [field]: value }));
+  }
+
+  // ── Hero right-side slides (hero.slides = [{ img, name, tag, ar }]) ──────────
+  function updateHeroSlide(i, patch) {
+    setHero((prev) => ({
+      ...prev,
+      slides: (prev.slides ?? []).map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
+    }));
+  }
+  function addHeroSlide() {
+    setHero((prev) => ({ ...prev, slides: [...(prev.slides ?? []), { img: "", name: "", tag: "", ar: {} }] }));
+  }
+  function removeHeroSlide(i) {
+    setHero((prev) => ({ ...prev, slides: (prev.slides ?? []).filter((_, idx) => idx !== i) }));
+  }
+  async function handleHeroSlideUpload(i, file) {
+    const err = validateImageFile(file);
+    if (err) { setError(err); return; }
+    const key = `hero-slide-${i}`;
+    setError("");
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      updateHeroSlide(i, { img: url });
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (e) {
+      setError("Image upload failed");
+      console.error(e);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // ── Hero floating cards (hero.floatCardTop / hero.floatCardBottom) ───────────
+  function updateFloatTop(patch) {
+    setHero((prev) => ({ ...prev, floatCardTop: { ...(prev.floatCardTop ?? {}), ...patch } }));
+  }
+  function updateFloatTopAr(patch) {
+    setHero((prev) => ({ ...prev, floatCardTop: { ...(prev.floatCardTop ?? {}), ar: { ...(prev.floatCardTop?.ar ?? {}), ...patch } } }));
+  }
+  function updateFloatBottom(patch) {
+    setHero((prev) => ({ ...prev, floatCardBottom: { ...(prev.floatCardBottom ?? {}), ...patch } }));
+  }
+  function updateFloatBottomAr(patch) {
+    setHero((prev) => ({ ...prev, floatCardBottom: { ...(prev.floatCardBottom ?? {}), ar: { ...(prev.floatCardBottom?.ar ?? {}), ...patch } } }));
   }
 
   function updateService(i, field, value) {
@@ -480,6 +537,145 @@ export default function ServicePageEditor() {
             />
             <CharCount value={hero.chipsMore ?? ""} max={FIELD_LIMITS.label} />
             <ArInput label="Chips More" kind="label" value={hero.ar?.chipsMore} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), chipsMore: v })} />
+          </div>
+
+          {/* CTA buttons — each shows only when it has a label */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Primary Button Label</label>
+              <input
+                value={hero.ctaPrimary ?? ""}
+                onChange={(e) => updateHero("ctaPrimary", e.target.value)}
+                className={inputClass}
+                placeholder="Get in Touch"
+                maxLength={FIELD_LIMITS.label}
+              />
+              <ArInput label="Primary Button" kind="label" value={hero.ar?.ctaPrimary} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), ctaPrimary: v })} />
+            </div>
+            <div>
+              <label className={labelClass}>Primary Button Link</label>
+              <input
+                value={hero.ctaPrimaryLink ?? ""}
+                onChange={(e) => updateHero("ctaPrimaryLink", e.target.value)}
+                className={inputClass}
+                placeholder="/contact"
+                maxLength={FIELD_LIMITS.link}
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Secondary Button Label (opens the Quote form)</label>
+            <input
+              value={hero.ctaSecondary ?? ""}
+              onChange={(e) => updateHero("ctaSecondary", e.target.value)}
+              className={inputClass}
+              placeholder="Get a Quote"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <ArInput label="Secondary Button" kind="label" value={hero.ar?.ctaSecondary} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), ctaSecondary: v })} />
+            <p className="mt-1 text-[11px] text-slate-400">Leave a label empty to hide that button.</p>
+          </div>
+
+          {/* Right-side rotating slides */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+            <div className="flex items-center justify-between">
+              <label className={labelClass} style={{ margin: 0 }}>Right-side Image Slides</label>
+              <button type="button" onClick={addHeroSlide} className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-700">
+                <Plus className="h-3 w-3" /> Add Slide
+              </button>
+            </div>
+            <p className="mb-2 mt-1 text-[11px] text-slate-400">The rotating cards on the right of the hero. Each needs an image; name &amp; tag are the caption. No slides = the right visual is hidden.</p>
+            <div className="space-y-3">
+              {(Array.isArray(hero.slides) ? hero.slides : []).map((s, i) => (
+                <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-500">Slide {i + 1}</span>
+                    <button type="button" onClick={() => removeHeroSlide(i)} className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" /> Remove
+                    </button>
+                  </div>
+                  <label className={labelClass}>Image</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={s.img ?? ""}
+                      onChange={(e) => updateHeroSlide(i, { img: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://… or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`hero-slide-${i}`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`hero-slide-${i}`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleHeroSlideUpload(i, f); e.target.value = ""; }} />
+                    </label>
+                  </div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>Name (caption)</label>
+                      <input value={s.name ?? ""} onChange={(e) => updateHeroSlide(i, { name: e.target.value })} className={inputClass} placeholder="Valet Service" maxLength={FIELD_LIMITS.label} />
+                      <ArInput label="Name" kind="label" value={s.ar?.name} onChange={(v) => updateHeroSlide(i, { ar: { ...(s.ar ?? {}), name: v } })} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Tag (small pill)</label>
+                      <input value={s.tag ?? ""} onChange={(e) => updateHeroSlide(i, { tag: e.target.value })} className={inputClass} placeholder="Parking" maxLength={FIELD_LIMITS.label} />
+                      <ArInput label="Tag" kind="label" value={s.ar?.tag} onChange={(v) => updateHeroSlide(i, { ar: { ...(s.ar ?? {}), tag: v } })} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(Array.isArray(hero.slides) ? hero.slides : []).length === 0 ? (
+                <p className="text-[11px] text-slate-400">No slides yet — the right-side visual is hidden.</p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Floating card — top-left (hides when empty) */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+            <label className={labelClass}>Floating Card — Top Left (leave empty to hide)</label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <input value={hero.floatCardTop?.title ?? ""} onChange={(e) => updateFloatTop({ title: e.target.value })} className={inputClass} placeholder="Title, e.g. Service Booked" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Title" kind="label" value={hero.floatCardTop?.ar?.title} onChange={(v) => updateFloatTopAr({ title: v })} />
+              </div>
+              <div>
+                <input value={hero.floatCardTop?.subtitle ?? ""} onChange={(e) => updateFloatTop({ subtitle: e.target.value })} className={inputClass} placeholder="Subtitle, e.g. Valet, Dubai Mall" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Subtitle" kind="label" value={hero.floatCardTop?.ar?.subtitle} onChange={(v) => updateFloatTopAr({ subtitle: v })} />
+              </div>
+            </div>
+          </div>
+
+          {/* Floating card — bottom-right (stat, hides when empty) */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+            <label className={labelClass}>Floating Card — Bottom Right (stat, leave empty to hide)</label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Title</label>
+                <input value={hero.floatCardBottom?.title ?? ""} onChange={(e) => updateFloatBottom({ title: e.target.value })} className={inputClass} placeholder="EV Charging" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Title" kind="label" value={hero.floatCardBottom?.ar?.title} onChange={(v) => updateFloatBottomAr({ title: v })} />
+              </div>
+              <div>
+                <label className={labelClass}>Badge (small pill)</label>
+                <input value={hero.floatCardBottom?.badge ?? ""} onChange={(e) => updateFloatBottom({ badge: e.target.value })} className={inputClass} placeholder="Live" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Badge" kind="label" value={hero.floatCardBottom?.ar?.badge} onChange={(v) => updateFloatBottomAr({ badge: v })} />
+              </div>
+              <div>
+                <label className={labelClass}>Progress % (0–100, optional)</label>
+                <input type="number" min="0" max="100" value={hero.floatCardBottom?.percent ?? ""} onChange={(e) => updateFloatBottom({ percent: e.target.value })} className={inputClass} placeholder="68" />
+              </div>
+              <div>
+                <label className={labelClass}>Value (bottom-left text)</label>
+                <input value={hero.floatCardBottom?.value ?? ""} onChange={(e) => updateFloatBottom({ value: e.target.value })} className={inputClass} placeholder="68% charged" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Value" kind="label" value={hero.floatCardBottom?.ar?.value} onChange={(v) => updateFloatBottomAr({ value: v })} />
+              </div>
+              <div>
+                <label className={labelClass}>Caption (bottom-right text)</label>
+                <input value={hero.floatCardBottom?.caption ?? ""} onChange={(e) => updateFloatBottom({ caption: e.target.value })} className={inputClass} placeholder="~22 min" maxLength={FIELD_LIMITS.label} />
+                <ArInput label="Caption" kind="label" value={hero.floatCardBottom?.ar?.caption} onChange={(v) => updateFloatBottomAr({ caption: v })} />
+              </div>
+            </div>
           </div>
         </div>
       </CollapsibleSection>

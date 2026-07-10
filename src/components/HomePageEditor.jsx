@@ -1242,7 +1242,8 @@ export default function HomePageEditor() {
                 rows={6}
                 placeholder="Section description shown on the website"
               />
-              <ArInput label="Body" kind="description" multiline value={whoWeAre.audiences?.business?.ar?.body} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={whoWeAre.audiences?.business?.ar?.body ?? ""} onChange={(v) => updateWhoAudience("business", "ar", { ...(whoWeAre.audiences?.business?.ar ?? {}), body: v })} maxLength={FIELD_LIMITS.description} rows={6} dir="rtl" variant="arabic" />
             </div>
 
             <div className="mt-1 flex items-center justify-between">
@@ -1308,16 +1309,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={h.title ?? ""} max={FIELD_LIMITS.heading} />
                   <ArInput label="Title" kind="heading" value={h.ar?.title} onChange={(v) => updateWhoHighlight(i, "ar", { ...(h.ar ?? {}), title: v })} />
-                  <textarea
+                  <RichTextArea
                     value={h.description ?? ""}
-                    onChange={(e) => updateWhoHighlight(i, "description", e.target.value)}
+                    onChange={(v) => updateWhoHighlight(i, "description", v)}
                     maxLength={FIELD_LIMITS.description}
-                    className={inputClass}
-                    rows={2}
+                    rows={3}
                     placeholder="Description"
                   />
-                  <CharCount value={h.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={h.ar?.description} onChange={(v) => updateWhoHighlight(i, "ar", { ...(h.ar ?? {}), description: v })} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={h.ar?.description ?? ""} onChange={(v) => updateWhoHighlight(i, "ar", { ...(h.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
               </div>
             ))}
@@ -1505,7 +1505,8 @@ export default function HomePageEditor() {
                 rows={3}
                 placeholder="Section description"
               />
-              <ArInput label="Description" kind="description" multiline value={aiPoweredParking.ar?.description} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={aiPoweredParking.ar?.description ?? ""} onChange={(v) => setAiPoweredParking((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
 
             <div className="my-1 border-t border-slate-200" />
@@ -1532,16 +1533,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={card.audienceTag ?? ""} max={FIELD_LIMITS.label} />
                   <ArInput label="Audience Tag" kind="label" value={card.ar?.audienceTag} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), audienceTag: v })} />
-                  <textarea
+                  <RichTextArea
                     value={card.description ?? ""}
-                    onChange={(e) => updateAiCard(i, "description", e.target.value)}
+                    onChange={(v) => updateAiCard(i, "description", v)}
                     maxLength={FIELD_LIMITS.description}
-                    className={inputClass}
-                    rows={2}
+                    rows={3}
                     placeholder="Description"
                   />
-                  <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={card.ar?.description} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), description: v })} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={card.ar?.description ?? ""} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                   <input
                     value={card.ctaLabel ?? ""}
                     onChange={(e) => updateAiCard(i, "ctaLabel", e.target.value)}
@@ -1689,16 +1689,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={step.title ?? ""} max={FIELD_LIMITS.heading} />
                   <ArInput label="Title" kind="heading" value={step.ar?.title} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), title: v })} />
-                  <textarea
+                  <RichTextArea
                     value={step.description ?? ""}
-                    onChange={(e) => updateHowStep(i, "description", e.target.value)}
+                    onChange={(v) => updateHowStep(i, "description", v)}
                     maxLength={FIELD_LIMITS.description}
-                    className={inputClass}
-                    rows={2}
+                    rows={3}
                     placeholder="Description"
                   />
-                  <CharCount value={step.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={step.ar?.description} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), description: v })} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={step.ar?.description ?? ""} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
               </div>
             ))}
@@ -1729,7 +1728,8 @@ export default function HomePageEditor() {
                 maxLength={FIELD_LIMITS.description}
                 rows={3}
               />
-              <ArInput label="Description" kind="description" multiline value={blackBanner.ar?.description} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={blackBanner.ar?.description ?? ""} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
             <div>
               <MediaField
@@ -1884,27 +1884,25 @@ export default function HomePageEditor() {
                     <ArInput label="Name" kind="label" value={card.ar?.name} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), name: v })} />
                     <label className={labelClass}>Description 1 (left side)</label>
                     {/* No character limit — the layout flows the text down. */}
-                    <textarea
+                    <RichTextArea
                       value={card.summary ?? ""}
-                      onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
+                      onChange={(v) => updateServiceCard(i, "summary", v)}
                       maxLength={FIELD_LIMITS.long}
-                      className={inputClass}
                       rows={4}
                       placeholder="Longer description shown on the LEFT side"
                     />
-                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.long} />
-                    <ArInput label="Description 1" kind="long" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description 1 (Arabic)</label>
+                    <RichTextArea value={card.ar?.summary ?? ""} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} maxLength={FIELD_LIMITS.long} rows={4} dir="rtl" variant="arabic" />
                     <label className={labelClass} style={{ marginTop: 6 }}>Description 2 (right card)</label>
-                    <textarea
+                    <RichTextArea
                       value={card.description2 ?? ""}
-                      onChange={(e) => updateServiceCard(i, "description2", e.target.value)}
+                      onChange={(v) => updateServiceCard(i, "description2", v)}
                       maxLength={FIELD_LIMITS.summary}
-                      className={inputClass}
                       rows={3}
                       placeholder="Shorter description shown on the RIGHT card"
                     />
-                    <CharCount value={card.description2 ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput label="Description 2" kind="summary" multiline value={card.ar?.description2} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), description2: v })} />
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description 2 (Arabic)</label>
+                    <RichTextArea value={card.ar?.description2 ?? ""} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), description2: v })} maxLength={FIELD_LIMITS.summary} rows={3} dir="rtl" variant="arabic" />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>
@@ -2024,16 +2022,15 @@ export default function HomePageEditor() {
                   />
 
                   <label className={labelClass}>Description</label>
-                  <textarea
+                  <RichTextArea
                     value={card.description ?? ""}
-                    onChange={(e) => updateSolutionCard(i, "description", e.target.value)}
+                    onChange={(v) => updateSolutionCard(i, "description", v)}
                     maxLength={FIELD_LIMITS.description}
-                    className={inputClass}
                     rows={3}
                     placeholder="Description"
                   />
-                  <CharCount value={card.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={card.ar?.description} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), description: v })} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={card.ar?.description ?? ""} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
               </div>
             ))}
@@ -2255,7 +2252,8 @@ export default function HomePageEditor() {
                 maxLength={FIELD_LIMITS.description}
                 rows={2}
               />
-              <ArInput label="Description" kind="description" multiline value={globalMobility.ar?.description} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={globalMobility.ar?.description ?? ""} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
@@ -2285,15 +2283,14 @@ export default function HomePageEditor() {
             </div>
             <div>
               <label className={labelClass}>Map Panel Body</label>
-              <textarea
+              <RichTextArea
                 value={globalMobility.panelBody ?? ""}
-                onChange={(e) => setGlobalMobility((p) => ({ ...p, panelBody: e.target.value }))}
+                onChange={(v) => setGlobalMobility((p) => ({ ...p, panelBody: v }))}
                 maxLength={FIELD_LIMITS.description}
-                className={inputClass}
-                rows={2}
+                rows={3}
               />
-              <CharCount value={globalMobility.panelBody ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Panel Body" kind="description" multiline value={globalMobility.ar?.panelBody} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelBody: v } }))} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Panel Body (Arabic)</label>
+              <RichTextArea value={globalMobility.ar?.panelBody ?? ""} onChange={(v) => setGlobalMobility((p) => ({ ...p, ar: { ...(p.ar ?? {}), panelBody: v } }))} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
 
             <div className="mt-2 flex items-center justify-between">
@@ -2328,16 +2325,15 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={cap.title ?? ""} max={FIELD_LIMITS.heading} />
                   <ArInput label="Title" kind="heading" value={cap.ar?.title} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), title: v })} />
-                  <textarea
+                  <RichTextArea
                     value={cap.description ?? ""}
-                    onChange={(e) => updateCapability(i, "description", e.target.value)}
+                    onChange={(v) => updateCapability(i, "description", v)}
                     maxLength={FIELD_LIMITS.description}
-                    className={inputClass}
-                    rows={2}
+                    rows={3}
                     placeholder="Description"
                   />
-                  <CharCount value={cap.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={cap.ar?.description} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), description: v })} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={cap.ar?.description ?? ""} onChange={(v) => updateCapability(i, "ar", { ...(cap.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                   <MediaField
                     label="Icon Image (optional — overrides the built-in icon)"
                     value={cap.iconImage ?? ""}
@@ -2683,7 +2679,8 @@ export default function HomePageEditor() {
             <div>
               <label className={labelClass}>Description</label>
               <RichTextArea value={supportCta.description ?? ""} onChange={(v) => setSupportCta((p) => ({ ...p, description: v }))} rows={2} maxLength={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" multiline value={supportCta.ar?.description} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={supportCta.ar?.description ?? ""} onChange={(v) => setSupportCta((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
@@ -2835,20 +2832,15 @@ export default function HomePageEditor() {
             {/* Description */}
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={promoPopup.description ?? ""}
-                onChange={(e) => setPromoPopup((prev) => ({ ...prev, description: e.target.value }))}
-                className={inputClass}
+                onChange={(v) => setPromoPopup((prev) => ({ ...prev, description: v }))}
+                maxLength={FIELD_LIMITS.description}
                 rows={4}
                 placeholder="Short message about the offer or new service"
               />
-              <ArInput
-                label="Description"
-                kind="description"
-                multiline
-                value={promoPopup.ar?.description}
-                onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), description: v } }))}
-              />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={promoPopup.ar?.description ?? ""} onChange={(v) => setPromoPopup((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
             </div>
 
             {/* CTA button */}

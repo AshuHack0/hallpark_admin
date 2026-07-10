@@ -15,6 +15,7 @@ import {
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { DEFAULT_CAREERS_SECTIONS, mergeCareersSections } from "../constants/careersDefaults.js";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 
 const inputClass =
@@ -954,8 +955,9 @@ export default function CareersPageEditor() {
                   </div>
                   <div>
                     <label className={labelClass}>Description</label>
-                    <textarea value={item.description ?? ""} onChange={(e) => updateOpportunity(i, "description", e.target.value)} className={inputClass} rows={4} />
-                    <ArInput label="Description" kind="description" limit={100000} multiline value={item.ar?.description} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} />
+                    <RichTextArea value={item.description ?? ""} onChange={(v) => updateOpportunity(i, "description", v)} maxLength={FIELD_LIMITS.description} rows={3} />
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                    <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                   </div>
                 </div>
               </div>
@@ -1234,18 +1236,20 @@ export default function CareersPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
-            <textarea
-              value={heroForm.description}
-              onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={6}
+            <RichTextArea
+              value={heroForm.description ?? ""}
+              onChange={(v) => setHeroForm((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Description"
-              kind="description"
-              limit={100000}
-              multiline
-              value={heroForm.ar?.description}
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={heroForm.ar?.description ?? ""}
               onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
             />
           </label>
           <label className="grid gap-1">
@@ -1429,14 +1433,15 @@ export default function CareersPageEditor() {
           </>
         }
       >
-        <textarea
-          value={paragraphText}
-          onChange={(e) => setParagraphText(e.target.value)}
-          className={inputClass}
-          rows={6}
+        <RichTextArea
+          value={paragraphText ?? ""}
+          onChange={setParagraphText}
+          maxLength={FIELD_LIMITS.description}
+          rows={3}
           placeholder="Paragraph text"
         />
-        <ArInput label="Paragraph" kind="description" limit={100000} multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+        <RichTextArea value={paragraphTextAr ?? ""} onChange={setParagraphTextAr} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
       </Modal>
 
       {/* Open positions section modal */}
@@ -1544,19 +1549,21 @@ export default function CareersPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Short description (shown on the card)</span>
-            <textarea
-              value={jobPostForm.description}
-              onChange={(e) => setJobPostForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
+            <RichTextArea
+              value={jobPostForm.description ?? ""}
+              onChange={(v) => setJobPostForm((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
               rows={3}
               placeholder="Brief one- or two-line summary shown on the careers listing"
             />
-            <ArInput label="Short Description"
-              kind="description"
-              limit={100000}
-              multiline
-              value={jobPostForm.ar?.description}
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={jobPostForm.ar?.description ?? ""}
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
             />
           </label>
           <label className="grid gap-1">
@@ -1740,18 +1747,20 @@ export default function CareersPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Team card paragraph</span>
-            <textarea
-              value={whyJoinForm.bodyParagraph}
-              onChange={(e) => setWhyJoinForm((p) => ({ ...p, bodyParagraph: e.target.value }))}
-              className={inputClass}
-              rows={5}
+            <RichTextArea
+              value={whyJoinForm.bodyParagraph ?? ""}
+              onChange={(v) => setWhyJoinForm((p) => ({ ...p, bodyParagraph: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Body Paragraph"
-              kind="description"
-              limit={100000}
-              multiline
-              value={whyJoinForm.ar?.bodyParagraph}
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={whyJoinForm.ar?.bodyParagraph ?? ""}
               onChange={(v) => setWhyJoinForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), bodyParagraph: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
             />
           </label>
         </div>
@@ -1855,18 +1864,20 @@ export default function CareersPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
-            <textarea
-              value={ctaForm.description}
-              onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={4}
+            <RichTextArea
+              value={ctaForm.description ?? ""}
+              onChange={(v) => setCtaForm((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Description"
-              kind="description"
-              limit={100000}
-              multiline
-              value={ctaForm.ar?.description}
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={ctaForm.ar?.description ?? ""}
               onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
             />
           </label>
           <label className="grid gap-1">

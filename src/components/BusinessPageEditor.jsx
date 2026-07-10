@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -541,15 +542,15 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.hero.description}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, description: e.target.value } })}
-                className={inputClass}
-                rows={3}
+              {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+              <RichTextArea
+                value={sections.hero.description ?? ""}
+                onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.hero.description} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={sections.hero.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
             <div>
               <label className={labelClass}>Checklist Items (comma-separated)</label>
@@ -567,7 +568,18 @@ export default function BusinessPageEditor() {
               />
             </div>
             <div>
-              <label className={labelClass}>Primary Button (Get Proposal)</label>
+              <div className="flex items-center justify-between">
+                <label className={labelClass}>Primary Button (Get Proposal)</label>
+                <label className="mb-2 inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={sections.hero?.showProposal !== false}
+                    onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, showProposal: e.target.checked } })}
+                    className="h-3.5 w-3.5 accent-[#0088FF]"
+                  />
+                  Show button
+                </label>
+              </div>
               <input
                 value={sections.hero?.ctaPrimary ?? ""}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaPrimary: e.target.value } })}
@@ -579,7 +591,18 @@ export default function BusinessPageEditor() {
               <ArInput label="Cta Primary" kind="button" value={sections.hero?.ar?.ctaPrimary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaPrimary: v } } })} />
             </div>
             <div>
-              <label className={labelClass}>Secondary Button (Book a Free Consultation)</label>
+              <div className="flex items-center justify-between">
+                <label className={labelClass}>Secondary Button (Book a Free Consultation)</label>
+                <label className="mb-2 inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={sections.hero?.showConsultation !== false}
+                    onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, showConsultation: e.target.checked } })}
+                    className="h-3.5 w-3.5 accent-[#0088FF]"
+                  />
+                  Show button
+                </label>
+              </div>
               <input
                 value={sections.hero?.ctaSecondary ?? ""}
                 onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaSecondary: e.target.value } })}
@@ -589,7 +612,7 @@ export default function BusinessPageEditor() {
               />
               <CharCount value={sections.hero?.ctaSecondary ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="Cta Secondary" kind="button" value={sections.hero?.ar?.ctaSecondary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaSecondary: v } } })} />
-              <p className="mt-1 text-[11px] text-slate-400">These two buttons open the Proposal / Consultation popups below (they no longer link to Contact Us).</p>
+              <p className="mt-1 text-[11px] text-slate-400">Each button shows only when it has a label and its “Show button” toggle is on. They open the Proposal / Consultation popups below.</p>
             </div>
 
             {/* ── Right-side image deck (multi-image) ── */}
@@ -777,15 +800,14 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.builtForSpace.description}
-                onChange={(e) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, description: e.target.value } })}
-                className={inputClass}
-                rows={3}
+              <RichTextArea
+                value={sections.builtForSpace.description ?? ""}
+                onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.builtForSpace.description} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.builtForSpace.ar?.description} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={sections.builtForSpace.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, builtForSpace: { ...sections.builtForSpace, ar: { ...(sections.builtForSpace.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
           </div>
         </CollapsibleSection>
@@ -864,15 +886,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={item.description}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
+                  <RichTextArea
+                    value={item.description ?? ""}
+                    onChange={(v) => update(i, { description: v })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={2}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
                 </div>
                 <div>
                   <label className={labelClass}>Card Image</label>
@@ -960,29 +981,27 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={sections.solutionsHeader?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description: e.target.value } })}
-                className={inputClass}
-                rows={2}
+                onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={2}
                 placeholder="Intelligent parking systems built for every business type…"
               />
-              <CharCount value={sections.solutionsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.solutionsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={sections.solutionsHeader?.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
             </div>
             <div>
               <label className={labelClass}>Description (second, smaller)</label>
-              <textarea
+              <RichTextArea
                 value={sections.solutionsHeader?.description2 ?? ""}
-                onChange={(e) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description2: e.target.value } })}
-                className={inputClass}
-                rows={2}
+                onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, description2: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={2}
                 placeholder="We make it possible to invest in parking infrastructure…"
               />
-              <CharCount value={sections.solutionsHeader?.description2 ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description2" kind="description" value={sections.solutionsHeader?.ar?.description2} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description2: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={sections.solutionsHeader?.ar?.description2 ?? ""} onChange={(v) => setSections({ ...sections, solutionsHeader: { ...sections.solutionsHeader, ar: { ...(sections.solutionsHeader?.ar ?? {}), description2: v } } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
             </div>
             <div>
               <label className={labelClass}>CTA Button (Explore All Solutions)</label>
@@ -1038,15 +1057,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={item.description}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
+                  <RichTextArea
+                    value={item.description ?? ""}
+                    onChange={(v) => update(i, { description: v })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={2}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1250,15 +1268,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={item.description}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
+                  <RichTextArea
+                    value={item.description ?? ""}
+                    onChange={(v) => update(i, { description: v })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={2}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
                 </div>
                 <div>
                   <label className={labelClass}>Image</label>
@@ -1384,15 +1401,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={sections.transformParking.description}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: e.target.value } })}
-                    className={inputClass}
-                    rows={3}
+                  <RichTextArea
+                    value={sections.transformParking.description ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: v } })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={3}
                   />
-                  <CharCount value={sections.transformParking.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={sections.transformParking.ar?.description} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
               </div>
             </div>
@@ -1427,15 +1443,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={sections.transformParking.parkingPartnerDescription}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: e.target.value } })}
-                    className={inputClass}
-                    rows={4}
+                  <RichTextArea
+                    value={sections.transformParking.parkingPartnerDescription ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: v } })}
                     maxLength={FIELD_LIMITS.long}
+                    rows={4}
                   />
-                  <CharCount value={sections.transformParking.parkingPartnerDescription} max={FIELD_LIMITS.long} />
-                  <ArInput label="Parking Partner Description" kind="description" value={sections.transformParking.ar?.parkingPartnerDescription} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.parkingPartnerDescription ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} maxLength={FIELD_LIMITS.long} rows={4} dir="rtl" variant="arabic" />
                 </div>
                 <div>
                   <div className="mb-2 flex items-center justify-between">
@@ -1527,27 +1542,25 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description 1</label>
-                  <textarea
-                    value={sections.transformParking.servicePartnerDescription1}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: e.target.value } })}
-                    className={inputClass}
-                    rows={3}
+                  <RichTextArea
+                    value={sections.transformParking.servicePartnerDescription1 ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: v } })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={3}
                   />
-                  <CharCount value={sections.transformParking.servicePartnerDescription1} max={FIELD_LIMITS.description} />
-                  <ArInput label="Service Partner Description1" kind="description" value={sections.transformParking.ar?.servicePartnerDescription1} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription1 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
                 <div>
                   <label className={labelClass}>Description 2</label>
-                  <textarea
-                    value={sections.transformParking.servicePartnerDescription2}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: e.target.value } })}
-                    className={inputClass}
-                    rows={3}
+                  <RichTextArea
+                    value={sections.transformParking.servicePartnerDescription2 ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: v } })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={3}
                   />
-                  <CharCount value={sections.transformParking.servicePartnerDescription2} max={FIELD_LIMITS.description} />
-                  <ArInput label="Service Partner Description2" kind="description" value={sections.transformParking.ar?.servicePartnerDescription2} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription2 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
                 <div>
                   <div className="mb-2 flex items-center justify-between">
@@ -1670,15 +1683,14 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    value={item.description}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={2}
+                  <RichTextArea
+                    value={item.description ?? ""}
+                    onChange={(v) => update(i, { description: v })}
                     maxLength={FIELD_LIMITS.description}
+                    rows={2}
                   />
-                  <CharCount value={item.description} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
                 </div>
               </div>
             )}
@@ -1735,16 +1747,15 @@ export default function BusinessPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Description</label>
-                <textarea
-                  value={sections.partnersShowcase.description}
-                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, description: e.target.value } })}
-                  className={inputClass}
+                <RichTextArea
+                  value={sections.partnersShowcase.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, description: v } })}
+                  maxLength={FIELD_LIMITS.description}
                   rows={4}
                   placeholder="Description text..."
-                  maxLength={FIELD_LIMITS.description}
                 />
-                <CharCount value={sections.partnersShowcase.description} max={FIELD_LIMITS.description} />
-                <ArInput label="Description" kind="description" value={sections.partnersShowcase.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), description: v } } })} multiline={true} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea value={sections.partnersShowcase.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
               </div>
             </div>
 
@@ -2170,16 +2181,15 @@ export default function BusinessPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>CTA Description</label>
-                <textarea
-                  value={sections.partnersShowcase.ctaSection?.description || ""}
-                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, description: e.target.value } } })}
-                  className={inputClass}
+                <RichTextArea
+                  value={sections.partnersShowcase.ctaSection?.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, description: v } } })}
+                  maxLength={FIELD_LIMITS.description}
                   rows={3}
                   placeholder="Join our growing network..."
-                  maxLength={FIELD_LIMITS.description}
                 />
-                <CharCount value={sections.partnersShowcase.ctaSection?.description || ""} max={FIELD_LIMITS.description} />
-                <ArInput label="Description" kind="description" value={sections.partnersShowcase.ctaSection?.ar?.description} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), description: v } } } })} multiline={true} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea value={sections.partnersShowcase.ctaSection?.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), description: v } } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
               </div>
               <div>
                 <label className={labelClass}>Bottom CTA Button (Get in Touch)</label>
@@ -2283,15 +2293,14 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.cta.description}
-                onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, description: e.target.value } })}
-                className={inputClass}
-                rows={3}
+              <RichTextArea
+                value={sections.cta.description ?? ""}
+                onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.cta.description} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.cta.ar?.description} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={sections.cta.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, cta: { ...sections.cta, ar: { ...(sections.cta.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

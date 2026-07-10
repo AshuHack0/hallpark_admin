@@ -3,6 +3,7 @@ import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -544,16 +545,21 @@ export default function ServicePageEditor() {
 
               <div>
                 <label className={labelClass}>Full Description</label>
-                <textarea
+                <RichTextArea
                   value={service.fullDesc ?? ""}
-                  onChange={(e) => updateService(i, "fullDesc", e.target.value)}
-                  className={inputClass}
-                  rows={3}
-                  placeholder="Service description..."
+                  onChange={(v) => updateService(i, "fullDesc", v)}
                   maxLength={FIELD_LIMITS.description}
+                  rows={3}
                 />
-                <CharCount value={service.fullDesc ?? ""} max={FIELD_LIMITS.description} />
-                <ArInput label="Full Desc" kind="description" multiline value={service.ar?.fullDesc} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), fullDesc: v })} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea
+                  value={service.ar?.fullDesc ?? ""}
+                  onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), fullDesc: v })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
+                  dir="rtl"
+                  variant="arabic"
+                />
               </div>
 
               <div>
@@ -672,15 +678,12 @@ export default function ServicePageEditor() {
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
-                        <textarea
+                        <RichTextArea
                           value={cat.description ?? ""}
-                          onChange={(e) => updateServiceCategory(i, j, "description", e.target.value)}
-                          className={inputClass}
-                          rows={2}
-                          placeholder="Category description..."
+                          onChange={(v) => updateServiceCategory(i, j, "description", v)}
                           maxLength={FIELD_LIMITS.description}
+                          rows={2}
                         />
-                        <CharCount value={cat.description ?? ""} max={FIELD_LIMITS.description} />
                       </div>
                     ))}
                     <button
@@ -750,16 +753,21 @@ export default function ServicePageEditor() {
           </div>
           <div>
             <label className={labelClass}>Description</label>
-            <textarea
+            <RichTextArea
               value={gridHeader.description ?? ""}
-              onChange={(e) => setGridHeader((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={2}
-              placeholder="From self-parking to valet, EV charging to car storage…"
+              onChange={(v) => setGridHeader((p) => ({ ...p, description: v }))}
               maxLength={FIELD_LIMITS.description}
+              rows={2}
             />
-            <CharCount value={gridHeader.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput label="Description" kind="description" multiline value={gridHeader.ar?.description} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={gridHeader.ar?.description ?? ""}
+              onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={2}
+              dir="rtl"
+              variant="arabic"
+            />
           </div>
         </div>
       </CollapsibleSection>
@@ -808,16 +816,21 @@ export default function ServicePageEditor() {
           </div>
           <div>
             <label className={labelClass}>Description</label>
-            <textarea
+            <RichTextArea
               value={partnersSection.description ?? ""}
-              onChange={(e) => setPartnersSection((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={2}
-              placeholder="HalaPark partners with global hotel chains..."
+              onChange={(v) => setPartnersSection((p) => ({ ...p, description: v }))}
               maxLength={FIELD_LIMITS.description}
+              rows={2}
             />
-            <CharCount value={partnersSection.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput label="Description" kind="description" multiline value={partnersSection.ar?.description} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={partnersSection.ar?.description ?? ""}
+              onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={2}
+              dir="rtl"
+              variant="arabic"
+            />
           </div>
 
           {/* Partner logos */}
@@ -1141,16 +1154,21 @@ export default function ServicePageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Success Message</label>
-                <textarea
+                <RichTextArea
                   value={quoteForm.successMessage ?? ""}
-                  onChange={(e) => setQuoteForm((p) => ({ ...p, successMessage: e.target.value }))}
-                  className={inputClass}
-                  rows={3}
-                  placeholder="Our team will review your request and get back to you within 24 hours."
+                  onChange={(v) => setQuoteForm((p) => ({ ...p, successMessage: v }))}
                   maxLength={FIELD_LIMITS.description}
+                  rows={3}
                 />
-                <CharCount value={quoteForm.successMessage ?? ""} max={FIELD_LIMITS.description} />
-                <ArInput label="Success Message" kind="description" multiline value={quoteForm.ar?.successMessage} onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), successMessage: v } }))} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea
+                  value={quoteForm.ar?.successMessage ?? ""}
+                  onChange={(v) => setQuoteForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), successMessage: v } }))}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
+                  dir="rtl"
+                  variant="arabic"
+                />
               </div>
             </div>
           </div>

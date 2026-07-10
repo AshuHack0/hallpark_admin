@@ -471,13 +471,21 @@ export default function AppPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={sections.hero.description}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, description: e.target.value } })}
-                className={inputClass}
-                rows={5}
+              <RichTextArea
+                value={sections.hero.description ?? ""}
+                onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, description: v } })}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <ArInput label="Description" kind="description" limit={100000} value={sections.hero.ar?.description} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea
+                value={sections.hero.ar?.description ?? ""}
+                onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), description: v } } })}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
+              />
             </div>
 
             {/* CTA */}
@@ -926,13 +934,21 @@ export default function AppPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Description</label>
-                <textarea
-                  value={sections.platform.description}
-                  onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, description: e.target.value } })}
-                  className={inputClass}
-                  rows={5}
+                <RichTextArea
+                  value={sections.platform.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, description: v } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
                 />
-                <ArInput label="Description" kind="description" limit={100000} value={sections.platform.ar?.description} onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })} multiline={true} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea
+                  value={sections.platform.ar?.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, platform: { ...sections.platform, ar: { ...(sections.platform.ar ?? {}), description: v } } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
+                  dir="rtl"
+                  variant="arabic"
+                />
               </div>
 
               {/* Phone screenshot */}
@@ -1050,15 +1066,22 @@ export default function AppPageEditor() {
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
-                      <textarea
-                        rows={3}
-                        value={item.description}
-                        onChange={(e) => update(i, { description: e.target.value })}
-                        className={inputClass}
+                      {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+                      <RichTextArea
+                        value={item.description ?? ""}
+                        onChange={(v) => update(i, { description: v })}
                         maxLength={FIELD_LIMITS.summary}
+                        rows={3}
                       />
-                      <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput label="Description" kind="summary" multiline value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                      <RichTextArea
+                        value={item.ar?.description ?? ""}
+                        onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })}
+                        maxLength={FIELD_LIMITS.summary}
+                        rows={3}
+                        dir="rtl"
+                        variant="arabic"
+                      />
                     </div>
                     <div>
                       <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
@@ -1119,15 +1142,22 @@ export default function AppPageEditor() {
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
-                      <textarea
-                        rows={3}
-                        value={item.description}
-                        onChange={(e) => update(i, { description: e.target.value })}
-                        className={inputClass}
+                      {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
+                      <RichTextArea
+                        value={item.description ?? ""}
+                        onChange={(v) => update(i, { description: v })}
                         maxLength={FIELD_LIMITS.summary}
+                        rows={3}
                       />
-                      <CharCount value={item.description} max={FIELD_LIMITS.summary} />
-                      <ArInput label="Description" kind="summary" multiline value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} />
+                      <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                      <RichTextArea
+                        value={item.ar?.description ?? ""}
+                        onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })}
+                        maxLength={FIELD_LIMITS.summary}
+                        rows={3}
+                        dir="rtl"
+                        variant="arabic"
+                      />
                     </div>
                     <div>
                       <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
@@ -1217,13 +1247,21 @@ export default function AppPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
+                  <RichTextArea
                     value={item.description ?? ""}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
-                    rows={4}
+                    onChange={(v) => update(i, { description: v })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
                   />
-                  <ArInput label="Description" kind="description" limit={100000} value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea
+                    value={item.ar?.description ?? ""}
+                    onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
+                    dir="rtl"
+                    variant="arabic"
+                  />
                 </div>
                 <div>
                   <label className={labelClass}>Steps (comma-separated)</label>
@@ -1440,16 +1478,22 @@ export default function AppPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={sections.screenshotsHeader?.description ?? ""}
-                onChange={(e) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, description: e.target.value } })}
-                className={inputClass}
-                rows={2}
+                onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, description: v } })}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
                 placeholder="Find your spot, book in seconds, pay securely…"
               />
-              <CharCount value={sections.screenshotsHeader?.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" value={sections.screenshotsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea
+                value={sections.screenshotsHeader?.ar?.description ?? ""}
+                onChange={(v) => setSections({ ...sections, screenshotsHeader: { ...sections.screenshotsHeader, ar: { ...(sections.screenshotsHeader?.ar ?? {}), description: v } } })}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
+              />
             </div>
             <div>
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Process Steps (Find → Explore → Book → Pay → Confirm)</p>
@@ -1540,10 +1584,10 @@ export default function AppPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
+                  <RichTextArea
                     value={item.description ?? ""}
-                    onChange={(e) => update(i, { description: e.target.value })}
-                    className={inputClass}
+                    onChange={(v) => update(i, { description: v })}
+                    maxLength={FIELD_LIMITS.description}
                     rows={2}
                   />
                 </div>
@@ -1626,7 +1670,15 @@ export default function AppPageEditor() {
                   rows={4}
                   placeholder="Section description shown on the website"
                 />
-                <ArInput label="Description" kind="description" value={sections.currency?.ar?.description} onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })} multiline={true} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea
+                  value={sections.currency?.ar?.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, currency: { ...sections.currency, ar: { ...(sections.currency?.ar ?? {}), description: v } } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
+                  dir="rtl"
+                  variant="arabic"
+                />
               </div>
               <div>
                 <label className={labelClass}>Section Image (phone screen)</label>
@@ -1781,13 +1833,21 @@ export default function AppPageEditor() {
                     </div>
                     <div>
                       <label className={labelClass}>Description</label>
-                      <textarea
+                      <RichTextArea
                         value={item.description ?? ""}
-                        onChange={(e) => update(i, { description: e.target.value })}
-                        className={inputClass}
+                        onChange={(v) => update(i, { description: v })}
+                        maxLength={FIELD_LIMITS.description}
                         rows={3}
                       />
-                      <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                      <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                      <RichTextArea
+                        value={item.ar?.description ?? ""}
+                        onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })}
+                        maxLength={FIELD_LIMITS.description}
+                        rows={3}
+                        dir="rtl"
+                        variant="arabic"
+                      />
                     </div>
                   </div>
                 )}
@@ -1841,7 +1901,15 @@ export default function AppPageEditor() {
                 rows={3}
                 placeholder="Powerful features designed to save you time, money, and effort."
               />
-              <ArInput label="Description" kind="description" value={sections.featureCardsHeader?.ar?.description} onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), description: v } } })} multiline={true} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea
+                value={sections.featureCardsHeader?.ar?.description ?? ""}
+                onChange={(v) => setSections({ ...sections, featureCardsHeader: { ...sections.featureCardsHeader, ar: { ...(sections.featureCardsHeader?.ar ?? {}), description: v } } })}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
+              />
             </div>
           </div>
           <ArrayItemEditor
@@ -1873,7 +1941,15 @@ export default function AppPageEditor() {
                     maxLength={FIELD_LIMITS.description}
                     rows={3}
                   />
-                  <ArInput label="Description" kind="description" value={item.ar?.description} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} multiline={true} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea
+                    value={item.ar?.description ?? ""}
+                    onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
+                    dir="rtl"
+                    variant="arabic"
+                  />
                 </div>
                 <div>
                   <label className={labelClass}>Icon Image (optional)</label>
@@ -2109,13 +2185,21 @@ export default function AppPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Description</label>
-                <textarea
+                <RichTextArea
                   value={sections.ctaFooter?.description ?? ""}
-                  onChange={(e) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, description: e.target.value } })}
-                  className={inputClass}
-                  rows={5}
+                  onChange={(v) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, description: v } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
                 />
-                <ArInput label="Description" kind="description" limit={100000} value={sections.ctaFooter?.ar?.description} onChange={(v) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, ar: { ...(sections.ctaFooter?.ar ?? {}), description: v } } })} multiline={true} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                <RichTextArea
+                  value={sections.ctaFooter?.ar?.description ?? ""}
+                  onChange={(v) => setSections({ ...sections, ctaFooter: { ...sections.ctaFooter, ar: { ...(sections.ctaFooter?.ar ?? {}), description: v } } })}
+                  maxLength={FIELD_LIMITS.description}
+                  rows={3}
+                  dir="rtl"
+                  variant="arabic"
+                />
               </div>
             </div>
 

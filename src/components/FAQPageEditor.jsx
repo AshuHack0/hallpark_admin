@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -507,15 +508,10 @@ export default function FAQPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={hero.description}
-                onChange={(e) => setHero({ ...hero, description: e.target.value })}
-                className={inputClass}
-                rows={3}
-                maxLength={FIELD_LIMITS.description}
-              />
+              <RichTextArea value={hero.description ?? ""} onChange={(v) => setHero({ ...hero, description: v })} maxLength={FIELD_LIMITS.description} rows={3} />
               <CharCount value={hero.description} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" multiline value={hero.ar?.description} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), description: v } })} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={hero.ar?.description ?? ""} onChange={(v) => setHero({ ...hero, ar: { ...(hero.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
             <div>
               <label className={labelClass}>Background Image URL</label>
@@ -757,15 +753,10 @@ export default function FAQPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                value={bottomCta.description ?? ""}
-                onChange={(e) => setBottomCta({ ...bottomCta, description: e.target.value })}
-                className={inputClass}
-                rows={3}
-                maxLength={FIELD_LIMITS.description}
-              />
+              <RichTextArea value={bottomCta.description ?? ""} onChange={(v) => setBottomCta({ ...bottomCta, description: v })} maxLength={FIELD_LIMITS.description} rows={3} />
               <CharCount value={bottomCta.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput label="Description" kind="description" multiline value={bottomCta.ar?.description} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), description: v } })} />
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea value={bottomCta.ar?.description ?? ""} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
             </div>
             <div>
               <label className={labelClass}>Contact Button Label</label>
@@ -958,16 +949,10 @@ export default function FAQPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Answer</label>
-                <textarea
-                  value={newQuestionForm.answer}
-                  onChange={(e) => setNewQuestionForm({ ...newQuestionForm, answer: e.target.value })}
-                  className={inputClass}
-                  rows={4}
-                  placeholder="Enter answer"
-                  maxLength={FIELD_LIMITS.description}
-                />
+                <RichTextArea value={newQuestionForm.answer ?? ""} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, answer: v })} maxLength={FIELD_LIMITS.description} rows={4} placeholder="Enter answer" />
                 <CharCount value={newQuestionForm.answer} max={FIELD_LIMITS.description} />
-                <ArInput label="Answer" kind="description" multiline value={newQuestionForm.ar?.answer} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} />
+                <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Answer (Arabic)</label>
+                <RichTextArea value={newQuestionForm.ar?.answer ?? ""} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
               </div>
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between mb-3">

@@ -3,6 +3,7 @@ import { Save, Loader2, Plus, Trash2, ChevronDown } from "lucide-react";
 import { api } from "../lib/api";
 import { validateUrl, validateEmail, validatePhone } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -358,22 +359,22 @@ export default function ContactPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
+              <RichTextArea
                 value={sections.hero.description ?? ""}
-                onChange={(e) => setHero((p) => ({ ...p, description: e.target.value }))}
-                className={inputClass}
-                rows={3}
+                onChange={(v) => setHero((p) => ({ ...p, description: v }))}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.hero.description ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput
-                label="Description"
-                kind="description"
-                multiline
-                value={sections.hero.ar?.description}
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+              <RichTextArea
+                value={sections.hero.ar?.description ?? ""}
                 onChange={(v) =>
                   setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))
                 }
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
               />
             </div>
           </div>
@@ -426,20 +427,20 @@ export default function ContactPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Intro</label>
-              <textarea
+              <RichTextArea
                 value={sections.details.intro ?? ""}
-                onChange={(e) => setDetails((p) => ({ ...p, intro: e.target.value }))}
-                className={inputClass}
-                rows={3}
+                onChange={(v) => setDetails((p) => ({ ...p, intro: v }))}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.details.intro ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput
-                label="Intro"
-                kind="description"
-                multiline
-                value={sections.details.ar?.intro}
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Intro (Arabic)</label>
+              <RichTextArea
+                value={sections.details.ar?.intro ?? ""}
                 onChange={(v) => setDetails((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
               />
             </div>
           </div>
@@ -539,22 +540,22 @@ export default function ContactPageEditor() {
                   </div>
                   <div>
                     <label className={labelClass}>Description (optional)</label>
-                    <textarea
+                    <RichTextArea
                       value={item.description ?? ""}
-                      onChange={(e) => updateDetailItem(i, { description: e.target.value })}
-                      className={inputClass}
-                      rows={2}
+                      onChange={(v) => updateDetailItem(i, { description: v })}
                       maxLength={FIELD_LIMITS.summary}
+                      rows={2}
                     />
-                    <CharCount value={item.description ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput
-                      label="Description"
-                      kind="summary"
-                      multiline
-                      value={item.ar?.description}
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                    <RichTextArea
+                      value={item.ar?.description ?? ""}
                       onChange={(v) =>
                         updateDetailItem(i, { ar: { ...(item.ar ?? {}), description: v } })
                       }
+                      maxLength={FIELD_LIMITS.summary}
+                      rows={2}
+                      dir="rtl"
+                      variant="arabic"
                     />
                   </div>
                 </div>
@@ -716,20 +717,20 @@ export default function ContactPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Body</label>
-              <textarea
+              <RichTextArea
                 value={sections.whatsappCta.body ?? ""}
-                onChange={(e) => setWhatsapp((p) => ({ ...p, body: e.target.value }))}
-                className={inputClass}
-                rows={3}
+                onChange={(v) => setWhatsapp((p) => ({ ...p, body: v }))}
                 maxLength={FIELD_LIMITS.description}
+                rows={3}
               />
-              <CharCount value={sections.whatsappCta.body ?? ""} max={FIELD_LIMITS.description} />
-              <ArInput
-                label="Body"
-                kind="description"
-                multiline
-                value={sections.whatsappCta.ar?.body}
+              <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Body (Arabic)</label>
+              <RichTextArea
+                value={sections.whatsappCta.ar?.body ?? ""}
                 onChange={(v) => setWhatsapp((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))}
+                maxLength={FIELD_LIMITS.description}
+                rows={3}
+                dir="rtl"
+                variant="arabic"
               />
             </div>
             <div>

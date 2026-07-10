@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
@@ -1251,13 +1252,21 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
-            <textarea
-              value={heroForm.description}
-              onChange={(e) => setHeroForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={5}
+            <RichTextArea
+              value={heroForm.description ?? ""}
+              onChange={(v) => setHeroForm((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Description" kind="description" limit={100000} value={heroForm.ar?.description} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={heroForm.ar?.description ?? ""}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </label>
 
           {/* Hero slides — hero.images = [{ img, label, ar?: { label } }] */}
@@ -1682,13 +1691,21 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Intro</span>
-            <textarea
-              value={whatWeDoSectionForm.intro}
-              onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, intro: e.target.value }))}
-              className={inputClass}
-              rows={4}
+            <RichTextArea
+              value={whatWeDoSectionForm.intro ?? ""}
+              onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, intro: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Intro" kind="description" limit={100000} value={whatWeDoSectionForm.ar?.intro} onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))} multiline />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Intro (Arabic)</label>
+            <RichTextArea
+              value={whatWeDoSectionForm.ar?.intro ?? ""}
+              onChange={(v) => setWhatWeDoSectionForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), intro: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </label>
           <ImageField
             label="Image path"
@@ -1750,13 +1767,21 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Body</span>
-            <textarea
-              value={technologyForm.body}
-              onChange={(e) => setTechnologyForm((p) => ({ ...p, body: e.target.value }))}
-              className={inputClass}
-              rows={6}
+            <RichTextArea
+              value={technologyForm.body ?? ""}
+              onChange={(v) => setTechnologyForm((p) => ({ ...p, body: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Body" kind="description" limit={100000} value={technologyForm.ar?.body} onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))} multiline />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Body (Arabic)</label>
+            <RichTextArea
+              value={technologyForm.ar?.body ?? ""}
+              onChange={(v) => setTechnologyForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), body: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </label>
           <ImageField
             label="Image path"
@@ -1819,13 +1844,21 @@ export default function AboutPageEditor() {
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Description</span>
-            <textarea
-              value={ctaForm.description}
-              onChange={(e) => setCtaForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={4}
+            <RichTextArea
+              value={ctaForm.description ?? ""}
+              onChange={(v) => setCtaForm((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <ArInput label="Description" kind="description" limit={100000} value={ctaForm.ar?.description} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} multiline />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={ctaForm.ar?.description ?? ""}
+              onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </label>
           <ImageField
             label="Image path"
@@ -1912,14 +1945,22 @@ export default function AboutPageEditor() {
           </>
         }
       >
-        <textarea
-          value={paragraphText}
-          onChange={(e) => setParagraphText(e.target.value)}
-          className={inputClass}
-          rows={5}
+        <RichTextArea
+          value={paragraphText ?? ""}
+          onChange={(v) => setParagraphText(v)}
+          maxLength={FIELD_LIMITS.description}
+          rows={3}
           placeholder="Paragraph text"
         />
-        <ArInput label="Paragraph" kind="description" limit={100000} multiline value={paragraphTextAr} onChange={setParagraphTextAr} />
+        <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Paragraph (Arabic)</label>
+        <RichTextArea
+          value={paragraphTextAr ?? ""}
+          onChange={(v) => setParagraphTextAr(v)}
+          maxLength={FIELD_LIMITS.description}
+          rows={3}
+          dir="rtl"
+          variant="arabic"
+        />
       </Modal>
 
       {/* Highlight modal */}

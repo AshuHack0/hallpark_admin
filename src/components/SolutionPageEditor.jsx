@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 
@@ -1416,16 +1417,21 @@ export default function SolutionPageEditor() {
           </div>
           <div>
             <label className={labelClass}>Description</label>
-            <textarea
+            <RichTextArea
               value={challenges.description ?? ""}
-              onChange={(e) => setChallenges((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              rows={3}
-              placeholder="Traditional parking systems..."
+              onChange={(v) => setChallenges((p) => ({ ...p, description: v }))}
               maxLength={FIELD_LIMITS.description}
+              rows={3}
             />
-            <CharCount value={challenges.description ?? ""} max={FIELD_LIMITS.description} />
-            <ArInput label="Description" kind="description" multiline value={challenges.ar?.description} onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={challenges.ar?.description ?? ""}
+              onChange={(v) => setChallenges((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </div>
 
           {/* Challenges Image */}
@@ -1819,22 +1825,27 @@ export default function SolutionPageEditor() {
                     ...p,
                     advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), title: v } } : a) },
                   }))} />
-                  <textarea
+                  <RichTextArea
                     value={adv.description ?? ""}
-                    onChange={(e) => setSolutions((p) => ({
+                    onChange={(v) => setSolutions((p) => ({
                       ...p,
-                      advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, description: e.target.value } : a) },
+                      advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, description: v } : a) },
                     }))}
-                    className={inputClass}
-                    rows={2}
-                    placeholder="Advantage description"
                     maxLength={FIELD_LIMITS.description}
+                    rows={2}
                   />
-                  <CharCount value={adv.description ?? ""} max={FIELD_LIMITS.description} />
-                  <ArInput label="Description" kind="description" multiline value={adv.ar?.description} onChange={(v) => setSolutions((p) => ({
-                    ...p,
-                    advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), description: v } } : a) },
-                  }))} />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea
+                    value={adv.ar?.description ?? ""}
+                    onChange={(v) => setSolutions((p) => ({
+                      ...p,
+                      advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, ar: { ...(a.ar ?? {}), description: v } } : a) },
+                    }))}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={2}
+                    dir="rtl"
+                    variant="arabic"
+                  />
                 </div>
               ))}
               {(solutions.advantages?.items ?? []).length === 0 && (
@@ -1957,20 +1968,27 @@ export default function SolutionPageEditor() {
                       ...p,
                       cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), title: v } } : c)
                     }))} />
-                    <textarea
+                    <RichTextArea
                       value={card.description ?? ""}
-                      onChange={(e) => setIntegration((p) => ({
+                      onChange={(v) => setIntegration((p) => ({
                         ...p,
-                        cards: p.cards.map((c, idx) => idx === i ? { ...c, description: e.target.value } : c)
+                        cards: p.cards.map((c, idx) => idx === i ? { ...c, description: v } : c)
                       }))}
-                      className={inputClass}
+                      maxLength={FIELD_LIMITS.description}
                       rows={3}
-                      placeholder="Card Description"
                     />
-                    <ArInput label="Description" limit={100000} multiline value={card.ar?.description} onChange={(v) => setIntegration((p) => ({
-                      ...p,
-                      cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
-                    }))} />
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                    <RichTextArea
+                      value={card.ar?.description ?? ""}
+                      onChange={(v) => setIntegration((p) => ({
+                        ...p,
+                        cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), description: v } } : c)
+                      }))}
+                      maxLength={FIELD_LIMITS.description}
+                      rows={3}
+                      dir="rtl"
+                      variant="arabic"
+                    />
                     <div className="flex gap-2">
                       <input
                         value={card.image ?? ""}
@@ -2580,14 +2598,23 @@ export default function SolutionPageEditor() {
                     />
                   </div>
                   <ArInput label="Title" kind="heading" value={st.ar?.title} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), title: v } } : x) }))} />
-                  <textarea
-                    value={st.description ?? ""}
-                    onChange={(e) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: e.target.value } : x) }))}
-                    className={`${inputClass} mt-2`}
+                  <div className="mt-2">
+                    <RichTextArea
+                      value={st.description ?? ""}
+                      onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, description: v } : x) }))}
+                      maxLength={FIELD_LIMITS.description}
+                      rows={3}
+                    />
+                  </div>
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea
+                    value={st.ar?.description ?? ""}
+                    onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))}
+                    maxLength={FIELD_LIMITS.description}
                     rows={3}
-                    placeholder="Step description"
+                    dir="rtl"
+                    variant="arabic"
                   />
-                  <ArInput label="Description" limit={100000} multiline value={st.ar?.description} onChange={(v) => setDeployment((p) => ({ ...p, steps: p.steps.map((x, idx) => idx === si ? { ...x, ar: { ...(x.ar ?? {}), description: v } } : x) }))} />
                 </div>
               ))}
             </div>
@@ -2861,14 +2888,21 @@ export default function SolutionPageEditor() {
           </div>
           <div>
             <label className={labelClass}>Description (optional — smaller text under subtitle)</label>
-            <textarea
+            <RichTextArea
               value={cta.description ?? ""}
-              onChange={(e) => setCtA((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
+              onChange={(v) => setCtA((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
               rows={3}
-              placeholder="Additional supporting copy…"
             />
-            <ArInput label="Description" kind="long" limit={100000} multiline value={cta.ar?.description} onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={cta.ar?.description ?? ""}
+              onChange={(v) => setCtA((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={3}
+              dir="rtl"
+              variant="arabic"
+            />
           </div>
 
           {/* Primary Button */}

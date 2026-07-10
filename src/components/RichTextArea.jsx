@@ -21,11 +21,18 @@ export default function RichTextArea({
   maxLength,
   placeholder,
   showCount = true,
+  dir = "ltr",
+  variant = "default", // "default" | "arabic" (green RTL styling)
 }) {
   const ref = useRef(null);
   const [color, setColor] = useState("#0088FF");
 
   const val = value ?? "";
+
+  const areaClass =
+    variant === "arabic"
+      ? "w-full rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-300/30"
+      : inputClass;
 
   // Wrap the current selection (or caret) with a prefix/suffix, then re-select
   // the inner text so the user can keep typing/formatting.
@@ -74,12 +81,13 @@ export default function RichTextArea({
       </div>
       <textarea
         ref={ref}
+        dir={dir}
         value={val}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         maxLength={maxLength}
         placeholder={placeholder}
-        className={inputClass}
+        className={`${areaClass} ${dir === "rtl" ? "text-right" : ""}`}
       />
       {showCount && typeof maxLength === "number" ? (
         <CharCount value={val} max={maxLength} />

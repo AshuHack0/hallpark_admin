@@ -1834,17 +1834,29 @@ export default function HomePageEditor() {
                     />
                     <CharCount value={card.name ?? ""} max={FIELD_LIMITS.label} />
                     <ArInput label="Name" kind="label" value={card.ar?.name} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), name: v })} />
-                    {/* No character limit — the card layout flows the text down. */}
+                    <label className={labelClass}>Description 1 (left side)</label>
+                    {/* No character limit — the layout flows the text down. */}
                     <textarea
                       value={card.summary ?? ""}
                       onChange={(e) => updateServiceCard(i, "summary", e.target.value)}
+                      maxLength={FIELD_LIMITS.long}
+                      className={inputClass}
+                      rows={4}
+                      placeholder="Longer description shown on the LEFT side"
+                    />
+                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.long} />
+                    <ArInput label="Description 1" kind="long" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
+                    <label className={labelClass} style={{ marginTop: 6 }}>Description 2 (right card)</label>
+                    <textarea
+                      value={card.description2 ?? ""}
+                      onChange={(e) => updateServiceCard(i, "description2", e.target.value)}
                       maxLength={FIELD_LIMITS.summary}
                       className={inputClass}
                       rows={3}
-                      placeholder="Description shown on the card"
+                      placeholder="Shorter description shown on the RIGHT card"
                     />
-                    <CharCount value={card.summary ?? ""} max={FIELD_LIMITS.summary} />
-                    <ArInput label="Summary" kind="summary" multiline value={card.ar?.summary} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), summary: v })} />
+                    <CharCount value={card.description2 ?? ""} max={FIELD_LIMITS.summary} />
+                    <ArInput label="Description 2" kind="summary" multiline value={card.ar?.description2} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), description2: v })} />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>

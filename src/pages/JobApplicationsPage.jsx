@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, ExternalLink, User, Mail, Phone, MapPin, Briefcase, MessageSquare } from "lucide-react";
+import { ArrowLeft, Trash2, ExternalLink, User, Mail, Phone, MapPin, Briefcase, MessageSquare, FileText } from "lucide-react";
 import { api } from "../lib/api";
 
 const STATUS_OPTIONS = ["new", "reviewed", "contacted", "closed"];
@@ -153,6 +153,28 @@ function ApplicationDetail({ app, onBack, onStatusChange, onDelete }) {
           {app.linkedIn && (
             <div className="sm:col-span-2">
               <DetailField icon={ExternalLink} label="LinkedIn" value={app.linkedIn} href={app.linkedIn} />
+            </div>
+          )}
+          {app.resumeUrl && (
+            <div className="sm:col-span-2">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF]">
+                  <FileText className="h-4 w-4 text-[#0088FF]" strokeWidth={1.8} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Resume / CV</p>
+                  <a
+                    href={app.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#0088FF] hover:text-white"
+                  >
+                    <FileText className="h-3.5 w-3.5" strokeWidth={2} />
+                    View Resume
+                    <ExternalLink className="h-3 w-3" strokeWidth={2} />
+                  </a>
+                </div>
+              </div>
             </div>
           )}
           {app.message && (

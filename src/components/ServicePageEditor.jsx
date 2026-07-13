@@ -216,6 +216,16 @@ export default function ServicePageEditor() {
   }
 
   async function handleSave() {
+    // Validation: a service card must have at least a Name — otherwise it saves
+    // as an empty/blank card that renders as a nameless tile on the website.
+    const emptyIdx = services.findIndex((s) => !(s?.name ?? "").trim());
+    if (emptyIdx !== -1) {
+      setSuccess("");
+      setError(`Service #${emptyIdx + 1} has no Name. Enter a name or delete the card before saving.`);
+      // Scroll the error into view.
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     try {
       setSaving(true);
       setError("");
@@ -699,15 +709,18 @@ export default function ServicePageEditor() {
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>Service Name</label>
+                  <label className={labelClass}>Service Name <span className="text-red-500">*</span></label>
                   <input
                     value={service.name ?? ""}
                     onChange={(e) => updateService(i, "name", e.target.value)}
-                    className={inputClass}
+                    className={`${inputClass} ${!(service.name ?? "").trim() ? "border-red-300 focus:border-red-400 focus:ring-red-200" : ""}`}
                     placeholder="Self-Parking"
                     maxLength={FIELD_LIMITS.heading}
                   />
                   <CharCount value={service.name ?? ""} max={FIELD_LIMITS.heading} />
+                  {!(service.name ?? "").trim() ? (
+                    <p className="mt-1 text-[11px] font-semibold text-red-500">Required — a service must have a name to be saved.</p>
+                  ) : null}
                   <ArInput label="Name" kind="heading" value={service.ar?.name} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), name: v })} />
                 </div>
                 <div>

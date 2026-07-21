@@ -63,6 +63,12 @@ export const api = {
   me: () => request("/api/auth/me"),
   stats: () => request("/api/admin/stats"),
   quotes: () => request("/api/admin/quotes"),
+  updateQuoteStatus: (id, status) =>
+    request(`/api/admin/quotes/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deleteQuote: (id) => request(`/api/admin/quotes/${id}`, { method: "DELETE" }),
   jobApplications: () => request("/api/admin/job-applications"),
   getJobApplication: (id) => request(`/api/admin/job-applications/${id}`),
   updateJobApplicationStatus: (id, status) =>

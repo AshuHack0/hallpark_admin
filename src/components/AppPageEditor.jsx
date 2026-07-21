@@ -159,6 +159,10 @@ export default function AppPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Raw text drafts for the comma-separated chips inputs — lets the admin type
+  // spaces freely; the parsed arrays update alongside and display after blur.
+  const [chipsDraft, setChipsDraft] = useState(null);
+  const [chipsArDraft, setChipsArDraft] = useState(null);
   // Per-field upload errors (same keys as uploadProgress) so validation
   // problems show right next to the field they belong to, not at the page top.
   const [uploadErrors, setUploadErrors] = useState({});

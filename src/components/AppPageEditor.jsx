@@ -1481,10 +1481,17 @@ export default function AppPageEditor() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Shared (all tabs)</p>
             <div>
               <label className={labelClass}>Feature Chips (comma-separated)</label>
+              {/* Draft-while-typing: parsing trims on every keystroke, which
+                  eats the space bar mid-word. Keep the raw text while the field
+                  is focused; normalize into the chips array on change + blur. */}
               <input
                 type="text"
-                value={Array.isArray(sections.serviceTabs?.featureChips) ? sections.serviceTabs.featureChips.join(", ") : ""}
-                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, featureChips: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } })}
+                value={chipsDraft ?? (Array.isArray(sections.serviceTabs?.featureChips) ? sections.serviceTabs.featureChips.join(", ") : "")}
+                onChange={(e) => {
+                  setChipsDraft(e.target.value);
+                  setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, featureChips: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } });
+                }}
+                onBlur={() => setChipsDraft(null)}
                 className={inputClass}
                 placeholder="Real-time updates, Seamless checkout, Mobile-first flow"
                 maxLength={FIELD_LIMITS.subtitle}
@@ -1493,8 +1500,12 @@ export default function AppPageEditor() {
               <input
                 type="text"
                 dir="rtl"
-                value={Array.isArray(sections.serviceTabs?.ar?.featureChips) ? sections.serviceTabs.ar.featureChips.join("، ") : ""}
-                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), featureChips: e.target.value.split(/،|,/).map((s) => s.trim()).filter(Boolean) } } })}
+                value={chipsArDraft ?? (Array.isArray(sections.serviceTabs?.ar?.featureChips) ? sections.serviceTabs.ar.featureChips.join("، ") : "")}
+                onChange={(e) => {
+                  setChipsArDraft(e.target.value);
+                  setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), featureChips: e.target.value.split(/،|,/).map((s) => s.trim()).filter(Boolean) } } });
+                }}
+                onBlur={() => setChipsArDraft(null)}
                 className={inputClass}
                 style={{ borderColor: "#16a34a" }}
                 maxLength={FIELD_LIMITS.subtitle}

@@ -2059,6 +2059,16 @@ export default function HomePageEditor() {
                   />
                   <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
                   <RichTextArea value={card.ar?.description ?? ""} onChange={(v) => updateSolutionCard(i, "ar", { ...(card.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+
+                  <label className={labelClass}>Card Link (optional — makes the card clickable)</label>
+                  <input
+                    value={card.href ?? ""}
+                    onChange={(e) => updateSolutionCard(i, "href", e.target.value)}
+                    maxLength={FIELD_LIMITS.link}
+                    className={inputClass}
+                    placeholder="/solutions or https://…"
+                  />
+                  <FieldError error={validateUrl(card.href ?? "")} />
                 </div>
               </div>
             ))}
@@ -2121,19 +2131,8 @@ export default function HomePageEditor() {
               <CharCount value={clientsPartners.heading ?? ""} max={FIELD_LIMITS.heading} />
               <ArInput label="Heading" kind="heading" value={clientsPartners.ar?.heading} onChange={(v) => setClientsPartners((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={clientsPartners.headingBr ?? false}
-                  onChange={(e) => setClientsPartners((p) => ({ ...p, headingBr: e.target.checked }))}
-                  className="h-4 w-4 rounded border-slate-300 text-[#0088FF]"
-                />
-                Add line break before end text
-              </label>
-            </div>
             <div>
-              <label className={labelClass}>Heading End (second part)</label>
+              <label className={labelClass}>Heading End (second part — shown in gradient on its own line)</label>
               <input
                 value={clientsPartners.headingEnd ?? ""}
                 onChange={(e) => setClientsPartners((p) => ({ ...p, headingEnd: e.target.value }))}

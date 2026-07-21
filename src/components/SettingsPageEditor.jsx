@@ -131,6 +131,26 @@ export default function SettingsPageEditor() {
     }
   }
 
+  // Footer QR code image upload.
+  const [qrPct, setQrPct] = useState(undefined);
+  async function handleQrUpload(file) {
+    const key = "footer-qr";
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setQrPct(0);
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) => setQrPct(pct));
+      setSections((prev) => ({ ...prev, footer: { ...(prev.footer ?? {}), qrImage: url } }));
+      setSuccess("QR code uploaded.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+    } finally {
+      setQrPct(undefined);
+    }
+  }
+
   // Per-store icon upload for the floating buttons (keyed by store index).
   const [storeIconPct, setStoreIconPct] = useState({});
   async function handleStoreIconUpload(index, file) {
@@ -702,6 +722,48 @@ export default function SettingsPageEditor() {
           <FieldError error={validateUrl(footer.appDownloadUrl)} />
           <p className="mt-1 text-[11px] text-slate-500">
             Drives the QR code and store links. Leave empty to hide the app column.
+          </p>
+        </label>
+
+        <label className="mt-4 block">
+          <span className={labelClass}>QR Code Image (optional — overrides the auto-generated QR)</span>
+          <div className="flex items-center gap-2">
+            <input
+              value={footer.qrImage ?? ""}
+              onChange={(e) => setFooter({ qrImage: e.target.value })}
+              className={inputClass}
+              placeholder="QR image URL or upload"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <span className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
+              qrPct !== undefined
+                ? "cursor-not-allowed border-slate-200 text-slate-400"
+                : "cursor-pointer border-[#0088FF]/30 bg-[#EEF6FF] text-[#0088FF] hover:bg-[#dcecff]"
+            }`}>
+              {qrPct !== undefined ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" />{qrPct}%</>
+              ) : (
+                <><Upload className="h-3.5 w-3.5" />Upload</>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={qrPct !== undefined}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) handleQrUpload(file);
+                }}
+              />
+            </span>
+          </div>
+          <FieldError error={validateUrl(footer.qrImage)} />
+          {uploadErrors["footer-qr"] ? (
+            <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["footer-qr"]}</p>
+          ) : null}
+          <p className="mt-1 text-[11px] text-slate-500">
+            Upload your own QR code image. When empty, a QR is generated automatically from the App Download URL.
           </p>
         </label>
       </div>

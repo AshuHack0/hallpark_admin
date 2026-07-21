@@ -950,6 +950,29 @@ export default function HomePageEditor() {
     }
   }
 
+  async function handleHalaParkImageUpload(file) {
+    const key = "hpa-image";
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setHalaParkInAction((prev) => ({ ...prev, image: url }));
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSupportImageUpload(file) {
     const key = "support-image";
     const err = validateImageFile(file);
@@ -991,21 +1014,27 @@ export default function HomePageEditor() {
       setError(`Slide ${badSlide + 1} needs a title and its ${slideMediaType(slides[badSlide])}.`);
       return;
     }
-    // Global Mobility map animation: every location needs an ID + label, and
-    // every connection must point at existing location IDs. Empty rows can be
-    // deleted instead of being silently dropped.
-    const gmNodes = globalMobility.mapNodes ?? [];
+    // Global Mobility map animation: completely empty location/connection rows
+    // are dropped silently (an accidental "+ Add" click must never block saving
+    // the whole page). Only PARTIALLY filled rows raise an error.
+    const gmNodes = (globalMobility.mapNodes ?? []).filter(
+      (n) => String(n.id ?? "").trim() || String(n.label ?? "").trim(),
+    );
     const badNode = gmNodes.findIndex((n) => !String(n.id ?? "").trim() || !String(n.label ?? "").trim());
     if (badNode !== -1) {
-      setError(`Global Mobility map location ${badNode + 1} needs both an ID and a label — fill them in or delete the row.`);
+      setError(`Global Mobility map location "${gmNodes[badNode].label || gmNodes[badNode].id}" needs both an ID and a label — fill them in or delete the row.`);
       return;
     }
     const gmNodeIds = new Set(gmNodes.map((n) => n.id));
-    const badLink = (globalMobility.mapLinks ?? []).findIndex((l) => !gmNodeIds.has(l.from) || !gmNodeIds.has(l.to));
+    const gmLinks = (globalMobility.mapLinks ?? []).filter(
+      (l) => String(l.from ?? "").trim() || String(l.to ?? "").trim(),
+    );
+    const badLink = gmLinks.findIndex((l) => !gmNodeIds.has(l.from) || !gmNodeIds.has(l.to));
     if (badLink !== -1) {
       setError(`Global Mobility map connection ${badLink + 1} needs valid From and To locations — pick existing locations or delete the row.`);
       return;
     }
+    const globalMobilityClean = { ...globalMobility, mapNodes: gmNodes, mapLinks: gmLinks };
     setSaving(true);
     try {
       const sections = {
@@ -1020,7 +1049,7 @@ export default function HomePageEditor() {
         solutionIntegration,
         technologySection,
         clientsPartners,
-        globalMobility,
+        globalMobility: globalMobilityClean,
         halaParkInAction,
         promoPopup,
         supportCta,
@@ -2608,6 +2637,18 @@ export default function HomePageEditor() {
               <CharCount value={halaParkInAction.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
               <ArInput label="Subtitle" kind="subtitle" value={halaParkInAction.ar?.subtitle} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
+
+            <MediaField
+              label="Right Image (app preview)"
+              value={halaParkInAction.image ?? ""}
+              accept="image/*"
+              resourceType="image"
+              uploading={uploadProgress["hpa-image"] !== undefined}
+              uploadError={uploadErrors["hpa-image"]}
+              progress={uploadProgress["hpa-image"]}
+              onChange={(v) => setHalaParkInAction((p) => ({ ...p, image: v }))}
+              onUpload={(file) => handleHalaParkImageUpload(file)}
+            />
 
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>

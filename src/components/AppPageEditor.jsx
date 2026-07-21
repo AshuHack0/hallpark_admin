@@ -159,6 +159,19 @@ export default function AppPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
   const [openSections, setOpenSections] = useState({ hero: true });
 
   useEffect(() => {
@@ -270,10 +283,10 @@ export default function AppPageEditor() {
   }
 
   async function handleImageUpload(section, field, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `${section}-${field}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -286,7 +299,7 @@ export default function AppPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -297,8 +310,8 @@ export default function AppPageEditor() {
   // from the list's renderItem; `field` is the image key on the item (e.g. "image").
   async function handleArrayImageUpload(key, update, i, field, file) {
     const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    setError("");
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -308,7 +321,7 @@ export default function AppPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -359,10 +372,10 @@ export default function AppPageEditor() {
 
   // Upload an icon image for a hero stat/card row (writes item.iconImage).
   async function handleHeroItemIconUpload(kind, i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `hero-${kind}-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -373,7 +386,7 @@ export default function AppPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (e) {
-      setError("Image upload failed");
+      setUploadError(key, e.message ?? "Upload failed");
       console.error(e);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -547,6 +560,9 @@ export default function AppPageEditor() {
                 </label>
               </div>
               <FieldError error={validateUrl(sections.hero.phoneImage)} />
+              {uploadErrors["hero-phoneImage"] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-phoneImage"]}</p>
+              ) : null}
             </div>
 
             {/* Stats editor */}
@@ -659,6 +675,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(stat.iconImage)} />
+                      {uploadErrors[`hero-stat-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-stat-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -797,6 +816,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(card.iconImage)} />
+                      {uploadErrors[`hero-card-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-card-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -981,6 +1003,9 @@ export default function AppPageEditor() {
                   </label>
                 </div>
                 <FieldError error={validateUrl(sections.platform.appScreen)} />
+                {uploadErrors["platform-appScreen"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["platform-appScreen"]}</p>
+                ) : null}
               </div>
 
               {/* App card button */}
@@ -1112,6 +1137,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(item.iconImage)} />
+                      {uploadErrors[`platform-appfeat-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`platform-appfeat-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -1188,6 +1216,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(item.iconImage)} />
+                      {uploadErrors[`platform-webfeat-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`platform-webfeat-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -1352,6 +1383,9 @@ export default function AppPageEditor() {
                     </label>
                   </div>
                   <FieldError error={validateUrl(item.screen)} />
+                  {uploadErrors[`svc-tab-${i}-screen`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`svc-tab-${i}-screen`]}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label className={labelClass}>Tab Icon (optional)</label>
@@ -1383,6 +1417,9 @@ export default function AppPageEditor() {
                     </label>
                   </div>
                   <FieldError error={validateUrl(item.iconImage)} />
+                  {uploadErrors[`svc-tab-${i}-icon`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`svc-tab-${i}-icon`]}</p>
+                  ) : null}
                 </div>
               </div>
             )}
@@ -1557,6 +1594,9 @@ export default function AppPageEditor() {
                       </div>
                       <CharCount value={item.iconImage ?? ""} max={FIELD_LIMITS.link} />
                       <FieldError error={validateUrl(item.iconImage)} />
+                      {uploadErrors[`scr-step-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`scr-step-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -1621,6 +1661,9 @@ export default function AppPageEditor() {
                   </div>
                   <CharCount value={item.image ?? ""} max={FIELD_LIMITS.link} />
                   <FieldError error={validateUrl(item.image)} />
+                  {uploadErrors[`screenshot-${i}-image`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`screenshot-${i}-image`]}</p>
+                  ) : null}
                 </div>
               </div>
             )}
@@ -1709,6 +1752,9 @@ export default function AppPageEditor() {
                   </label>
                 </div>
                 <FieldError error={validateUrl(sections.currency?.image)} />
+                {uploadErrors["currency-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["currency-image"]}</p>
+                ) : null}
               </div>
             </div>
 
@@ -1789,6 +1835,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(item.iconImage)} />
+                      {uploadErrors[`currency-card-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`currency-card-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                   </div>
                 )}
@@ -1981,6 +2030,9 @@ export default function AppPageEditor() {
                   </div>
                   <CharCount value={item.iconImage ?? ""} max={FIELD_LIMITS.link} />
                   <FieldError error={validateUrl(item.iconImage)} />
+                  {uploadErrors[`feat-card-${i}-icon`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-icon`]}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label className={labelClass}>Card Image (optional)</label>
@@ -2012,6 +2064,9 @@ export default function AppPageEditor() {
                   </div>
                   <CharCount value={item.image ?? ""} max={FIELD_LIMITS.link} />
                   <FieldError error={validateUrl(item.image)} />
+                  {uploadErrors[`feat-card-${i}-img`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-img`]}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label className={labelClass}>Preview Type (fallback visual when no Card Image)</label>
@@ -2105,6 +2160,9 @@ export default function AppPageEditor() {
                       </div>
                       <CharCount value={item.icon} max={FIELD_LIMITS.link} />
                       <FieldError error={validateUrl(item.icon)} />
+                      {uploadErrors[`storeicon-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`storeicon-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                     <div>
                       <label className={labelClass}>Alt Text</label>
@@ -2265,6 +2323,9 @@ export default function AppPageEditor() {
                         </label>
                       </div>
                       <FieldError error={validateUrl(item.icon)} />
+                      {uploadErrors[`ctafooter-store-${i}-icon`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`ctafooter-store-${i}-icon`]}</p>
+                      ) : null}
                     </div>
                     <div>
                       <label className={labelClass}>Store URL</label>

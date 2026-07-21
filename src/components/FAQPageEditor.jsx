@@ -148,6 +148,19 @@ export default function FAQPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
   const [openSections, setOpenSections] = useState({ hero: true, faqs: true, searchHeader: true, bottomCta: true });
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [questionModalOpen, setQuestionModalOpen] = useState(false);
@@ -213,10 +226,10 @@ export default function FAQPageEditor() {
   }
 
   async function handleImageUpload(field, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `hero-${field}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -226,7 +239,7 @@ export default function FAQPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -239,10 +252,10 @@ export default function FAQPageEditor() {
   // fully discarded on Cancel.
   async function handleModalVideoUpload(videoIndex, file) {
     if (!file) return;
-    const err = validateVideoFile(file);
-    if (err) { setError(err); return; }
     const key = `modal-video-${videoIndex}`;
-    setError("");
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadVideoToCloudinary(file, (pct) =>
@@ -257,7 +270,7 @@ export default function FAQPageEditor() {
       setSuccess("Video uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Video upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -268,10 +281,10 @@ export default function FAQPageEditor() {
   // state. Persisted onto the category (as `iconImage`) only on Save.
   async function handleCategoryIconUpload(file) {
     if (!file) return;
-    const err = validateImageFile(file);
-    if (err) { setCategoryError(err); return; }
     const key = "cat-icon";
-    setCategoryError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -279,7 +292,7 @@ export default function FAQPageEditor() {
       );
       setNewCategoryForm((prev) => ({ ...prev, iconImage: url }));
     } catch (err) {
-      setCategoryError("Icon image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -540,6 +553,9 @@ export default function FAQPageEditor() {
                 </label>
               </div>
               <FieldError error={validateUrl(hero.image)} />
+              {uploadErrors["hero-image"] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
+              ) : null}
             </div>
           </div>
         </CollapsibleSection>
@@ -889,6 +905,9 @@ export default function FAQPageEditor() {
                   </label>
                 </div>
                 <FieldError error={validateUrl(newCategoryForm.iconImage)} />
+                {uploadErrors["cat-icon"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cat-icon"]}</p>
+                ) : null}
                 {(newCategoryForm.iconImage ?? "").trim() !== "" && (
                   <img
                     src={newCategoryForm.iconImage}
@@ -1035,6 +1054,9 @@ export default function FAQPageEditor() {
                         </button>
                       </div>
                       <FieldError error={validateUrl(video)} />
+                      {uploadErrors[uploadKey] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[uploadKey]}</p>
+                      ) : null}
                       <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
                       </div>
                     );

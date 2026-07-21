@@ -882,6 +882,19 @@ export default function SolutionPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
   // Detail modal: editingDetail = { index, draft, isNew } | null
   const [editingDetail, setEditingDetail] = useState(null);
 
@@ -1000,10 +1013,10 @@ export default function SolutionPageEditor() {
     setHero((p) => ({ ...p, showcase: { ...(p.showcase ?? {}), [col]: ((p.showcase?.[col]) ?? []).filter((_, i) => i !== idx) } }));
   }
   async function handleShowcaseImageUpload(col, idx, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `showcase-${col}-${idx}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })));
@@ -1011,7 +1024,7 @@ export default function SolutionPageEditor() {
       setSuccess("Showcase image uploaded. Remember to Save.");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1019,10 +1032,10 @@ export default function SolutionPageEditor() {
   }
 
   async function handleChallengesImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = "challenges-image";
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1032,7 +1045,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1040,10 +1053,10 @@ export default function SolutionPageEditor() {
   }
 
   async function handleTrustImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = "trust-image";
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1053,7 +1066,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1061,10 +1074,10 @@ export default function SolutionPageEditor() {
   }
 
   async function handleCtaImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = "cta-image";
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1074,7 +1087,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1083,10 +1096,10 @@ export default function SolutionPageEditor() {
 
   // Upload an icon image for a Seamless Integrations item, keyed seamless-${i}-icon.
   async function handleSeamlessIconUpload(index, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `seamless-${index}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1099,7 +1112,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1107,10 +1120,10 @@ export default function SolutionPageEditor() {
   }
 
   async function handleImageUpload(section, cardIndex, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `${section}-${cardIndex}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1138,7 +1151,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1147,10 +1160,10 @@ export default function SolutionPageEditor() {
 
   // Per-industry icon image upload → features.industries[i].iconImage.
   async function handleIndustryIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `feat-ind-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -1163,7 +1176,7 @@ export default function SolutionPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (uploadErr) {
-      setError("Image upload failed");
+      setUploadError(key, uploadErr.message ?? "Upload failed");
       console.error(uploadErr);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1287,28 +1300,33 @@ export default function SolutionPageEditor() {
                 </div>
                 <div className="space-y-2">
                   {(hero.showcase?.[col] ?? []).map((img, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
-                        {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <span className="text-[9px] text-slate-300">—</span>}
+                    <div key={idx}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                          {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <span className="text-[9px] text-slate-300">—</span>}
+                        </div>
+                        <input
+                          value={img ?? ""}
+                          onChange={(e) => updateShowcaseImage(col, idx, e.target.value)}
+                          className={inputClass}
+                          placeholder="Image URL or /path"
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                          {uploadProgress[`showcase-${col}-${idx}`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`showcase-${col}-${idx}`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" /></>
+                          )}
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleShowcaseImageUpload(col, idx, f); e.target.value = ""; }} />
+                        </label>
+                        <button type="button" onClick={() => removeShowcaseImage(col, idx)} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
-                      <input
-                        value={img ?? ""}
-                        onChange={(e) => updateShowcaseImage(col, idx, e.target.value)}
-                        className={inputClass}
-                        placeholder="Image URL or /path"
-                        maxLength={FIELD_LIMITS.link}
-                      />
-                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
-                        {uploadProgress[`showcase-${col}-${idx}`] !== undefined ? (
-                          <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`showcase-${col}-${idx}`]}%</>
-                        ) : (
-                          <><Upload className="h-3.5 w-3.5" /></>
-                        )}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleShowcaseImageUpload(col, idx, f); e.target.value = ""; }} />
-                      </label>
-                      <button type="button" onClick={() => removeShowcaseImage(col, idx)} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {uploadErrors[`showcase-${col}-${idx}`] ? (
+                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`showcase-${col}-${idx}`]}</p>
+                      ) : null}
                     </div>
                   ))}
                   {(hero.showcase?.[col] ?? []).length === 0 && (
@@ -1464,6 +1482,9 @@ export default function SolutionPageEditor() {
                 />
               </label>
             </div>
+            {uploadErrors["challenges-image"] ? (
+              <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["challenges-image"]}</p>
+            ) : null}
             <FieldError error={validateUrl(challenges.image ?? "")} />
           </div>
 
@@ -1679,6 +1700,9 @@ export default function SolutionPageEditor() {
                         />
                       </label>
                     </div>
+                    {uploadErrors[`solutions-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`solutions-${i}`]}</p>
+                    ) : null}
                     <FieldError error={validateUrl(card.image ?? "")} />
 
                     {/* Slug — links the card to its detail page */}
@@ -2024,6 +2048,9 @@ export default function SolutionPageEditor() {
                         />
                       </label>
                     </div>
+                    {uploadErrors[`integration-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`integration-${i}`]}</p>
+                    ) : null}
                     <FieldError error={validateUrl(card.image ?? "")} />
                     <textarea
                       value={card.gradient ?? ""}
@@ -2129,6 +2156,9 @@ export default function SolutionPageEditor() {
                   <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["trust-image"] !== undefined}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTrustImageUpload(f); e.target.value = ""; }} />
                 </label>
+                {uploadErrors["trust-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["trust-image"]}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -2319,6 +2349,9 @@ export default function SolutionPageEditor() {
                               }}
                             />
                           </label>
+                          {uploadErrors[`seamless-${i}-icon`] ? (
+                            <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`seamless-${i}-icon`]}</p>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -2405,6 +2438,9 @@ export default function SolutionPageEditor() {
                   <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["features-0"] !== undefined}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("features", 0, f); e.target.value = ""; }} />
                 </label>
+                {uploadErrors["features-0"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["features-0"]}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -2490,6 +2526,9 @@ export default function SolutionPageEditor() {
                             </button>
                           ) : null}
                         </div>
+                        {uploadErrors[iconKey] ? (
+                          <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[iconKey]}</p>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -2679,6 +2718,9 @@ export default function SolutionPageEditor() {
                     <input type="file" accept="image/*" className="hidden" disabled={uploadProgress["deployment-0"] !== undefined}
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("deployment", 0, f); e.target.value = ""; }} />
                   </label>
+                  {uploadErrors["deployment-0"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["deployment-0"]}</p>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -2838,6 +2880,9 @@ export default function SolutionPageEditor() {
                     }}
                   />
                 </label>
+                {uploadErrors["why-0"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["why-0"]}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -2991,6 +3036,9 @@ export default function SolutionPageEditor() {
                     }}
                   />
                 </label>
+                {uploadErrors["cta-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
+                ) : null}
               </div>
             </div>
           </div>

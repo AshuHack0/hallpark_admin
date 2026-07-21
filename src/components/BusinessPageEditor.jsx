@@ -346,8 +346,23 @@ export default function BusinessPageEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  // Upload failures are shown inline per field (uploadErrors below); nothing
+  // sets the global error banner anymore, so only the value is kept.
+  const [error] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
   const [openSections, setOpenSections] = useState({ hero: true });
 
   useEffect(() => {
@@ -425,10 +440,10 @@ export default function BusinessPageEditor() {
 
   // Upload a hero deck image → hero.deckImages[index].img
   async function handleDeckImageUpload(index, file) {
-    const validationError = validateImageFile(file);
-    if (validationError) { setError(validationError); return; }
     const key = `hero-deck-${index}`;
-    setError("");
+    const validationError = validateImageFile(file);
+    if (validationError) { setUploadError(key, validationError); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadProgress((p) => ({ ...p, [key]: pct })));
@@ -437,7 +452,7 @@ export default function BusinessPageEditor() {
         hero: { ...prev.hero, deckImages: (prev.hero?.deckImages ?? []).map((s, i) => (i === index ? { ...s, img: url } : s)) },
       }));
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Image upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -445,10 +460,10 @@ export default function BusinessPageEditor() {
   }
 
   async function handleImageUpload(section, field, file, itemIndex = null) {
-    const validationError = validateImageFile(file);
-    if (validationError) { setError(validationError); return; }
     const key = `${section}-${field}`;
-    setError("");
+    const validationError = validateImageFile(file);
+    if (validationError) { setUploadError(key, validationError); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -468,7 +483,7 @@ export default function BusinessPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Image upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -630,7 +645,8 @@ export default function BusinessPageEditor() {
               <p className="mb-2 text-[11px] text-slate-400">The rotating photo cards on the right of the hero. Add 3–4 for the best effect. Leave empty to use the built-in images.</p>
               <div className="space-y-2">
                 {(sections.hero?.deckImages ?? []).map((slide, di) => (
-                  <div key={di} className="flex items-center gap-2">
+                  <div key={di}>
+                  <div className="flex items-center gap-2">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
                       {slide.img ? <img src={slide.img} alt="" className="h-full w-full object-cover" /> : <span className="text-[9px] text-slate-300">—</span>}
                     </div>
@@ -657,6 +673,10 @@ export default function BusinessPageEditor() {
                     <button type="button" onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).filter((_, idx) => idx !== di) } })} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
+                  </div>
+                  {uploadErrors[`hero-deck-${di}`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-deck-${di}`]}</p>
+                  ) : null}
                   </div>
                 ))}
               </div>
@@ -921,6 +941,9 @@ export default function BusinessPageEditor() {
                     </label>
                   </div>
                   <FieldError error={validateUrl(item.image ?? "")} />
+                  {uploadErrors["whyChoose-image"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whyChoose-image"]}</p>
+                  ) : null}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the left side of the card. If left blank, the gradient colors below are used instead.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -1092,6 +1115,9 @@ export default function BusinessPageEditor() {
                       </label>
                     </div>
                     <FieldError error={validateUrl(item.image)} />
+                    {uploadErrors["solutions-image"] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["solutions-image"]}</p>
+                    ) : null}
                   </div>
                   <div>
                     <label className={labelClass}>Icon (emoji)</label>
@@ -1305,6 +1331,9 @@ export default function BusinessPageEditor() {
                     </label>
                   </div>
                   <FieldError error={validateUrl(item.image ?? "")} />
+                  {uploadErrors["whoWeWork-image"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whoWeWork-image"]}</p>
+                  ) : null}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the right side of the partner card. Leave blank to render no photo.</p>
                 </div>
                 <div>
@@ -1335,6 +1364,9 @@ export default function BusinessPageEditor() {
                     </label>
                   </div>
                   <FieldError error={validateUrl(item.icon ?? "")} />
+                  {uploadErrors["whoWeWork-icon"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whoWeWork-icon"]}</p>
+                  ) : null}
                   <p className="mt-1 text-[11px] text-slate-400">Small badge shown next to the partner category label.</p>
                 </div>
                 <div>
@@ -1838,6 +1870,9 @@ export default function BusinessPageEditor() {
                   </label>
                 </div>
                 <FieldError error={validateUrl(sections.partnersShowcase.image)} />
+                {uploadErrors["partnersShowcase-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["partnersShowcase-image"]}</p>
+                ) : null}
               </div>
               <div>
                 <label className={labelClass}>CTA Label</label>
@@ -1934,7 +1969,8 @@ export default function BusinessPageEditor() {
                 <p className="text-xs font-semibold text-slate-700 mb-4">Row 1 Partners ({sections.partnersShowcase.partners?.row1?.length ?? 0})</p>
                 <div className="space-y-2">
                   {(sections.partnersShowcase.partners?.row1 ?? []).map((partner, i) => (
-                    <div key={i} className="flex gap-2 items-end">
+                    <div key={i}>
+                    <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <input
                           value={partner.name}
@@ -2000,16 +2036,18 @@ export default function BusinessPageEditor() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const err = validateImageFile(file);
-                              if (err) { setError(err); e.target.value = ""; return; }
                               const key = `partnersShowcase-row1-logo-${i}`;
+                              const err = validateImageFile(file);
+                              if (err) { setUploadError(key, err); e.target.value = ""; return; }
+                              clearUploadError(key);
                               setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
                               uploadMediaToCloudinary(file, "image", (progress) => {
                                 setUploadProgress((prev) => ({ ...prev, [key]: progress }));
                               }).then((url) => {
                                 setSections((prevSections) => ({ ...prevSections, partnersShowcase: { ...prevSections.partnersShowcase, partners: { ...prevSections.partnersShowcase.partners, row1: prevSections.partnersShowcase.partners.row1.map((p, idx) => idx === i ? { ...p, logo: url } : p) } } }));
                                 setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
-                              }).catch(() => {
+                              }).catch((uploadErr) => {
+                                setUploadError(key, uploadErr.message ?? "Image upload failed");
                                 setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
                               });
                             }
@@ -2026,6 +2064,10 @@ export default function BusinessPageEditor() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
+                    </div>
+                    {uploadErrors[`partnersShowcase-row1-logo-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`partnersShowcase-row1-logo-${i}`]}</p>
+                    ) : null}
                     </div>
                   ))}
                 </div>
@@ -2045,7 +2087,8 @@ export default function BusinessPageEditor() {
                 <p className="text-xs font-semibold text-slate-700 mb-4">Row 2 Partners ({sections.partnersShowcase.partners?.row2?.length ?? 0})</p>
                 <div className="space-y-2">
                   {(sections.partnersShowcase.partners?.row2 ?? []).map((partner, i) => (
-                    <div key={i} className="flex gap-2 items-end">
+                    <div key={i}>
+                    <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <input
                           value={partner.name}
@@ -2111,16 +2154,18 @@ export default function BusinessPageEditor() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const err = validateImageFile(file);
-                              if (err) { setError(err); e.target.value = ""; return; }
                               const key = `partnersShowcase-row2-logo-${i}`;
+                              const err = validateImageFile(file);
+                              if (err) { setUploadError(key, err); e.target.value = ""; return; }
+                              clearUploadError(key);
                               setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
                               uploadMediaToCloudinary(file, "image", (progress) => {
                                 setUploadProgress((prev) => ({ ...prev, [key]: progress }));
                               }).then((url) => {
                                 setSections((prevSections) => ({ ...prevSections, partnersShowcase: { ...prevSections.partnersShowcase, partners: { ...prevSections.partnersShowcase.partners, row2: prevSections.partnersShowcase.partners.row2.map((p, idx) => idx === i ? { ...p, logo: url } : p) } } }));
                                 setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
-                              }).catch(() => {
+                              }).catch((uploadErr) => {
+                                setUploadError(key, uploadErr.message ?? "Image upload failed");
                                 setUploadProgress((prev) => ({ ...prev, [key]: undefined }));
                               });
                             }
@@ -2137,6 +2182,10 @@ export default function BusinessPageEditor() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
+                    </div>
+                    {uploadErrors[`partnersShowcase-row2-logo-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`partnersShowcase-row2-logo-${i}`]}</p>
+                    ) : null}
                     </div>
                   ))}
                 </div>
@@ -2235,14 +2284,16 @@ export default function BusinessPageEditor() {
                         const file = e.target.files?.[0];
                         if (file) {
                           const err = validateImageFile(file);
-                          if (err) { setError(err); e.target.value = ""; return; }
+                          if (err) { setUploadError("partnersShowcase-ctaSection-image", err); e.target.value = ""; return; }
+                          clearUploadError("partnersShowcase-ctaSection-image");
                           setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": 0 }));
                           uploadMediaToCloudinary(file, "image", (progress) => {
                             setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": progress }));
                           }).then((url) => {
                             setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, image: url } } });
                             setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": null }));
-                          }).catch(() => {
+                          }).catch((uploadErr) => {
+                            setUploadError("partnersShowcase-ctaSection-image", uploadErr.message ?? "Image upload failed");
                             setUploadProgress((prev) => ({ ...prev, "partnersShowcase-ctaSection-image": null }));
                           });
                         }
@@ -2252,6 +2303,9 @@ export default function BusinessPageEditor() {
                   </label>
                 </div>
                 <FieldError error={validateUrl(sections.partnersShowcase.ctaSection?.image || "")} />
+                {uploadErrors["partnersShowcase-ctaSection-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["partnersShowcase-ctaSection-image"]}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -2355,6 +2409,9 @@ export default function BusinessPageEditor() {
                 </label>
               </div>
               <FieldError error={validateUrl(sections.cta.image)} />
+              {uploadErrors["cta-image"] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
+              ) : null}
             </div>
           </div>
         </CollapsibleSection>

@@ -66,6 +66,19 @@ export default function SettingsPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadPct, setUploadPct] = useState(undefined);
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
 
   useEffect(() => {
     document.title = "Site Settings — HalaPark Admin";
@@ -101,17 +114,18 @@ export default function SettingsPageEditor() {
   }, []);
 
   async function handleLogoUpload(file) {
+    const key = "logo";
     const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    setError("");
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadPct(0);
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadPct(pct));
       setSections((prev) => ({ ...prev, logo: { ...prev.logo, image: url } }));
       setSuccess("Logo uploaded.");
       setTimeout(() => setSuccess(""), 3000);
-    } catch {
-      setError("Logo upload failed");
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadPct(undefined);
     }
@@ -120,9 +134,10 @@ export default function SettingsPageEditor() {
   // Per-store icon upload for the floating buttons (keyed by store index).
   const [storeIconPct, setStoreIconPct] = useState({});
   async function handleStoreIconUpload(index, file) {
+    const key = `store-icon-${index}`;
     const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    setError("");
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setStoreIconPct((p) => ({ ...p, [index]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) => setStoreIconPct((p) => ({ ...p, [index]: pct })));
@@ -135,8 +150,8 @@ export default function SettingsPageEditor() {
       }));
       setSuccess("Icon uploaded.");
       setTimeout(() => setSuccess(""), 3000);
-    } catch {
-      setError("Icon upload failed");
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setStoreIconPct((p) => ({ ...p, [index]: undefined }));
     }
@@ -313,6 +328,9 @@ export default function SettingsPageEditor() {
               />
             </label>
           </div>
+          {uploadErrors["logo"] ? (
+            <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["logo"]}</p>
+          ) : null}
           <FieldError error={validateUrl(logoImage)} />
         </label>
 
@@ -437,6 +455,9 @@ export default function SettingsPageEditor() {
                   </button>
                 ) : null}
               </div>
+              {uploadErrors[`store-icon-${i}`] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`store-icon-${i}`]}</p>
+              ) : null}
             </div>
           ))}
           {(sections.floatingApp?.stores ?? []).length === 0 ? (

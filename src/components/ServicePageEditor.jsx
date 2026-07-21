@@ -182,6 +182,19 @@ export default function ServicePageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
 
   useEffect(() => {
     loadData();
@@ -261,10 +274,10 @@ export default function ServicePageEditor() {
     setHero((prev) => ({ ...prev, slides: (prev.slides ?? []).filter((_, idx) => idx !== i) }));
   }
   async function handleHeroSlideUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `hero-slide-${i}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -273,7 +286,7 @@ export default function ServicePageEditor() {
       updateHeroSlide(i, { img: url });
       setSuccess("Image uploaded. Remember to Save.");
     } catch (e) {
-      setError("Image upload failed");
+      setUploadError(key, e.message ?? "Upload failed");
       console.error(e);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -391,10 +404,10 @@ export default function ServicePageEditor() {
   }
 
   async function handleServiceImageUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `service-${i}-image`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -403,7 +416,7 @@ export default function ServicePageEditor() {
       updateService(i, "mediaSrc", url);
       setSuccess("Image uploaded. Remember to Save.");
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -430,10 +443,10 @@ export default function ServicePageEditor() {
     }));
   }
   async function handlePartnerLogoUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `partner-${i}-logo`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -442,7 +455,7 @@ export default function ServicePageEditor() {
       updatePartner(i, "logo", url);
       setSuccess("Logo uploaded. Remember to Save.");
     } catch (err) {
-      setError("Logo upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -622,6 +635,9 @@ export default function ServicePageEditor() {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleHeroSlideUpload(i, f); e.target.value = ""; }} />
                     </label>
                   </div>
+                  {uploadErrors[`hero-slide-${i}`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-slide-${i}`]}</p>
+                  ) : null}
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     <div>
                       <label className={labelClass}>Name (caption)</label>
@@ -811,6 +827,9 @@ export default function ServicePageEditor() {
                   />
                 </label>
               </div>
+              {uploadErrors[`service-${i}-image`] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`service-${i}-image`]}</p>
+              ) : null}
 
               <div>
                 <label className={labelClass}>Included Label</label>
@@ -1110,6 +1129,9 @@ export default function ServicePageEditor() {
                             />
                           </label>
                         </div>
+                        {uploadErrors[`partner-${i}-logo`] ? (
+                          <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`partner-${i}-logo`]}</p>
+                        ) : null}
                         <FieldError error={validateUrl(partner.logo)} />
                         <div className="grid grid-cols-2 gap-2">
                           <div>

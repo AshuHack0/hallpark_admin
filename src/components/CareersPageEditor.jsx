@@ -89,6 +89,19 @@ export default function CareersPageEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
 
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [buildingModalOpen, setBuildingModalOpen] = useState(false);
@@ -182,8 +195,8 @@ export default function CareersPageEditor() {
   // the uploaded URL wherever the caller needs it.
   async function uploadImageToKey(file, key, assign) {
     const validationError = validateImageFile(file);
-    if (validationError) { setError(validationError); return; }
-    setError("");
+    if (validationError) { setUploadError(key, validationError); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -193,7 +206,7 @@ export default function CareersPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Image upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -691,6 +704,9 @@ export default function CareersPageEditor() {
                       maxLength={FIELD_LIMITS.link}
                     />
                     <FieldError error={validateUrl(url)} />
+                    {uploadErrors[`hero-img-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-img-${i}`]}</p>
+                    ) : null}
                   </div>
                   <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                     <Upload className="h-3.5 w-3.5" />
@@ -946,6 +962,9 @@ export default function CareersPageEditor() {
                       </label>
                     </div>
                     <FieldError error={validateUrl(item.iconImage ?? "")} />
+                    {uploadErrors[`opp-${i}-icon`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`opp-${i}-icon`]}</p>
+                    ) : null}
                   </div>
                   <div>
                     <label className={labelClass}>Title</label>
@@ -1282,6 +1301,9 @@ export default function CareersPageEditor() {
               </label>
             </div>
             <FieldError error={validateUrl(heroForm.image)} />
+            {uploadErrors["hero-image"] ? (
+              <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
+            ) : null}
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary Button (View Open Positions)</span>

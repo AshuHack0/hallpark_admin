@@ -221,14 +221,14 @@ const DEFAULT_PROMO_POPUP = {
 
 // Social platforms the popup can render (must match PromoPopup.jsx SOCIAL_ICONS).
 const PROMO_SOCIAL_PLATFORMS = [
-  { value: "instagram", label: "Instagram" },
-  { value: "facebook", label: "Facebook" },
-  { value: "tiktok", label: "TikTok" },
-  { value: "x", label: "X (Twitter)" },
-  { value: "youtube", label: "YouTube" },
-  { value: "linkedin", label: "LinkedIn" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "snapchat", label: "Snapchat" },
+  { value: "instagram", label: "Instagram", placeholder: "https://instagram.com/halapark" },
+  { value: "facebook", label: "Facebook", placeholder: "https://facebook.com/halapark" },
+  { value: "tiktok", label: "TikTok", placeholder: "https://tiktok.com/@halapark" },
+  { value: "x", label: "X (Twitter)", placeholder: "https://x.com/halapark" },
+  { value: "youtube", label: "YouTube", placeholder: "https://youtube.com/@halapark" },
+  { value: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/company/halapark" },
+  { value: "whatsapp", label: "WhatsApp", placeholder: "https://wa.me/971500000000" },
+  { value: "snapchat", label: "Snapchat", placeholder: "https://snapchat.com/add/halapark" },
 ];
 
 function emptySlide() {
@@ -253,7 +253,7 @@ function slideMediaType(slide) {
 }
 
 // A labelled text input + Cloudinary upload button for one media field.
-function MediaField({ label, value, accept, resourceType, uploading, progress, onChange, onUpload }) {
+function MediaField({ label, value, accept, resourceType, uploading, progress, onChange, onUpload, uploadError }) {
   return (
     <div>
       <label className={labelClass}>{label}</label>
@@ -298,6 +298,9 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
         </label>
       </div>
       <FieldError error={validateUrl(value)} />
+      {uploadError ? (
+        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadError}</p>
+      ) : null}
       {resourceType === "video" ? (
         <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
       ) : null}
@@ -364,6 +367,19 @@ export default function HomePageEditor() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
 
   useEffect(() => {
     document.title = "Home — HalaPark Admin";
@@ -453,10 +469,10 @@ export default function HomePageEditor() {
   }
 
   async function handleAiCardImageUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `aicard-${i}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -465,7 +481,7 @@ export default function HomePageEditor() {
       updateAiCard(i, "imageSrc", url);
       setSuccess("Image uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -505,10 +521,10 @@ export default function HomePageEditor() {
   // Custom icon upload for a Solution Integration card. iconImage overrides the
   // built-in icon selected in the dropdown.
   async function handleSolutionCardIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `sol-card-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -517,7 +533,7 @@ export default function HomePageEditor() {
       updateSolutionCard(i, "iconImage", url);
       setSuccess("Icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -593,10 +609,10 @@ export default function HomePageEditor() {
   }
 
   async function handleWhyImageUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `why-${i}-image`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -605,7 +621,7 @@ export default function HomePageEditor() {
       updateWhyItem(i, "image", url);
       setSuccess("Image uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -640,10 +656,10 @@ export default function HomePageEditor() {
   }
 
   async function handleUpload(index, field, file, resourceType) {
-    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `${index}-${field}`;
-    setError("");
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, resourceType, (pct) =>
@@ -652,7 +668,7 @@ export default function HomePageEditor() {
       updateSlide(index, field, url);
       setSuccess("Media uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -682,10 +698,10 @@ export default function HomePageEditor() {
     }));
   }
   async function handleServiceCardMediaUpload(i, file, resourceType) {
-    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `glcard-${i}`;
-    setError("");
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, resourceType, (pct) =>
@@ -694,7 +710,7 @@ export default function HomePageEditor() {
       updateServiceCard(i, "mediaSrc", url);
       setSuccess("Media uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -724,10 +740,10 @@ export default function HomePageEditor() {
     }));
   }
   async function handleLogoUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `logo-${i}`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -736,7 +752,7 @@ export default function HomePageEditor() {
       updateLogo(i, "image", url);
       setSuccess("Logo uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -747,10 +763,10 @@ export default function HomePageEditor() {
   }
 
   async function handleHowItWorksVideoUpload(file) {
-    const err = validateVideoFile(file);
-    if (err) { setError(err); return; }
     const key = "howItWorks-video";
-    setError("");
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "video", (pct) =>
@@ -759,7 +775,7 @@ export default function HomePageEditor() {
       setHowItWorks((prev) => ({ ...prev, videoUrl: url }));
       setSuccess("Video uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -770,10 +786,10 @@ export default function HomePageEditor() {
   }
 
   async function handleStoreIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `storeLink-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -782,7 +798,7 @@ export default function HomePageEditor() {
       updateStoreLink(i, "icon", url);
       setSuccess("Store icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -794,11 +810,11 @@ export default function HomePageEditor() {
 
   // Pop-up media upload (image or video → Cloudinary).
   async function handlePromoUpload(file, resourceType) {
-    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
-    if (err) { setError(err); return; }
     const field = resourceType === "video" ? "video" : "image";
     const key = `promo-${field}`;
-    setError("");
+    const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, resourceType, (pct) =>
@@ -807,7 +823,7 @@ export default function HomePageEditor() {
       setPromoPopup((prev) => ({ ...prev, [field]: url }));
       setSuccess("Pop-up media uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -818,10 +834,10 @@ export default function HomePageEditor() {
   }
 
   async function handleCapIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `gm-cap-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -830,7 +846,7 @@ export default function HomePageEditor() {
       updateCapability(i, "iconImage", url);
       setSuccess("Icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -841,10 +857,10 @@ export default function HomePageEditor() {
   }
 
   async function handleStatIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `gm-stat-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -853,7 +869,7 @@ export default function HomePageEditor() {
       updateImpactStat(i, "iconImage", url);
       setSuccess("Icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -866,10 +882,10 @@ export default function HomePageEditor() {
   // Custom icon uploads for the Who We Are highlights + Why HalaPark items.
   // A custom image (iconImage) overrides the preset lucide icon on the site.
   async function handleWhoIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `who-hl-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -878,7 +894,7 @@ export default function HomePageEditor() {
       updateWhoHighlight(i, "iconImage", url);
       setSuccess("Icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -889,10 +905,10 @@ export default function HomePageEditor() {
   }
 
   async function handleWhyIconUpload(i, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = `why-item-${i}-icon`;
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -901,7 +917,7 @@ export default function HomePageEditor() {
       updateWhyItem(i, "iconImage", url);
       setSuccess("Icon uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -912,10 +928,10 @@ export default function HomePageEditor() {
   }
 
   async function handleBlackBannerImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = "blackBanner-image";
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -924,7 +940,7 @@ export default function HomePageEditor() {
       setBlackBanner((prev) => ({ ...prev, image: url }));
       setSuccess("Banner image uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -935,10 +951,10 @@ export default function HomePageEditor() {
   }
 
   async function handleSupportImageUpload(file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
     const key = "support-image";
-    setError("");
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -947,7 +963,7 @@ export default function HomePageEditor() {
       setSupportCta((prev) => ({ ...prev, image: url }));
       setSuccess("Image uploaded. Remember to Save.");
     } catch (err) {
-      setError(err.message ?? "Upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => {
         const next = { ...p };
@@ -1173,6 +1189,7 @@ export default function HomePageEditor() {
                       resourceType="video"
                       uploading={prog(index, "video") !== undefined}
                       progress={prog(index, "video")}
+                      uploadError={uploadErrors[`${index}-video`]}
                       onChange={(v) => updateSlide(index, "video", v)}
                       onUpload={(file, rt) => handleUpload(index, "video", file, rt)}
                     />
@@ -1184,6 +1201,7 @@ export default function HomePageEditor() {
                       resourceType="image"
                       uploading={prog(index, "image") !== undefined}
                       progress={prog(index, "image")}
+                      uploadError={uploadErrors[`${index}-image`]}
                       onChange={(v) => updateSlide(index, "image", v)}
                       onUpload={(file, rt) => handleUpload(index, "image", file, rt)}
                     />
@@ -1294,6 +1312,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`who-hl-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`who-hl-${i}-icon`]}
                     progress={uploadProgress[`who-hl-${i}-icon`]}
                     onChange={(v) => updateWhoHighlight(i, "iconImage", v)}
                     onUpload={(file) => handleWhoIconUpload(i, file)}
@@ -1390,6 +1409,7 @@ export default function HomePageEditor() {
                         accept="image/*"
                         resourceType="image"
                         uploading={uploadProgress[`why-item-${i}-icon`] !== undefined}
+                        uploadError={uploadErrors[`why-item-${i}-icon`]}
                         progress={uploadProgress[`why-item-${i}-icon`]}
                         onChange={(v) => updateWhyItem(i, "iconImage", v)}
                         onUpload={(file) => handleWhyIconUpload(i, file)}
@@ -1454,6 +1474,9 @@ export default function HomePageEditor() {
                       />
                     </label>
                   </div>
+                  {uploadErrors[upKey] ? (
+                    <p className="text-xs font-medium text-red-600" role="alert">{uploadErrors[upKey]}</p>
+                  ) : null}
                 </div>
               );
             })}
@@ -1566,6 +1589,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`aicard-${i}`] !== undefined}
+                    uploadError={uploadErrors[`aicard-${i}`]}
                     progress={uploadProgress[`aicard-${i}`] ?? 0}
                     onChange={(v) => updateAiCard(i, "imageSrc", v)}
                     onUpload={(file) => handleAiCardImageUpload(i, file)}
@@ -1629,6 +1653,7 @@ export default function HomePageEditor() {
                 accept="video/*"
                 resourceType="video"
                 uploading={uploadProgress["howItWorks-video"] !== undefined}
+                uploadError={uploadErrors["howItWorks-video"]}
                 progress={uploadProgress["howItWorks-video"]}
                 onChange={(v) => setHowItWorks((p) => ({ ...p, videoUrl: v }))}
                 onUpload={(file) => handleHowItWorksVideoUpload(file)}
@@ -1738,6 +1763,7 @@ export default function HomePageEditor() {
                 accept="image/*"
                 resourceType="image"
                 uploading={uploadProgress["blackBanner-image"] !== undefined}
+                uploadError={uploadErrors["blackBanner-image"]}
                 progress={uploadProgress["blackBanner-image"]}
                 onChange={(v) => setBlackBanner((p) => ({ ...p, image: v }))}
                 onUpload={(file) => handleBlackBannerImageUpload(file)}
@@ -1933,6 +1959,7 @@ export default function HomePageEditor() {
                       accept={card.mediaType === "video" ? "video/*" : "image/*"}
                       resourceType={card.mediaType === "video" ? "video" : "image"}
                       uploading={uploadProgress[`glcard-${i}`] !== undefined}
+                      uploadError={uploadErrors[`glcard-${i}`]}
                       progress={uploadProgress[`glcard-${i}`] ?? 0}
                       onChange={(v) => updateServiceCard(i, "mediaSrc", v)}
                       onUpload={(file, rt) => handleServiceCardMediaUpload(i, file, rt)}
@@ -2016,6 +2043,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`sol-card-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`sol-card-${i}-icon`]}
                     progress={uploadProgress[`sol-card-${i}-icon`]}
                     onChange={(v) => updateSolutionCard(i, "iconImage", v)}
                     onUpload={(file) => handleSolutionCardIconUpload(i, file)}
@@ -2180,6 +2208,7 @@ export default function HomePageEditor() {
                       accept="image/*"
                       resourceType="image"
                       uploading={uploadProgress[`logo-${i}`] !== undefined}
+                      uploadError={uploadErrors[`logo-${i}`]}
                       progress={uploadProgress[`logo-${i}`] ?? 0}
                       onChange={(v) => updateLogo(i, "image", v)}
                       onUpload={(file) => handleLogoUpload(i, file)}
@@ -2340,6 +2369,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`gm-cap-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`gm-cap-${i}-icon`]}
                     progress={uploadProgress[`gm-cap-${i}-icon`]}
                     onChange={(v) => updateCapability(i, "iconImage", v)}
                     onUpload={(file) => handleCapIconUpload(i, file)}
@@ -2394,6 +2424,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`gm-stat-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`gm-stat-${i}-icon`]}
                     progress={uploadProgress[`gm-stat-${i}-icon`]}
                     onChange={(v) => updateImpactStat(i, "iconImage", v)}
                     onUpload={(file) => handleStatIconUpload(i, file)}
@@ -2608,6 +2639,7 @@ export default function HomePageEditor() {
                     accept="image/*"
                     resourceType="image"
                     uploading={uploadProgress[`storeLink-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`storeLink-${i}-icon`]}
                     progress={uploadProgress[`storeLink-${i}-icon`]}
                     onChange={(v) => updateStoreLink(i, "icon", v)}
                     onUpload={(file) => handleStoreIconUpload(i, file)}
@@ -2728,6 +2760,7 @@ export default function HomePageEditor() {
               accept="image/*"
               resourceType="image"
               uploading={uploadProgress["support-image"] !== undefined}
+              uploadError={uploadErrors["support-image"]}
               progress={uploadProgress["support-image"]}
               onChange={(v) => setSupportCta((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleSupportImageUpload(file)}
@@ -2772,6 +2805,7 @@ export default function HomePageEditor() {
                   accept="video/*"
                   resourceType="video"
                   uploading={uploadProgress["promo-video"] !== undefined}
+                  uploadError={uploadErrors["promo-video"]}
                   progress={uploadProgress["promo-video"]}
                   onChange={(v) => setPromoPopup((prev) => ({ ...prev, video: v }))}
                   onUpload={(file, rt) => handlePromoUpload(file, rt)}
@@ -2783,6 +2817,7 @@ export default function HomePageEditor() {
                   accept="image/*"
                   resourceType="image"
                   uploading={uploadProgress["promo-image"] !== undefined}
+                  uploadError={uploadErrors["promo-image"]}
                   progress={uploadProgress["promo-image"]}
                   onChange={(v) => setPromoPopup((prev) => ({ ...prev, image: v }))}
                   onUpload={(file, rt) => handlePromoUpload(file, rt)}
@@ -2916,18 +2951,24 @@ export default function HomePageEditor() {
                         </option>
                       ))}
                     </select>
-                    <input
-                      value={s?.url ?? ""}
-                      onChange={(e) =>
-                        setPromoPopup((prev) => {
-                          const next = [...(prev.socials ?? [])];
-                          next[i] = { ...next[i], url: e.target.value };
-                          return { ...prev, socials: next };
-                        })
-                      }
-                      className={inputClass}
-                      placeholder="https://instagram.com/halapark"
-                    />
+                    <div>
+                      <input
+                        value={s?.url ?? ""}
+                        onChange={(e) =>
+                          setPromoPopup((prev) => {
+                            const next = [...(prev.socials ?? [])];
+                            next[i] = { ...next[i], url: e.target.value };
+                            return { ...prev, socials: next };
+                          })
+                        }
+                        className={inputClass}
+                        placeholder={
+                          PROMO_SOCIAL_PLATFORMS.find((p) => p.value === (s?.platform ?? "instagram"))
+                            ?.placeholder ?? "https://…"
+                        }
+                      />
+                      <FieldError error={validateUrl(s?.url ?? "")} />
+                    </div>
                     <button
                       type="button"
                       onClick={() =>

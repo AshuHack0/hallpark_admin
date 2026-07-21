@@ -86,6 +86,19 @@ export default function AboutPageEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
+  // Per-field upload errors (same keys as uploadProgress) so validation
+  // problems show right next to the field they belong to, not at the page top.
+  const [uploadErrors, setUploadErrors] = useState({});
+  function setUploadError(key, msg) {
+    setUploadErrors((p) => ({ ...p, [key]: msg }));
+  }
+  function clearUploadError(key) {
+    setUploadErrors((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  }
 
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [missionSectionModalOpen, setMissionSectionModalOpen] = useState(false);
@@ -192,8 +205,8 @@ export default function AboutPageEditor() {
   // one has a working Upload button — not just the hero.
   async function uploadImageForForm(uploadKey, setForm, file, field = "image") {
     const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    setError("");
+    if (err) { setUploadError(uploadKey, err); return; }
+    clearUploadError(uploadKey);
     setUploadProgress((p) => ({ ...p, [uploadKey]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -203,7 +216,7 @@ export default function AboutPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(uploadKey, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [uploadKey]: undefined }));
@@ -248,6 +261,9 @@ export default function AboutPageEditor() {
             </label>
           </div>
         </div>
+        {uploadErrors[uploadKey] ? (
+          <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[uploadKey]}</p>
+        ) : null}
         <FieldError error={validateUrl(value)} />
       </label>
     );
@@ -274,10 +290,10 @@ export default function AboutPageEditor() {
   }
 
   async function uploadHeroSlideImage(index, file) {
-    const err = validateImageFile(file);
-    if (err) { setError(err); return; }
-    setError("");
     const key = `about-hero-${index}`;
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
       const url = await uploadMediaToCloudinary(file, "image", (pct) =>
@@ -290,7 +306,7 @@ export default function AboutPageEditor() {
       setSuccess("Image uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Image upload failed");
+      setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
@@ -1332,6 +1348,9 @@ export default function AboutPageEditor() {
                     </label>
                   </div>
                 </div>
+                {uploadErrors[`about-hero-${i}`] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`about-hero-${i}`]}</p>
+                ) : null}
                 <FieldError error={validateUrl(slide.img)} />
                 <label className="mt-2 grid gap-1">
                   <span className={labelClass}>Label</span>

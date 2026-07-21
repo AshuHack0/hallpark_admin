@@ -1025,6 +1025,41 @@ export default function AppPageEditor() {
                 ) : null}
               </div>
 
+              {/* Website screenshot (shown inside the browser-frame mockup) */}
+              <div>
+                <label className={labelClass}>Website Screenshot (replaces the built-in login mockup)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.platform.webScreen ?? ""}
+                    onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, webScreen: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    {uploadProgress["platform-webScreen"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["platform-webScreen"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload</>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload("platform", "webScreen", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(sections.platform.webScreen)} />
+                {uploadErrors["platform-webScreen"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["platform-webScreen"]}</p>
+                ) : null}
+              </div>
+
               {/* App card button */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>

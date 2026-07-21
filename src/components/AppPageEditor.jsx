@@ -471,6 +471,18 @@ export default function AppPageEditor() {
               <ArInput label="Title" kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} />
             </div>
             <div>
+              <label className={labelClass}>Title Gradient (shown in gradient on its own line)</label>
+              <input
+                type="text"
+                value={sections.hero.titleGradient ?? ""}
+                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, titleGradient: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+              />
+              <CharCount value={sections.hero.titleGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Title Gradient" kind="heading" value={sections.hero.ar?.titleGradient} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), titleGradient: v } } })} />
+            </div>
+            <div>
               <label className={labelClass}>Subtitle</label>
               <input
                 type="text"
@@ -785,6 +797,11 @@ export default function AppPageEditor() {
                             maxLength={FIELD_LIMITS.button}
                           />
                         </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-3">
+                        <ArInput label="Timer" kind="label" value={card.ar?.timer} onChange={(v) => updateHeroCard(i, { ar: { ...(card.ar ?? {}), timer: v } })} />
+                        <ArInput label="Amount" kind="label" value={card.ar?.amount} onChange={(v) => updateHeroCard(i, { ar: { ...(card.ar ?? {}), amount: v } })} />
+                        <ArInput label="Button Label" kind="button" value={card.ar?.buttonLabel} onChange={(v) => updateHeroCard(i, { ar: { ...(card.ar ?? {}), buttonLabel: v } })} />
                       </div>
                     </div>
                     <div>

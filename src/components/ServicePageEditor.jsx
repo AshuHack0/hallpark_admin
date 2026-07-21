@@ -177,6 +177,10 @@ export default function ServicePageEditor() {
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
   const [quoteForm, setQuoteForm] = useState(DEFAULT_QUOTE_FORM);
   const [gridHeader, setGridHeader] = useState({});
+  // Raw text drafts for the comma-separated chips inputs — lets the admin type
+  // spaces freely; the parsed arrays update alongside, display after blur.
+  const [chipsDraft, setChipsDraft] = useState(null);
+  const [chipsArDraft, setChipsArDraft] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -532,8 +536,12 @@ export default function ServicePageEditor() {
           <div>
             <label className={labelClass}>Service Chips (comma-separated)</label>
             <input
-              value={Array.isArray(hero.chips) ? hero.chips.join(", ") : ""}
-              onChange={(e) => updateHero("chips", e.target.value.split(",").map((s) => s.trim()))}
+              value={chipsDraft ?? (Array.isArray(hero.chips) ? hero.chips.join(", ") : "")}
+              onChange={(e) => {
+                setChipsDraft(e.target.value);
+                updateHero("chips", e.target.value.split(",").map((s) => s.trim()));
+              }}
+              onBlur={() => setChipsDraft(null)}
               className={inputClass}
               placeholder="Self-Parking, Valet Service, EV Charging, Car Storage, Airport Parking"
               maxLength={FIELD_LIMITS.long}
@@ -541,8 +549,12 @@ export default function ServicePageEditor() {
             <label className={labelClass} style={{ marginTop: 6 }}>Service Chips — Arabic (comma-separated, same order)</label>
             <input
               dir="rtl"
-              value={Array.isArray(hero.ar?.chips) ? hero.ar.chips.join("، ") : ""}
-              onChange={(e) => updateHero("ar", { ...(hero.ar ?? {}), chips: e.target.value.split(/،|,/).map((s) => s.trim()) })}
+              value={chipsArDraft ?? (Array.isArray(hero.ar?.chips) ? hero.ar.chips.join("، ") : "")}
+              onChange={(e) => {
+                setChipsArDraft(e.target.value);
+                updateHero("ar", { ...(hero.ar ?? {}), chips: e.target.value.split(/،|,/).map((s) => s.trim()) });
+              }}
+              onBlur={() => setChipsArDraft(null)}
               className={inputClass}
               style={{ borderColor: "#16a34a" }}
               maxLength={FIELD_LIMITS.long}

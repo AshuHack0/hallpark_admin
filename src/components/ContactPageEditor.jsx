@@ -148,6 +148,10 @@ export default function ContactPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [openSections, setOpenSections] = useState({ hero: true });
+  // Raw text drafts for the comma-separated subjects inputs — lets the admin
+  // type spaces freely; the parsed arrays update alongside, display after blur.
+  const [subjectsDraft, setSubjectsDraft] = useState(null);
+  const [subjectsArDraft, setSubjectsArDraft] = useState(null);
 
   useEffect(() => {
     document.title = "Contact — HalaPark Admin";
@@ -630,13 +634,15 @@ export default function ContactPageEditor() {
               <label className={labelClass}>Subjects (comma-separated)</label>
               <input
                 type="text"
-                value={Array.isArray(sections.form.subjects) ? sections.form.subjects.join(", ") : ""}
-                onChange={(e) =>
+                value={subjectsDraft ?? (Array.isArray(sections.form.subjects) ? sections.form.subjects.join(", ") : "")}
+                onChange={(e) => {
+                  setSubjectsDraft(e.target.value);
                   setForm((p) => ({
                     ...p,
                     subjects: e.target.value.split(",").map((s) => s.trim()),
-                  }))
-                }
+                  }));
+                }}
+                onBlur={() => setSubjectsDraft(null)}
                 className={inputClass}
                 placeholder="General Inquiry, Support, Partnership"
                 maxLength={FIELD_LIMITS.summary}
@@ -652,19 +658,22 @@ export default function ContactPageEditor() {
                 type="text"
                 dir="rtl"
                 value={
-                  Array.isArray(sections.form.ar?.subjects)
+                  subjectsArDraft ??
+                  (Array.isArray(sections.form.ar?.subjects)
                     ? sections.form.ar.subjects.join("، ")
-                    : ""
+                    : "")
                 }
-                onChange={(e) =>
+                onChange={(e) => {
+                  setSubjectsArDraft(e.target.value);
                   setForm((p) => ({
                     ...p,
                     ar: {
                       ...(p.ar ?? {}),
                       subjects: e.target.value.split(/،|,/).map((s) => s.trim()),
                     },
-                  }))
-                }
+                  }));
+                }}
+                onBlur={() => setSubjectsArDraft(null)}
                 className={inputClass}
                 style={{ borderColor: "#16a34a" }}
                 maxLength={FIELD_LIMITS.summary}

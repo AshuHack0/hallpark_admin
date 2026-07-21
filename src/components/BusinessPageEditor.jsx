@@ -459,6 +459,38 @@ export default function BusinessPageEditor() {
     }
   }
 
+  // Multi-image upload for the hero deck: pick several files at once; each is
+  // validated, uploaded, and appended as its own deck card.
+  async function handleDeckMultiUpload(files) {
+    const key = "hero-deck-multi";
+    const picked = Array.from(files ?? []);
+    if (picked.length === 0) return;
+    for (const file of picked) {
+      const validationError = validateImageFile(file);
+      if (validationError) { setUploadError(key, validationError); return; }
+    }
+    clearUploadError(key);
+    try {
+      for (let i = 0; i < picked.length; i += 1) {
+        setUploadProgress((p) => ({ ...p, [key]: 0 }));
+        const url = await uploadMediaToCloudinary(picked[i], "image", (pct) =>
+          setUploadProgress((p) => ({ ...p, [key]: pct })),
+        );
+        setSections((prev) => ({
+          ...prev,
+          hero: { ...prev.hero, deckImages: [...(prev.hero?.deckImages ?? []), { img: url, label: "" }] },
+        }));
+      }
+      setSuccess(`${picked.length} image${picked.length !== 1 ? "s" : ""} uploaded. Remember to Save.`);
+      setTimeout(() => setSuccess(""), 3500);
+    } catch (err) {
+      setUploadError(key, err.message ?? "Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(section, field, file, itemIndex = null) {
     const key = `${section}-${field}`;
     const validationError = validateImageFile(file);
@@ -556,6 +588,18 @@ export default function BusinessPageEditor() {
               <ArInput label="Title" kind="heading" value={sections.hero.ar?.title} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), title: v } } })} multiline={false} />
             </div>
             <div>
+              <label className={labelClass}>Title Gradient (shown in gradient on its own line)</label>
+              <input
+                type="text"
+                value={sections.hero.titleGradient ?? ""}
+                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, titleGradient: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+              />
+              <CharCount value={sections.hero.titleGradient ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Title Gradient" kind="heading" value={sections.hero.ar?.titleGradient} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero.ar ?? {}), titleGradient: v } } })} multiline={false} />
+            </div>
+            <div>
               <label className={labelClass}>Description</label>
               {/* Rich text: Bold / Italic / Color toolbar. Stored as safe markup. */}
               <RichTextArea
@@ -604,6 +648,15 @@ export default function BusinessPageEditor() {
               />
               <CharCount value={sections.hero?.ctaPrimary ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="Cta Primary" kind="button" value={sections.hero?.ar?.ctaPrimary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaPrimary: v } } })} />
+              <label className={labelClass} style={{ marginTop: 6 }}>Primary Button Link (optional — redirects instead of opening the popup)</label>
+              <input
+                value={sections.hero?.ctaPrimaryHref ?? ""}
+                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaPrimaryHref: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.link}
+                placeholder="Leave empty to open the Proposal popup"
+              />
+              <FieldError error={validateUrl(sections.hero?.ctaPrimaryHref ?? "")} />
             </div>
             <div>
               <div className="flex items-center justify-between">
@@ -627,22 +680,58 @@ export default function BusinessPageEditor() {
               />
               <CharCount value={sections.hero?.ctaSecondary ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="Cta Secondary" kind="button" value={sections.hero?.ar?.ctaSecondary} onChange={(v) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), ctaSecondary: v } } })} />
-              <p className="mt-1 text-[11px] text-slate-400">Each button shows only when it has a label and its “Show button” toggle is on. They open the Proposal / Consultation popups below.</p>
+              <label className={labelClass} style={{ marginTop: 6 }}>Secondary Button Link (optional — redirects instead of opening the popup)</label>
+              <input
+                value={sections.hero?.ctaSecondaryHref ?? ""}
+                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ctaSecondaryHref: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.link}
+                placeholder="Leave empty to open the Consultation popup"
+              />
+              <FieldError error={validateUrl(sections.hero?.ctaSecondaryHref ?? "")} />
+              <p className="mt-1 text-[11px] text-slate-400">Each button shows only when it has a label and its “Show button” toggle is on. With a link set, the button redirects there (full URLs open in a new tab); without one, it opens its Proposal / Consultation popup.</p>
             </div>
 
             {/* ── Right-side image deck (multi-image) ── */}
             <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <label className={labelClass}>Hero Images (deck) ({(sections.hero?.deckImages ?? []).length})</label>
-                <button
-                  type="button"
-                  onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: [...(sections.hero?.deckImages ?? []), { img: "", label: "" }] } })}
-                  className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add Image
-                </button>
+                <div className="flex items-center gap-2">
+                  <label className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white ${
+                    uploadProgress["hero-deck-multi"] !== undefined
+                      ? "cursor-not-allowed bg-slate-300"
+                      : "cursor-pointer bg-[#0088FF] hover:brightness-110"
+                  }`}>
+                    {uploadProgress["hero-deck-multi"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["hero-deck-multi"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" /> Upload Images</>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={uploadProgress["hero-deck-multi"] !== undefined}
+                      onChange={(e) => {
+                        handleDeckMultiUpload(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: [...(sections.hero?.deckImages ?? []), { img: "", label: "" }] } })}
+                    className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-2.5 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Row
+                  </button>
+                </div>
               </div>
-              <p className="mb-2 text-[11px] text-slate-400">The rotating photo cards on the right of the hero. Add 3–4 for the best effect. Leave empty to use the built-in images.</p>
+              {uploadErrors["hero-deck-multi"] ? (
+                <p className="mb-2 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-deck-multi"]}</p>
+              ) : null}
+              <p className="mb-2 text-[11px] text-slate-400">The rotating photo cards on the right of the hero. Select several files at once with &ldquo;Upload Images&rdquo; — each becomes its own card. Add 3–4 for the best effect. Leave empty to use the built-in images.</p>
               <div className="space-y-2">
                 {(sections.hero?.deckImages ?? []).map((slide, di) => (
                   <div key={di}>
@@ -1396,342 +1485,7 @@ export default function BusinessPageEditor() {
 
         {/* 7. Transform Parking */}
         <CollapsibleSection
-          title="7. TransformParking"
-          isOpen={openSections.transformParking}
-          onToggle={() => toggleSection("transformParking")}
-        >
-          <EnabledToggle enabled={sections.transformParking?.enabled} onChange={(v) => setSectionEnabled("transformParking", v)} />
-          <div className="space-y-6">
-            {/* Main Section */}
-            <div className="border-b border-slate-200 pb-6">
-              <h3 className="mb-4 text-sm font-semibold text-slate-700">Main Section</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.title}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, title: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={sections.transformParking.title} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Title" kind="heading" value={sections.transformParking.ar?.title} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), title: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Title Accent (gradient part — must be the end of the title)</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.titleAccent ?? ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, titleAccent: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.label}
-                    placeholder="Parking Business?"
-                  />
-                  <CharCount value={sections.transformParking.titleAccent ?? ""} max={FIELD_LIMITS.label} />
-                  <ArInput label="Title Accent" kind="label" value={sections.transformParking.ar?.titleAccent} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), titleAccent: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <RichTextArea
-                    value={sections.transformParking.description ?? ""}
-                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: v } })}
-                    maxLength={FIELD_LIMITS.description}
-                    rows={3}
-                  />
-                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-                  <RichTextArea value={sections.transformParking.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
-                </div>
-              </div>
-            </div>
-
-            {/* Parking Partner */}
-            <div className="border-b border-slate-200 pb-6">
-              <h3 className="mb-4 text-sm font-semibold text-slate-700">Parking Partner Card</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.parkingPartnerTitle}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerTitle: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={sections.transformParking.parkingPartnerTitle} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Parking Partner Title" kind="heading" value={sections.transformParking.ar?.parkingPartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerTitle: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Subtitle</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.parkingPartnerSubtitle}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerSubtitle: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.subtitle}
-                  />
-                  <CharCount value={sections.transformParking.parkingPartnerSubtitle} max={FIELD_LIMITS.subtitle} />
-                  <ArInput label="Parking Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.parkingPartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerSubtitle: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <RichTextArea
-                    value={sections.transformParking.parkingPartnerDescription ?? ""}
-                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: v } })}
-                    maxLength={FIELD_LIMITS.long}
-                    rows={4}
-                  />
-                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-                  <RichTextArea value={sections.transformParking.ar?.parkingPartnerDescription ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} maxLength={FIELD_LIMITS.long} rows={4} dir="rtl" variant="arabic" />
-                </div>
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label className={labelClass}>Perks (points)</label>
-                    <button
-                      type="button"
-                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: [...(sections.transformParking.parkingPartnerPerks ?? []), ""] } })}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Add Perk
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {(sections.transformParking.parkingPartnerPerks ?? []).map((perk, pi) => (
-                      <div key={pi} className="flex gap-2">
-                        <input
-                          value={perk ?? ""}
-                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
-                          className={inputClass}
-                          placeholder={`Perk ${pi + 1}`}
-                          maxLength={FIELD_LIMITS.item}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
-                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className={labelClass}>CTA Button Label</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.parkingPartnerCtaLabel ?? ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLabel: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.button}
-                    placeholder="Start Earning with HalaPark"
-                  />
-                  <CharCount value={sections.transformParking.parkingPartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
-                  <ArInput label="Parking Partner Cta Label" kind="button" value={sections.transformParking.ar?.parkingPartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerCtaLabel: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>CTA Button Link</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.parkingPartnerCtaLink ?? ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLink: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.link}
-                    placeholder="/contact"
-                  />
-                  <FieldError error={validateUrl(sections.transformParking.parkingPartnerCtaLink ?? "")} />
-                </div>
-              </div>
-            </div>
-
-            {/* Service Partner */}
-            <div>
-              <h3 className="mb-4 text-sm font-semibold text-slate-700">Service Partner Card</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.servicePartnerTitle}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerTitle: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={sections.transformParking.servicePartnerTitle} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Service Partner Title" kind="heading" value={sections.transformParking.ar?.servicePartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerTitle: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Subtitle</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.servicePartnerSubtitle}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerSubtitle: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.subtitle}
-                  />
-                  <CharCount value={sections.transformParking.servicePartnerSubtitle} max={FIELD_LIMITS.subtitle} />
-                  <ArInput label="Service Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.servicePartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerSubtitle: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description 1</label>
-                  <RichTextArea
-                    value={sections.transformParking.servicePartnerDescription1 ?? ""}
-                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: v } })}
-                    maxLength={FIELD_LIMITS.description}
-                    rows={3}
-                  />
-                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription1 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
-                </div>
-                <div>
-                  <label className={labelClass}>Description 2</label>
-                  <RichTextArea
-                    value={sections.transformParking.servicePartnerDescription2 ?? ""}
-                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: v } })}
-                    maxLength={FIELD_LIMITS.description}
-                    rows={3}
-                  />
-                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription2 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
-                </div>
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label className={labelClass}>Partnership Opportunities (points)</label>
-                    <button
-                      type="button"
-                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: [...(sections.transformParking.servicePartnerPerks ?? []), ""] } })}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Add Item
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {(sections.transformParking.servicePartnerPerks ?? []).map((perk, pi) => (
-                      <div key={pi} className="flex gap-2">
-                        <input
-                          value={perk ?? ""}
-                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
-                          className={inputClass}
-                          placeholder={`Item ${pi + 1}`}
-                          maxLength={FIELD_LIMITS.item}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
-                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className={labelClass}>CTA Button Label</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.servicePartnerCtaLabel ?? ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLabel: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.button}
-                    placeholder="Partner With Us Today"
-                  />
-                  <CharCount value={sections.transformParking.servicePartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
-                  <ArInput label="Service Partner Cta Label" kind="button" value={sections.transformParking.ar?.servicePartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerCtaLabel: v } } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>CTA Button Link</label>
-                  <input
-                    type="text"
-                    value={sections.transformParking.servicePartnerCtaLink ?? ""}
-                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLink: e.target.value } })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.link}
-                    placeholder="/contact"
-                  />
-                  <FieldError error={validateUrl(sections.transformParking.servicePartnerCtaLink ?? "")} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* 8. HalaPark Advantage */}
-        <CollapsibleSection
-          title="8. HalaParkAdvantage"
-          isOpen={openSections.advantage}
-          onToggle={() => toggleSection("advantage")}
-        >
-          <EnabledToggle enabled={sections.advantageHeader?.enabled} onChange={(v) => setSectionEnabled("advantageHeader", v)} />
-          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
-            <div>
-              <label className={labelClass}>Heading (first part)</label>
-              <input
-                value={sections.advantageHeader?.heading ?? ""}
-                onChange={(e) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, heading: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.heading}
-                placeholder="..."
-              />
-              <CharCount value={sections.advantageHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
-              <ArInput label="Heading" kind="heading" value={sections.advantageHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), heading: v } } })} />
-            </div>
-            <div>
-              <label className={labelClass}>Heading Gradient (Advantage)</label>
-              <input
-                value={sections.advantageHeader?.headingGradient ?? ""}
-                onChange={(e) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, headingGradient: e.target.value } })}
-                className={inputClass}
-                maxLength={FIELD_LIMITS.label}
-                placeholder="Advantage"
-              />
-              <CharCount value={sections.advantageHeader?.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-              <ArInput label="Heading Gradient" kind="label" value={sections.advantageHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), headingGradient: v } } })} />
-            </div>
-          </div>
-          <ArrayItemEditor
-            items={sections.advantage}
-            onItemsChange={(items) => setSections({ ...sections, advantage: items })}
-            title="Advantage Item"
-            addButtonText="Add Advantage"
-            defaultItem={{
-              title: "New Advantage",
-              description: "Description here",
-            }}
-            renderItem={(item, i, update) => (
-              <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input
-                    type="text"
-                    value={item.title}
-                    onChange={(e) => update(i, { title: e.target.value })}
-                    className={inputClass}
-                    maxLength={FIELD_LIMITS.heading}
-                  />
-                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
-                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
-                </div>
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <RichTextArea
-                    value={item.description ?? ""}
-                    onChange={(v) => update(i, { description: v })}
-                    maxLength={FIELD_LIMITS.description}
-                    rows={2}
-                  />
-                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
-                </div>
-              </div>
-            )}
-          />
-        </CollapsibleSection>
-
-        {/* 8.5. Partner Showcase */}
-        <CollapsibleSection
-          title="8.5. Partner Showcase"
+          title="6. Partner Showcase"
           isOpen={openSections.partnersShowcase}
           onToggle={() => toggleSection("partnersShowcase")}
         >
@@ -1905,7 +1659,7 @@ export default function BusinessPageEditor() {
 
         {/* 8.6. Partner Carousel */}
         <CollapsibleSection
-          title="8.6. Partner Carousel"
+          title="7. Partner Carousel"
           isOpen={openSections.partnerCarousel}
           onToggle={() => toggleSection("partnerCarousel")}
         >
@@ -2206,7 +1960,7 @@ export default function BusinessPageEditor() {
 
         {/* 8.7. Partner CTA (Get in Touch) */}
         <CollapsibleSection
-          title="8.7. Partner CTA (Get in Touch)"
+          title="8. Partner CTA (Get in Touch)"
           isOpen={openSections.partnerCta}
           onToggle={() => toggleSection("partnerCta")}
         >
@@ -2313,7 +2067,342 @@ export default function BusinessPageEditor() {
 
         {/* 9. Business CTA */}
         <CollapsibleSection
-          title="9. BusinessCTA"
+          title="9. TransformParking"
+          isOpen={openSections.transformParking}
+          onToggle={() => toggleSection("transformParking")}
+        >
+          <EnabledToggle enabled={sections.transformParking?.enabled} onChange={(v) => setSectionEnabled("transformParking", v)} />
+          <div className="space-y-6">
+            {/* Main Section */}
+            <div className="border-b border-slate-200 pb-6">
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Main Section</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.title}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, title: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={sections.transformParking.title} max={FIELD_LIMITS.heading} />
+                  <ArInput label="Title" kind="heading" value={sections.transformParking.ar?.title} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), title: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Title Accent (gradient part — must be the end of the title)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.titleAccent ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, titleAccent: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                    placeholder="Parking Business?"
+                  />
+                  <CharCount value={sections.transformParking.titleAccent ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Title Accent" kind="label" value={sections.transformParking.ar?.titleAccent} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), titleAccent: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <RichTextArea
+                    value={sections.transformParking.description ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, description: v } })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
+                  />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.description ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), description: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+                </div>
+              </div>
+            </div>
+
+            {/* Parking Partner */}
+            <div className="border-b border-slate-200 pb-6">
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Parking Partner Card</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerTitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerTitle: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerTitle} max={FIELD_LIMITS.heading} />
+                  <ArInput label="Parking Partner Title" kind="heading" value={sections.transformParking.ar?.parkingPartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerTitle: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Subtitle</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerSubtitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerSubtitle: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.subtitle}
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerSubtitle} max={FIELD_LIMITS.subtitle} />
+                  <ArInput label="Parking Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.parkingPartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerSubtitle: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <RichTextArea
+                    value={sections.transformParking.parkingPartnerDescription ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerDescription: v } })}
+                    maxLength={FIELD_LIMITS.long}
+                    rows={4}
+                  />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.parkingPartnerDescription ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} maxLength={FIELD_LIMITS.long} rows={4} dir="rtl" variant="arabic" />
+                </div>
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className={labelClass}>Perks (points)</label>
+                    <button
+                      type="button"
+                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: [...(sections.transformParking.parkingPartnerPerks ?? []), ""] } })}
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Perk
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(sections.transformParking.parkingPartnerPerks ?? []).map((perk, pi) => (
+                      <div key={pi} className="flex gap-2">
+                        <input
+                          value={perk ?? ""}
+                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
+                          className={inputClass}
+                          placeholder={`Perk ${pi + 1}`}
+                          maxLength={FIELD_LIMITS.item}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerCtaLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.button}
+                    placeholder="Start Earning with HalaPark"
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="Parking Partner Cta Label" kind="button" value={sections.transformParking.ar?.parkingPartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerCtaLabel: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerCtaLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLink: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                    placeholder="/contact"
+                  />
+                  <FieldError error={validateUrl(sections.transformParking.parkingPartnerCtaLink ?? "")} />
+                </div>
+              </div>
+            </div>
+
+            {/* Service Partner */}
+            <div>
+              <h3 className="mb-4 text-sm font-semibold text-slate-700">Service Partner Card</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerTitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerTitle: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerTitle} max={FIELD_LIMITS.heading} />
+                  <ArInput label="Service Partner Title" kind="heading" value={sections.transformParking.ar?.servicePartnerTitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerTitle: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Subtitle</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerSubtitle}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerSubtitle: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.subtitle}
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerSubtitle} max={FIELD_LIMITS.subtitle} />
+                  <ArInput label="Service Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.servicePartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerSubtitle: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description 1</label>
+                  <RichTextArea
+                    value={sections.transformParking.servicePartnerDescription1 ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription1: v } })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
+                  />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription1 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription1: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+                </div>
+                <div>
+                  <label className={labelClass}>Description 2</label>
+                  <RichTextArea
+                    value={sections.transformParking.servicePartnerDescription2 ?? ""}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerDescription2: v } })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={3}
+                  />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription2 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+                </div>
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className={labelClass}>Partnership Opportunities (points)</label>
+                    <button
+                      type="button"
+                      onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: [...(sections.transformParking.servicePartnerPerks ?? []), ""] } })}
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Item
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(sections.transformParking.servicePartnerPerks ?? []).map((perk, pi) => (
+                      <div key={pi} className="flex gap-2">
+                        <input
+                          value={perk ?? ""}
+                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
+                          className={inputClass}
+                          placeholder={`Item ${pi + 1}`}
+                          maxLength={FIELD_LIMITS.item}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerCtaLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.button}
+                    placeholder="Partner With Us Today"
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+                  <ArInput label="Service Partner Cta Label" kind="button" value={sections.transformParking.ar?.servicePartnerCtaLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerCtaLabel: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>CTA Button Link</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerCtaLink ?? ""}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLink: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                    placeholder="/contact"
+                  />
+                  <FieldError error={validateUrl(sections.transformParking.servicePartnerCtaLink ?? "")} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        {/* 8. HalaPark Advantage */}
+        <CollapsibleSection
+          title="10. HalaParkAdvantage"
+          isOpen={openSections.advantage}
+          onToggle={() => toggleSection("advantage")}
+        >
+          <EnabledToggle enabled={sections.advantageHeader?.enabled} onChange={(v) => setSectionEnabled("advantageHeader", v)} />
+          <div className="mb-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Section Header</p>
+            <div>
+              <label className={labelClass}>Heading (first part)</label>
+              <input
+                value={sections.advantageHeader?.heading ?? ""}
+                onChange={(e) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, heading: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.heading}
+                placeholder="..."
+              />
+              <CharCount value={sections.advantageHeader?.heading ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Heading" kind="heading" value={sections.advantageHeader?.ar?.heading} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), heading: v } } })} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading Gradient (Advantage)</label>
+              <input
+                value={sections.advantageHeader?.headingGradient ?? ""}
+                onChange={(e) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, headingGradient: e.target.value } })}
+                className={inputClass}
+                maxLength={FIELD_LIMITS.label}
+                placeholder="Advantage"
+              />
+              <CharCount value={sections.advantageHeader?.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Heading Gradient" kind="label" value={sections.advantageHeader?.ar?.headingGradient} onChange={(v) => setSections({ ...sections, advantageHeader: { ...sections.advantageHeader, ar: { ...(sections.advantageHeader?.ar ?? {}), headingGradient: v } } })} />
+            </div>
+          </div>
+          <ArrayItemEditor
+            items={sections.advantage}
+            onItemsChange={(items) => setSections({ ...sections, advantage: items })}
+            title="Advantage Item"
+            addButtonText="Add Advantage"
+            defaultItem={{
+              title: "New Advantage",
+              description: "Description here",
+            }}
+            renderItem={(item, i, update) => (
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={(e) => update(i, { title: e.target.value })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.heading}
+                  />
+                  <CharCount value={item.title} max={FIELD_LIMITS.heading} />
+                  <ArInput label="Title" kind="heading" value={item.ar?.title} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), title: v } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Description</label>
+                  <RichTextArea
+                    value={item.description ?? ""}
+                    onChange={(v) => update(i, { description: v })}
+                    maxLength={FIELD_LIMITS.description}
+                    rows={2}
+                  />
+                  <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+                  <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
+                </div>
+              </div>
+            )}
+          />
+        </CollapsibleSection>
+
+        {/* 8.5. Partner Showcase */}
+        <CollapsibleSection
+          title="11. BusinessCTA"
           isOpen={openSections.cta}
           onToggle={() => toggleSection("cta")}
         >

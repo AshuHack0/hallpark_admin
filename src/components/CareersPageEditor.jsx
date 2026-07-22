@@ -815,6 +815,124 @@ export default function CareersPageEditor() {
           </div>
         </div>
 
+        {/* Open positions */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF6FF]">
+                <ClipboardList className="h-4 w-4 text-[#0088FF]" />
+              </div>
+              <p className="text-sm font-semibold text-[#050A13]">Open Positions</p>
+            </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={content.openPositions?.enabled !== false}
+                onChange={(e) => toggleSectionEnabled("openPositions", e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+              />
+              Show on website
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={openOpenPositionsModal} className={btnOutline}>
+                <Pencil className="h-3.5 w-3.5" />
+                Edit section
+              </button>
+              <button type="button" onClick={openAddJobPost} className={btnPrimary}>
+                <Plus className="h-3.5 w-3.5" />
+                Add job post
+              </button>
+            </div>
+          </div>
+          <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
+            <PreviewRow label="Section title" value={content.openPositions?.title} />
+            <PreviewRow label="Subtitle" value={content.openPositions?.subtitle} />
+          </div>
+
+          {jobPostCount === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+              No job posts yet. Add one to show open positions on the careers page.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {content.openPositions.posts.map((post, index) => {
+                const isClosed = post.status === "closed";
+                return (
+                <div
+                  key={`job-${index}-${post.title}`}
+                  className={`rounded-xl border p-3 sm:p-4 ${isClosed ? "border-slate-200 bg-slate-100 opacity-75" : "border-slate-200 bg-slate-50"}`}
+                >
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                          Job {index + 1}
+                        </p>
+                        <span className={`rounded-full px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider ${isClosed ? "bg-slate-200 text-slate-500" : "bg-green-100 text-green-700"}`}>
+                          {isClosed ? "Closed" : "Active"}
+                        </span>
+                      </div>
+                      <p className="mt-1 font-semibold text-[#050A13]">{post.title}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {post.department ? (
+                          <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[#0088FF]">
+                            {post.department}
+                          </span>
+                        ) : null}
+                        {post.employmentType ? (
+                          <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-slate-600">
+                            {post.employmentType}
+                          </span>
+                        ) : null}
+                      </div>
+                      {post.location ? (
+                        <p className="mt-2 text-xs text-slate-500">{post.location}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleJobStatus(index)}
+                        className={btnOutline}
+                        title={isClosed ? "Reopen this job" : "Close this job (move to Closed)"}
+                      >
+                        {isClosed ? "Reopen" : "Close"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openEditJobPost(index)}
+                        className={btnOutline}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openDeleteConfirm("jobPost", index, post.title)}
+                        className={btnDanger}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  {post.description ? (
+                    <p className="mb-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
+                      {post.description}
+                    </p>
+                  ) : null}
+                  <p className="text-xs text-slate-400">
+                    {post.applyMode === "form"
+                      ? `${post.applyLabel ?? "Apply Now"} → application form`
+                      : `${post.applyLabel ?? "Apply Now"} → ${post.applyLink ?? "/contact"}`}
+                  </p>
+                </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Opportunities section heading */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -867,6 +985,35 @@ export default function CareersPageEditor() {
                   opportunitiesHeader: {
                     ...(prev.opportunitiesHeader ?? {}),
                     ar: { ...(prev.opportunitiesHeader?.ar ?? {}), heading: v },
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="mt-3 grid gap-1">
+            <span className={labelClass}>Heading Gradient (shown in gradient on its own line)</span>
+            <input
+              value={content.opportunitiesHeader?.headingGradient ?? ""}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: { ...(prev.opportunitiesHeader ?? {}), headingGradient: e.target.value },
+                }))
+              }
+              className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={content.opportunitiesHeader?.headingGradient ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput
+              label="Heading Gradient"
+              kind="heading"
+              value={content.opportunitiesHeader?.ar?.headingGradient}
+              onChange={(v) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: {
+                    ...(prev.opportunitiesHeader ?? {}),
+                    ar: { ...(prev.opportunitiesHeader?.ar ?? {}), headingGradient: v },
                   },
                 }))
               }
@@ -985,124 +1132,6 @@ export default function CareersPageEditor() {
               <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-400">No opportunities yet. Click &quot;Add&quot;.</p>
             ) : null}
           </div>
-        </div>
-
-        {/* Open positions */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF6FF]">
-                <ClipboardList className="h-4 w-4 text-[#0088FF]" />
-              </div>
-              <p className="text-sm font-semibold text-[#050A13]">Open Positions</p>
-            </div>
-            <label className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={content.openPositions?.enabled !== false}
-                onChange={(e) => toggleSectionEnabled("openPositions", e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
-              />
-              Show on website
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" onClick={openOpenPositionsModal} className={btnOutline}>
-                <Pencil className="h-3.5 w-3.5" />
-                Edit section
-              </button>
-              <button type="button" onClick={openAddJobPost} className={btnPrimary}>
-                <Plus className="h-3.5 w-3.5" />
-                Add job post
-              </button>
-            </div>
-          </div>
-          <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
-            <PreviewRow label="Section title" value={content.openPositions?.title} />
-            <PreviewRow label="Subtitle" value={content.openPositions?.subtitle} />
-          </div>
-
-          {jobPostCount === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-              No job posts yet. Add one to show open positions on the careers page.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {content.openPositions.posts.map((post, index) => {
-                const isClosed = post.status === "closed";
-                return (
-                <div
-                  key={`job-${index}-${post.title}`}
-                  className={`rounded-xl border p-3 sm:p-4 ${isClosed ? "border-slate-200 bg-slate-100 opacity-75" : "border-slate-200 bg-slate-50"}`}
-                >
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
-                          Job {index + 1}
-                        </p>
-                        <span className={`rounded-full px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider ${isClosed ? "bg-slate-200 text-slate-500" : "bg-green-100 text-green-700"}`}>
-                          {isClosed ? "Closed" : "Active"}
-                        </span>
-                      </div>
-                      <p className="mt-1 font-semibold text-[#050A13]">{post.title}</p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {post.department ? (
-                          <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-[#0088FF]">
-                            {post.department}
-                          </span>
-                        ) : null}
-                        {post.employmentType ? (
-                          <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-slate-600">
-                            {post.employmentType}
-                          </span>
-                        ) : null}
-                      </div>
-                      {post.location ? (
-                        <p className="mt-2 text-xs text-slate-500">{post.location}</p>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleJobStatus(index)}
-                        className={btnOutline}
-                        title={isClosed ? "Reopen this job" : "Close this job (move to Closed)"}
-                      >
-                        {isClosed ? "Reopen" : "Close"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openEditJobPost(index)}
-                        className={btnOutline}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openDeleteConfirm("jobPost", index, post.title)}
-                        className={btnDanger}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                  {post.description ? (
-                    <p className="mb-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
-                      {post.description}
-                    </p>
-                  ) : null}
-                  <p className="text-xs text-slate-400">
-                    {post.applyMode === "form"
-                      ? `${post.applyLabel ?? "Apply Now"} → application form`
-                      : `${post.applyLabel ?? "Apply Now"} → ${post.applyLink ?? "/contact"}`}
-                  </p>
-                </div>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Why join */}
@@ -1254,6 +1283,21 @@ export default function CareersPageEditor() {
             />
           </label>
           <label className="grid gap-1">
+            <span className={labelClass}>Title Gradient (shown in gradient on its own line)</span>
+            <input
+              value={heroForm.titleGradient ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, titleGradient: e.target.value }))}
+              className={inputClass}
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={heroForm.titleGradient ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Title Gradient"
+              kind="heading"
+              value={heroForm.ar?.titleGradient}
+              onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleGradient: v } }))}
+            />
+          </label>
+          <label className="grid gap-1">
             <span className={labelClass}>Description</span>
             <RichTextArea
               value={heroForm.description ?? ""}
@@ -1320,6 +1364,15 @@ export default function CareersPageEditor() {
               value={heroForm.ar?.primaryCta}
               onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCta: v } }))}
             />
+            <span className={labelClass} style={{ marginTop: 6 }}>Primary Button Link (default: scrolls to Open Positions)</span>
+            <input
+              value={heroForm.primaryCtaLink ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, primaryCtaLink: e.target.value }))}
+              className={inputClass}
+              placeholder="#open-positions"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(heroForm.primaryCtaLink ?? "")} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Secondary Button (Get In Touch)</span>
@@ -1336,6 +1389,15 @@ export default function CareersPageEditor() {
               value={heroForm.ar?.secondaryCta}
               onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCta: v } }))}
             />
+            <span className={labelClass} style={{ marginTop: 6 }}>Secondary Button Link (default: /contact)</span>
+            <input
+              value={heroForm.secondaryCtaLink ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
+              className={inputClass}
+              placeholder="/contact"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(heroForm.secondaryCtaLink ?? "")} />
           </label>
 
           {/* Hero badges (floating cards over the mosaic) */}
@@ -1382,6 +1444,55 @@ export default function CareersPageEditor() {
                   />
                 </label>
               ))}
+
+              {/* Badge icons — uploaded image overrides the built-in icon */}
+              {[
+                ["hiringIconImage", "Hiring badge icon (overrides the built-in icon)", "hero-badge-hiring-icon"],
+                ["cultureIconImage", "Culture badge icon (overrides the built-in icon)", "hero-badge-culture-icon"],
+              ].map(([key, label, upKey]) => (
+                <label key={key} className="grid gap-1">
+                  <span className={labelClass}>{label}</span>
+                  <div className="flex gap-2">
+                    <input
+                      value={heroForm.badges?.[key] ?? ""}
+                      onChange={(e) =>
+                        setHeroForm((p) => ({
+                          ...p,
+                          badges: { ...(p.badges ?? {}), [key]: e.target.value },
+                        }))
+                      }
+                      className={inputClass}
+                      placeholder="Icon URL or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" />
+                      {uploadProgress[upKey] !== undefined ? `${uploadProgress[upKey]}%` : null}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            void uploadImageToKey(file, upKey, (u) =>
+                              setHeroForm((p) => ({
+                                ...p,
+                                badges: { ...(p.badges ?? {}), [key]: u },
+                              })),
+                            );
+                          }
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(heroForm.badges?.[key] ?? "")} />
+                  {uploadErrors[upKey] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[upKey]}</p>
+                  ) : null}
+                </label>
+              ))}
             </div>
           </div>
         </div>
@@ -1426,6 +1537,21 @@ export default function CareersPageEditor() {
             kind="heading"
             value={buildingForm.ar?.title}
             onChange={(v) => setBuildingForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))}
+          />
+        </label>
+        <label className="mt-3 grid gap-1">
+          <span className={labelClass}>Title Gradient (shown in gradient on its own line)</span>
+          <input
+            value={buildingForm.titleGradient ?? ""}
+            onChange={(e) => setBuildingForm((p) => ({ ...p, titleGradient: e.target.value }))}
+            className={inputClass}
+            maxLength={FIELD_LIMITS.heading}
+          />
+          <CharCount value={buildingForm.titleGradient ?? ""} max={FIELD_LIMITS.heading} />
+          <ArInput label="Title Gradient"
+            kind="heading"
+            value={buildingForm.ar?.titleGradient}
+            onChange={(v) => setBuildingForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleGradient: v } }))}
           />
         </label>
       </Modal>

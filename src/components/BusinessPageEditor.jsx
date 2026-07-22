@@ -1692,32 +1692,6 @@ export default function BusinessPageEditor() {
               <div>
                 <label className={labelClass}>Carousel Heading</label>
                 <input
-                  type="text"
-                  value={sections.partnersShowcase.partners?.heading || ""}
-                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, heading: e.target.value } } })}
-                  className={inputClass}
-                  placeholder="Trusted by Industry Leaders"
-                  maxLength={FIELD_LIMITS.heading}
-                />
-                <CharCount value={sections.partnersShowcase.partners?.heading || ""} max={FIELD_LIMITS.heading} />
-                <ArInput label="Heading" kind="heading" value={sections.partnersShowcase.partners?.ar?.heading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), heading: v } } } })} multiline={false} />
-              </div>
-              <div>
-                <label className={labelClass}>Carousel Subheading</label>
-                <input
-                  type="text"
-                  value={sections.partnersShowcase.partners?.subheading || ""}
-                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, subheading: e.target.value } } })}
-                  className={inputClass}
-                  placeholder="Work with some of the most recognized brands..."
-                  maxLength={FIELD_LIMITS.subtitle}
-                />
-                <CharCount value={sections.partnersShowcase.partners?.subheading || ""} max={FIELD_LIMITS.subtitle} />
-                <ArInput label="Subheading" kind="subtitle" value={sections.partnersShowcase.partners?.ar?.subheading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, ar: { ...(sections.partnersShowcase.partners?.ar ?? {}), subheading: v } } } })} multiline={false} />
-              </div>
-              <div>
-                <label className={labelClass}>Carousel Heading (Trusted by Industry Leaders)</label>
-                <input
                   value={sections.partnersShowcase?.carouselHeading ?? ""}
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, carouselHeading: e.target.value } })}
                   className={inputClass}
@@ -1726,6 +1700,7 @@ export default function BusinessPageEditor() {
                 />
                 <CharCount value={sections.partnersShowcase?.carouselHeading ?? ""} max={FIELD_LIMITS.heading} />
                 <ArInput label="Carousel Heading" kind="heading" value={sections.partnersShowcase?.ar?.carouselHeading} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ar: { ...(sections.partnersShowcase?.ar ?? {}), carouselHeading: v } } })} />
+                <p className="mt-1 text-[11px] text-slate-400">Shown centered above the logo carousel on the website.</p>
               </div>
               <div>
                 <label className={labelClass}>Carousel Subheading</label>

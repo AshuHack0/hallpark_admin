@@ -718,6 +718,67 @@ export default function ServicePageEditor() {
         </div>
       </CollapsibleSection>
 
+      {/* SERVICES GRID HEADER */}
+      <CollapsibleSection title="Services Grid Header" defaultOpen={false}>
+        <EnabledToggle section={gridHeader} setSection={setGridHeader} />
+        <div className="grid gap-3">
+          <div>
+            <label className={labelClass}>Heading (first part)</label>
+            <input
+              value={gridHeader.heading ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, heading: e.target.value }))}
+              className={inputClass}
+              placeholder="Explore Our"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={gridHeader.heading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Heading" kind="heading" value={gridHeader.ar?.heading} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Heading Gradient (highlighted word)</label>
+            <input
+              value={gridHeader.headingGradient ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, headingGradient: e.target.value }))}
+              className={inputClass}
+              placeholder="Services"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={gridHeader.headingGradient ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput label="Heading Gradient" kind="label" value={gridHeader.ar?.headingGradient} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Subtitle</label>
+            <input
+              value={gridHeader.subtitle ?? ""}
+              onChange={(e) => setGridHeader((p) => ({ ...p, subtitle: e.target.value }))}
+              className={inputClass}
+              placeholder="Everything you need, one platform."
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={gridHeader.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput label="Subtitle" kind="subtitle" value={gridHeader.ar?.subtitle} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <RichTextArea
+              value={gridHeader.description ?? ""}
+              onChange={(v) => setGridHeader((p) => ({ ...p, description: v }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={2}
+            />
+            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
+            <RichTextArea
+              value={gridHeader.ar?.description ?? ""}
+              onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
+              maxLength={FIELD_LIMITS.description}
+              rows={2}
+              dir="rtl"
+              variant="arabic"
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+
       {/* SERVICES */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -951,67 +1012,6 @@ export default function ServicePageEditor() {
         ))}
       </div>
 
-      {/* SERVICES GRID HEADER */}
-      <CollapsibleSection title="Services Grid Header" defaultOpen={false}>
-        <EnabledToggle section={gridHeader} setSection={setGridHeader} />
-        <div className="grid gap-3">
-          <div>
-            <label className={labelClass}>Heading (first part)</label>
-            <input
-              value={gridHeader.heading ?? ""}
-              onChange={(e) => setGridHeader((p) => ({ ...p, heading: e.target.value }))}
-              className={inputClass}
-              placeholder="Explore Our"
-              maxLength={FIELD_LIMITS.heading}
-            />
-            <CharCount value={gridHeader.heading ?? ""} max={FIELD_LIMITS.heading} />
-            <ArInput label="Heading" kind="heading" value={gridHeader.ar?.heading} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
-          </div>
-          <div>
-            <label className={labelClass}>Heading Gradient (highlighted word)</label>
-            <input
-              value={gridHeader.headingGradient ?? ""}
-              onChange={(e) => setGridHeader((p) => ({ ...p, headingGradient: e.target.value }))}
-              className={inputClass}
-              placeholder="Services"
-              maxLength={FIELD_LIMITS.label}
-            />
-            <CharCount value={gridHeader.headingGradient ?? ""} max={FIELD_LIMITS.label} />
-            <ArInput label="Heading Gradient" kind="label" value={gridHeader.ar?.headingGradient} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingGradient: v } }))} />
-          </div>
-          <div>
-            <label className={labelClass}>Subtitle</label>
-            <input
-              value={gridHeader.subtitle ?? ""}
-              onChange={(e) => setGridHeader((p) => ({ ...p, subtitle: e.target.value }))}
-              className={inputClass}
-              placeholder="Everything you need, one platform."
-              maxLength={FIELD_LIMITS.subtitle}
-            />
-            <CharCount value={gridHeader.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
-            <ArInput label="Subtitle" kind="subtitle" value={gridHeader.ar?.subtitle} onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
-          </div>
-          <div>
-            <label className={labelClass}>Description</label>
-            <RichTextArea
-              value={gridHeader.description ?? ""}
-              onChange={(v) => setGridHeader((p) => ({ ...p, description: v }))}
-              maxLength={FIELD_LIMITS.description}
-              rows={2}
-            />
-            <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
-            <RichTextArea
-              value={gridHeader.ar?.description ?? ""}
-              onChange={(v) => setGridHeader((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))}
-              maxLength={FIELD_LIMITS.description}
-              rows={2}
-              dir="rtl"
-              variant="arabic"
-            />
-          </div>
-        </div>
-      </CollapsibleSection>
-
       {/* PARTNERS SECTION */}
       <CollapsibleSection title="Partners Section" defaultOpen={false}>
         <EnabledToggle section={partnersSection} setSection={setPartnersSection} />
@@ -1173,6 +1173,49 @@ export default function ServicePageEditor() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Bottom "Get in touch" line under the logos */}
+          <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Bottom &ldquo;Get in Touch&rdquo; Line</p>
+            <div>
+              <label className={labelClass}>Text</label>
+              <input
+                value={partnersSection.ctaText ?? ""}
+                onChange={(e) => setPartnersSection((p) => ({ ...p, ctaText: e.target.value }))}
+                className={inputClass}
+                placeholder="Want to become a partner?"
+                maxLength={FIELD_LIMITS.subtitle}
+              />
+              <CharCount value={partnersSection.ctaText ?? ""} max={FIELD_LIMITS.subtitle} />
+              <ArInput label="Text" kind="subtitle" value={partnersSection.ar?.ctaText} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaText: v } }))} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Link Label</label>
+                <input
+                  value={partnersSection.ctaLabel ?? ""}
+                  onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLabel: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Get in touch"
+                  maxLength={FIELD_LIMITS.button}
+                />
+                <CharCount value={partnersSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+                <ArInput label="Link Label" kind="button" value={partnersSection.ar?.ctaLabel} onChange={(v) => setPartnersSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Link URL</label>
+                <input
+                  value={partnersSection.ctaLink ?? ""}
+                  onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLink: e.target.value }))}
+                  className={inputClass}
+                  placeholder="/contact"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(partnersSection.ctaLink ?? "")} />
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">Leave the fields empty to hide the line. The link opens the Contact page by default — the Contact page itself is editable under its own tab.</p>
           </div>
         </div>
       </CollapsibleSection>

@@ -1983,6 +1983,18 @@ export default function BusinessPageEditor() {
                 <ArInput label="Title" kind="heading" value={sections.partnersShowcase.ctaSection?.ar?.title} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), title: v } } } })} multiline={false} />
               </div>
               <div>
+                <label className={labelClass}>CTA Title Gradient (shown in gradient on its own line)</label>
+                <input
+                  type="text"
+                  value={sections.partnersShowcase.ctaSection?.titleGradient || ""}
+                  onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, titleGradient: e.target.value } } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.heading}
+                />
+                <CharCount value={sections.partnersShowcase.ctaSection?.titleGradient || ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Title Gradient" kind="heading" value={sections.partnersShowcase.ctaSection?.ar?.titleGradient} onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSection: { ...sections.partnersShowcase.ctaSection, ar: { ...(sections.partnersShowcase.ctaSection?.ar ?? {}), titleGradient: v } } } })} multiline={false} />
+              </div>
+              <div>
                 <label className={labelClass}>CTA Description</label>
                 <RichTextArea
                   value={sections.partnersShowcase.ctaSection?.description ?? ""}
@@ -2395,12 +2407,44 @@ export default function BusinessPageEditor() {
                   <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
                   <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={2} dir="rtl" variant="arabic" />
                 </div>
+                <div>
+                  <label className={labelClass}>Icon Image (optional — overrides the built-in icon)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item.iconImage ?? ""}
+                      onChange={(e) => update(i, { iconImage: e.target.value })}
+                      className={inputClass}
+                      placeholder="Icon URL or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress["advantage-iconImage"] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress["advantage-iconImage"]}%</>
+                      ) : (<Upload className="h-3.5 w-3.5" />)}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("advantage", "iconImage", file, i);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(item.iconImage ?? "")} />
+                  {uploadErrors["advantage-iconImage"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["advantage-iconImage"]}</p>
+                  ) : null}
+                </div>
               </div>
             )}
           />
         </CollapsibleSection>
 
-        {/* 8.5. Partner Showcase */}
+        {/* 11. BusinessCTA */}
         <CollapsibleSection
           title="11. BusinessCTA"
           isOpen={openSections.cta}
@@ -2468,9 +2512,19 @@ export default function BusinessPageEditor() {
                   className={inputClass}
                   maxLength={FIELD_LIMITS.link}
                   placeholder="/contact"
+                  disabled={sections.cta.usePopup === true}
                 />
                 <CharCount value={sections.cta.ctaLink ?? ""} max={FIELD_LIMITS.link} />
                 <FieldError error={validateUrl(sections.cta.ctaLink ?? "")} />
+                <label className="mt-2 flex w-fit cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={sections.cta.usePopup === true}
+                    onChange={(e) => setSections({ ...sections, cta: { ...sections.cta, usePopup: e.target.checked } })}
+                    className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+                  />
+                  Open the &ldquo;Book a Free Consultation&rdquo; popup instead of a link
+                </label>
               </div>
             </div>
             <div>

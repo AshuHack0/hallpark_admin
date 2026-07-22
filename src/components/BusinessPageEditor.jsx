@@ -350,6 +350,11 @@ export default function BusinessPageEditor() {
   // sets the global error banner anymore, so only the value is kept.
   const [error] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
+  // Raw text drafts for comma-separated inputs (keyed per field) — lets the
+  // admin type spaces freely; parsed arrays update alongside, display on blur.
+  const [csvDrafts, setCsvDrafts] = useState({});
+  const setCsvDraft = (key, value) => setCsvDrafts((p) => ({ ...p, [key]: value }));
+  const clearCsvDraft = (key) => setCsvDrafts((p) => ({ ...p, [key]: undefined }));
   // Per-field upload errors (same keys as uploadProgress) so validation
   // problems show right next to the field they belong to, not at the page top.
   const [uploadErrors, setUploadErrors] = useState({});
@@ -614,15 +619,23 @@ export default function BusinessPageEditor() {
             <div>
               <label className={labelClass}>Checklist Items (comma-separated)</label>
               <input
-                value={Array.isArray(sections.hero?.features) ? sections.hero.features.join(", ") : ""}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, features: e.target.value.split(",").map((x) => x.trim()) } })}
+                value={csvDrafts["hero-features"] ?? (Array.isArray(sections.hero?.features) ? sections.hero.features.join(", ") : "")}
+                onChange={(e) => {
+                  setCsvDraft("hero-features", e.target.value);
+                  setSections({ ...sections, hero: { ...sections.hero, features: e.target.value.split(",").map((x) => x.trim()) } });
+                }}
+                onBlur={() => clearCsvDraft("hero-features")}
                 className={inputClass}
                 maxLength={FIELD_LIMITS.long}
               />
               <label className={labelClass} style={{ marginTop: 6 }}>Checklist Items — Arabic (comma-separated, same order)</label>
               <input dir="rtl"
-                value={Array.isArray(sections.hero?.ar?.features) ? sections.hero.ar.features.join("، ") : ""}
-                onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), features: e.target.value.split(/،|,/).map((x) => x.trim()) } } })}
+                value={csvDrafts["hero-features-ar"] ?? (Array.isArray(sections.hero?.ar?.features) ? sections.hero.ar.features.join("، ") : "")}
+                onChange={(e) => {
+                  setCsvDraft("hero-features-ar", e.target.value);
+                  setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), features: e.target.value.split(/،|,/).map((x) => x.trim()) } } });
+                }}
+                onBlur={() => clearCsvDraft("hero-features-ar")}
                 className={inputClass} style={{ borderColor: "#16a34a" }} maxLength={FIELD_LIMITS.long}
               />
             </div>
@@ -1462,8 +1475,12 @@ export default function BusinessPageEditor() {
                   <label className={labelClass}>Benefits (comma-separated)</label>
                   <input
                     type="text"
-                    value={Array.isArray(item.benefits) ? item.benefits.join(", ") : ""}
-                    onChange={(e) => update(i, { benefits: e.target.value.split(",").map((b) => b.trim()) })}
+                    value={csvDrafts[`benefits-${i}`] ?? (Array.isArray(item.benefits) ? item.benefits.join(", ") : "")}
+                    onChange={(e) => {
+                      setCsvDraft(`benefits-${i}`, e.target.value);
+                      update(i, { benefits: e.target.value.split(",").map((b) => b.trim()) });
+                    }}
+                    onBlur={() => clearCsvDraft(`benefits-${i}`)}
                     className={inputClass}
                     maxLength={FIELD_LIMITS.item}
                   />
@@ -1471,8 +1488,12 @@ export default function BusinessPageEditor() {
                   <label className={labelClass} style={{ marginTop: 6 }}>Benefits — Arabic (comma-separated, same order)</label>
                   <input dir="rtl"
                     type="text"
-                    value={Array.isArray(item.ar?.benefits) ? item.ar.benefits.join("، ") : ""}
-                    onChange={(e) => update(i, { ar: { ...(item.ar ?? {}), benefits: e.target.value.split(/،|,/).map((b) => b.trim()) } })}
+                    value={csvDrafts[`benefits-ar-${i}`] ?? (Array.isArray(item.ar?.benefits) ? item.ar.benefits.join("، ") : "")}
+                    onChange={(e) => {
+                      setCsvDraft(`benefits-ar-${i}`, e.target.value);
+                      update(i, { ar: { ...(item.ar ?? {}), benefits: e.target.value.split(/،|,/).map((b) => b.trim()) } });
+                    }}
+                    onBlur={() => clearCsvDraft(`benefits-ar-${i}`)}
                     className={inputClass}
                     style={{ borderColor: "#16a34a" }}
                     maxLength={FIELD_LIMITS.item}

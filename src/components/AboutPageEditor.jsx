@@ -18,7 +18,7 @@ import {
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
-import { validateUrl, validateImageFile } from "../lib/validators";
+import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
 const inputClass =
@@ -291,19 +291,21 @@ export default function AboutPageEditor() {
 
   async function uploadHeroSlideImage(index, file) {
     const key = `about-hero-${index}`;
-    const err = validateImageFile(file);
+    // Slides accept images OR videos — the website renders whichever was uploaded.
+    const isVideo = (file?.type || "").startsWith("video/");
+    const err = isVideo ? validateVideoFile(file) : validateImageFile(file);
     if (err) { setUploadError(key, err); return; }
     clearUploadError(key);
     setUploadProgress((p) => ({ ...p, [key]: 0 }));
     try {
-      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+      const url = await uploadMediaToCloudinary(file, isVideo ? "video" : "image", (pct) =>
         setUploadProgress((p) => ({ ...p, [key]: pct })),
       );
       setHeroForm((p) => ({
         ...p,
         images: (p.images ?? []).map((slide, i) => (i === index ? { ...slide, img: url } : slide)),
       }));
-      setSuccess("Image uploaded successfully!");
+      setSuccess(`${isVideo ? "Video" : "Image"} uploaded successfully!`);
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setUploadError(key, err.message ?? "Upload failed");
@@ -1285,6 +1287,58 @@ export default function AboutPageEditor() {
             />
           </label>
 
+          {/* Floating badges around the hero imagery — hidden on site when blank */}
+          <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Floating Badges (over the hero images)</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Badge 1 Title (top-left)</label>
+                <input
+                  value={heroForm.badge1Title ?? ""}
+                  onChange={(e) => setHeroForm((p) => ({ ...p, badge1Title: e.target.value }))}
+                  className={inputClass}
+                  placeholder="UAE-Born"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <ArInput label="Badge 1 Title" kind="label" value={heroForm.ar?.badge1Title} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge1Title: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Badge 1 Subtitle</label>
+                <input
+                  value={heroForm.badge1Subtitle ?? ""}
+                  onChange={(e) => setHeroForm((p) => ({ ...p, badge1Subtitle: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Local expertise"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <ArInput label="Badge 1 Subtitle" kind="label" value={heroForm.ar?.badge1Subtitle} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge1Subtitle: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Badge 2 Value (bottom-right)</label>
+                <input
+                  value={heroForm.badge2Value ?? ""}
+                  onChange={(e) => setHeroForm((p) => ({ ...p, badge2Value: e.target.value }))}
+                  className={inputClass}
+                  placeholder="10K+"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <ArInput label="Badge 2 Value" kind="label" value={heroForm.ar?.badge2Value} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge2Value: v } }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Badge 2 Label</label>
+                <input
+                  value={heroForm.badge2Label ?? ""}
+                  onChange={(e) => setHeroForm((p) => ({ ...p, badge2Label: e.target.value }))}
+                  className={inputClass}
+                  placeholder="happy drivers"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <ArInput label="Badge 2 Label" kind="label" value={heroForm.ar?.badge2Label} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), badge2Label: v } }))} />
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">Leave a badge&rsquo;s fields empty to hide it on the website.</p>
+          </div>
+
           {/* Hero slides — hero.images = [{ img, label, ar?: { label } }] */}
           <div className="grid gap-2">
             <div className="flex items-center justify-between gap-2">
@@ -1336,7 +1390,7 @@ export default function AboutPageEditor() {
                       )}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*"
                         className="hidden"
                         disabled={uploadProgress[`about-hero-${i}`] !== undefined}
                         onChange={(e) => {

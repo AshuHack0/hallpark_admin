@@ -4,6 +4,7 @@ import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
+import { scrollToNewItem } from "../lib/scrollToNewItem";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -284,8 +285,11 @@ function EnabledToggle({ enabled, onChange }) {
 }
 
 function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title, addButtonText = "Add Item" }) {
-  const addItem = () => {
+  // After adding, scroll the freshly rendered card into view so the admin
+  // lands on the new item instead of staying at the top of a long list.
+  const addItem = (e) => {
     onItemsChange([...items, defaultItem]);
+    scrollToNewItem(e);
   };
 
   const updateItem = (index, updates) => {
@@ -299,7 +303,7 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-item-list-root>
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-600">{items.length} {title.toLowerCase()}</p>
         <button
@@ -312,7 +316,7 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
       </div>
 
       {items.map((item, i) => (
-        <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div key={i} data-new-item-row className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-semibold text-slate-700">{title} {i + 1}</p>
             <button

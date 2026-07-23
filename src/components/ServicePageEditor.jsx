@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 
@@ -139,12 +140,12 @@ function EnabledToggle({ section, setSection }) {
 
 function ArrayItemEditor({ label, items, onAdd, onRemove, onUpdate, renderItem }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-item-list-root>
       <div>
         <label className={labelClass}>{label}</label>
       </div>
       {items.map((item, i) => (
-        <div key={i} className="flex gap-2">
+        <div key={i} data-new-item-row className="flex gap-2">
           <div className="flex-1">
             {renderItem(item, i, onUpdate)}
           </div>
@@ -159,7 +160,10 @@ function ArrayItemEditor({ label, items, onAdd, onRemove, onUpdate, renderItem }
       ))}
       <button
         type="button"
-        onClick={onAdd}
+        onClick={(e) => {
+          onAdd();
+          scrollToNewItem(e);
+        }}
         className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
       >
         <Plus className="h-3.5 w-3.5" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 
@@ -97,8 +98,11 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
 }
 
 function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title, addButtonText = "Add Item" }) {
-  const addItem = () => {
+  // After adding, scroll the freshly rendered card into view so the admin
+  // lands on the new item instead of staying at the top of a long list.
+  const addItem = (e) => {
     onItemsChange([...items, defaultItem]);
+    scrollToNewItem(e);
   };
 
   const updateItem = (index, updates) => {
@@ -112,7 +116,7 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-item-list-root>
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-600">{items.length} {title.toLowerCase()}</p>
         <button
@@ -125,7 +129,7 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
       </div>
 
       {items.map((item, i) => (
-        <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div key={i} data-new-item-row className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-semibold text-slate-700">{title} {i + 1}</p>
             <button

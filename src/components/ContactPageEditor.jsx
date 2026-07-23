@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Save, Loader2, Plus, Trash2, ChevronDown } from "lucide-react";
-import { api } from "../lib/api";
-import { validateUrl, validateEmail, validatePhone } from "../lib/validators";
+import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
+import { api, uploadMediaToCloudinary } from "../lib/api";
+import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 
@@ -70,6 +70,7 @@ function emptyDetailItem() {
     value: "",
     href: "",
     description: "",
+    iconImage: "",
     ar: { title: "", value: "", description: "" },
   };
 }
@@ -198,6 +199,30 @@ export default function ContactPageEditor() {
   }
   function setMap(fn) {
     setSections((prev) => ({ ...prev, map: typeof fn === "function" ? fn(prev.map) : fn }));
+  }
+
+  // Per-item icon image upload → details.items[i].iconImage (overrides the
+  // built-in icon chosen by the Type dropdown).
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [uploadErrors, setUploadErrors] = useState({});
+  async function handleDetailIconUpload(i, file) {
+    const key = `contact-item-${i}-icon`;
+    const err = validateImageFile(file);
+    if (err) { setUploadErrors((p) => ({ ...p, [key]: err })); return; }
+    setUploadErrors((p) => ({ ...p, [key]: undefined }));
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateDetailItem(i, { iconImage: url });
+      setSuccess("Icon uploaded. Remember to Save.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (uploadErr) {
+      setUploadErrors((p) => ({ ...p, [key]: uploadErr.message ?? "Upload failed" }));
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
   }
 
   function updateDetailItem(index, updates) {
@@ -491,6 +516,40 @@ export default function ContactPageEditor() {
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Icon Image (optional — overrides the icon above)</label>
+                    <div className="flex gap-2">
+                      <input
+                        value={item.iconImage ?? ""}
+                        onChange={(e) => updateDetailItem(i, { iconImage: e.target.value })}
+                        className={inputClass}
+                        placeholder="Icon URL or upload"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                        {uploadProgress[`contact-item-${i}-icon`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`contact-item-${i}-icon`]}%</>
+                        ) : (
+                          <><Upload className="h-3.5 w-3.5" />Upload</>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadProgress[`contact-item-${i}-icon`] !== undefined}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDetailIconUpload(i, file);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <FieldError error={validateUrl(item.iconImage ?? "")} />
+                    {uploadErrors[`contact-item-${i}-icon`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`contact-item-${i}-icon`]}</p>
+                    ) : null}
                   </div>
                   <div>
                     <label className={labelClass}>Title</label>

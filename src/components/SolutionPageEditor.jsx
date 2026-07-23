@@ -4,6 +4,7 @@ import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
+import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -2630,11 +2631,14 @@ export default function SolutionPageEditor() {
           </div>
 
           {/* Steps */}
-          <div className="border-t border-slate-200 pt-4">
+          <div className="border-t border-slate-200 pt-4" data-item-list-root>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-700">Steps ({(deployment.steps ?? []).length})</h3>
               <button
-                onClick={() => setDeployment((p) => ({ ...p, steps: [...(p.steps ?? []), { step: String((p.steps?.length ?? 0) + 1).padStart(2, "0"), title: "", description: "" }] }))}
+                onClick={(e) => {
+                  setDeployment((p) => ({ ...p, steps: [...(p.steps ?? []), { step: String((p.steps?.length ?? 0) + 1).padStart(2, "0"), title: "", description: "" }] }));
+                  scrollToNewItem(e);
+                }}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
                 <Plus className="h-3.5 w-3.5" /> Add Step
@@ -2642,7 +2646,7 @@ export default function SolutionPageEditor() {
             </div>
             <div className="space-y-3">
               {(deployment.steps ?? []).map((st, si) => (
-                <div key={si} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div key={si} data-new-item-row className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-semibold text-slate-600">Step {si + 1}</p>
                     <button
@@ -2793,12 +2797,15 @@ export default function SolutionPageEditor() {
           </div>
 
           {/* Points list */}
-          <div>
+          <div data-item-list-root>
             <div className="mb-2 flex items-center justify-between">
               <label className={labelClass}>Points / Reasons</label>
               <button
                 type="button"
-                onClick={() => setWhy((p) => ({ ...p, points: [...(p.points ?? []), ""] }))}
+                onClick={(e) => {
+                  setWhy((p) => ({ ...p, points: [...(p.points ?? []), ""] }));
+                  scrollToNewItem(e);
+                }}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
                 <Plus className="h-3.5 w-3.5" /> Add Point
@@ -2806,21 +2813,40 @@ export default function SolutionPageEditor() {
             </div>
             <div className="space-y-2">
               {(why.points ?? []).map((point, i) => (
-                <div key={i} className="flex gap-2">
+                <div key={i} data-new-item-row className="grid gap-1.5 rounded-xl border border-slate-200 bg-slate-50/60 p-2.5">
+                  <div className="flex gap-2">
+                    <input
+                      value={point ?? ""}
+                      onChange={(e) => setWhy((p) => ({ ...p, points: (p.points ?? []).map((pt, idx) => (idx === i ? e.target.value : pt)) }))}
+                      className={inputClass}
+                      placeholder={`Point ${i + 1}`}
+                      maxLength={FIELD_LIMITS.item}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setWhy((p) => ({
+                        ...p,
+                        points: (p.points ?? []).filter((_, idx) => idx !== i),
+                        ar: { ...(p.ar ?? {}), points: (p.ar?.points ?? []).filter((_, idx) => idx !== i) },
+                      }))}
+                      className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                   <input
-                    value={point ?? ""}
-                    onChange={(e) => setWhy((p) => ({ ...p, points: (p.points ?? []).map((pt, idx) => (idx === i ? e.target.value : pt)) }))}
+                    dir="rtl"
+                    value={why.ar?.points?.[i] ?? ""}
+                    onChange={(e) => setWhy((p) => {
+                      const arPoints = [...(p.ar?.points ?? [])];
+                      arPoints[i] = e.target.value;
+                      return { ...p, ar: { ...(p.ar ?? {}), points: arPoints } };
+                    })}
                     className={inputClass}
-                    placeholder={`Point ${i + 1}`}
+                    style={{ borderColor: "#16a34a" }}
+                    placeholder={`النقطة ${i + 1} (بالعربية)`}
                     maxLength={FIELD_LIMITS.item}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setWhy((p) => ({ ...p, points: (p.points ?? []).filter((_, idx) => idx !== i) }))}
-                    className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
                 </div>
               ))}
             </div>

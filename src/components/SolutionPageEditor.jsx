@@ -265,9 +265,13 @@ function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, 
 // Picker for "Other Related Services" — choose other solution detail slugs to
 // cross-link. `allDetails` is the full list (so options exclude the current one).
 // eslint-disable-next-line react/prop-types
-function RelatedServicesPicker({ currentSlug, selected, allDetails, onChange }) {
+function RelatedServicesPicker({ currentSlug, selected, allDetails, cardSlugs, onChange }) {
   const chosen = Array.isArray(selected) ? selected : [];
-  const options = (allDetails ?? []).filter((d) => d.slug && d.slug !== currentSlug);
+  // Only LIVE solutions are offered — a detail must belong to a current card.
+  // Orphaned/seeded detail pages ("static solutions") are not selectable.
+  const options = (allDetails ?? []).filter(
+    (d) => d.slug && d.slug !== currentSlug && (!cardSlugs || cardSlugs.has(d.slug)),
+  );
   const toggle = (slug) => onChange(chosen.includes(slug) ? chosen.filter((s) => s !== slug) : [...chosen, slug]);
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
@@ -399,7 +403,7 @@ function CategoryManager({ groups, arGroups, cards, onChange, onArChange, onGrou
 // returns it via onSave; the parent merges it into `details` (persisted on the
 // page's main "Save Changes").
 // eslint-disable-next-line react/prop-types
-function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
+function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClose }) {
   const [draft, setDraft] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
@@ -812,6 +816,7 @@ function DetailEditModal({ initial, isNew, allDetails, onSave, onClose }) {
             currentSlug={draft.slug}
             selected={draft.relatedServices ?? []}
             allDetails={allDetails}
+            cardSlugs={cardSlugs}
             onChange={(slugs) => setField("relatedServices", slugs)}
           />
         </div>
@@ -1640,14 +1645,17 @@ export default function SolutionPageEditor() {
           />
 
           {/* Solution Cards */}
-          <div>
+          <div data-item-list-root>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-slate-700">Solution Cards ({solutions.cards?.length ?? 0})</h3>
               <button
-                onClick={() => setSolutions((p) => ({
-                  ...p,
-                  cards: [...(p.cards ?? []), { slug: "", title: "New Solution", description: "Description", image: "/image.png" }]
-                }))}
+                onClick={(e) => {
+                  setSolutions((p) => ({
+                    ...p,
+                    cards: [...(p.cards ?? []), { slug: "", title: "New Solution", description: "Description", image: "/image.png" }]
+                  }));
+                  scrollToNewItem(e);
+                }}
                 className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -1659,14 +1667,26 @@ export default function SolutionPageEditor() {
                 const cardSlug = card.slug || slugify(card.title);
                 const hasDetail = details.some((d) => d.slug === cardSlug);
                 return (
-                <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div key={i} data-new-item-row className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
                     <button
-                      onClick={() => setSolutions((p) => ({
-                        ...p,
-                        cards: p.cards.filter((_, idx) => idx !== i)
-                      }))}
+                      onClick={() => {
+                        // Deleting a card also deletes its detail page (after
+                        // confirming) so orphaned "static" details never pile up.
+                        const removeDetailToo =
+                          hasDetail &&
+                          window.confirm(
+                            `This card has a detail page (/solutions/${cardSlug}). Delete the detail page too?\n\nOK = delete both · Cancel = keep the detail page`,
+                          );
+                        setSolutions((p) => ({
+                          ...p,
+                          cards: p.cards.filter((_, idx) => idx !== i)
+                        }));
+                        if (removeDetailToo) {
+                          setDetails((list) => list.filter((d) => d.slug !== cardSlug));
+                        }
+                      }}
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -3123,6 +3143,14 @@ export default function SolutionPageEditor() {
           initial={editingDetail.draft}
           isNew={editingDetail.isNew}
           allDetails={details}
+          cardSlugs={new Set(
+            (solutions.cards ?? [])
+              .map((c) => (c.slug || slugify(c.title) || "").trim())
+              .filter(Boolean)
+              // The card being edited may not have a detail yet, but its slug
+              // is always live once saved.
+              .concat(editingDetail.slug ? [editingDetail.slug] : []),
+          )}
           onSave={saveDetailFromModal}
           onClose={() => setEditingDetail(null)}
         />

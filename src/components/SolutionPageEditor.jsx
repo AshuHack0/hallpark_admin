@@ -870,6 +870,9 @@ export default function SolutionPageEditor() {
   const [challenges, setChallenges] = useState(DEFAULT_CHALLENGES);
   const [solutions, setSolutions] = useState(DEFAULT_SOLUTIONS);
   const [integration, setIntegration] = useState(DEFAULT_INTEGRATION);
+  // Raw text drafts for the "one per line" points textareas — lets the admin
+  // press Enter / type spaces freely; the parsed arrays update alongside.
+  const [pointsDrafts, setPointsDrafts] = useState({});
   const [trust, setTrust] = useState(DEFAULT_TRUST);
   const [seamless, setSeamless] = useState(DEFAULT_SEAMLESS);
   const [features, setFeatures] = useState(DEFAULT_FEATURES);
@@ -1279,6 +1282,29 @@ export default function SolutionPageEditor() {
             <div>
               <label className={labelClass}>CTA Link</label>
               <PageLinkSelect value={hero.ctaLink} onChange={(v) => setHero((p) => ({ ...p, ctaLink: v }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Second Button Label</label>
+              <input
+                value={hero.secondaryCtaLabel ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, secondaryCtaLabel: e.target.value }))}
+                className={inputClass}
+                placeholder="Explore Our Parking Solutions"
+                maxLength={FIELD_LIMITS.button}
+              />
+              <CharCount value={hero.secondaryCtaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="Second Button" kind="button" value={hero.ar?.secondaryCtaLabel} onChange={(v) => setHero((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaLabel: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Second Button Link (optional)</label>
+              <input
+                value={hero.secondaryCtaLink ?? ""}
+                onChange={(e) => setHero((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
+                className={inputClass}
+                placeholder="Leave empty to scroll to the solutions grid"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <FieldError error={validateUrl(hero.secondaryCtaLink ?? "")} />
             </div>
           </div>
           {/* Hero Showcase (mosaic + badges) — shown when no Image/Video above is set */}
@@ -2062,12 +2088,19 @@ export default function SolutionPageEditor() {
                       rows={2}
                       placeholder="Gradient (e.g., from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20)"
                     />
+                    {/* Draft-while-typing: parsing per keystroke eats Enter and
+                        trailing spaces; keep raw text while focused, normalize
+                        into the points array alongside + on blur. */}
                     <textarea
-                      value={Array.isArray(card.points) ? card.points.join("\n") : ""}
-                      onChange={(e) => setIntegration((p) => ({
-                        ...p,
-                        cards: p.cards.map((c, idx) => idx === i ? { ...c, points: e.target.value.split("\n").map(p => p.trim()).filter(Boolean) } : c)
-                      }))}
+                      value={pointsDrafts[`int-${i}`] ?? (Array.isArray(card.points) ? card.points.join("\n") : "")}
+                      onChange={(e) => {
+                        setPointsDrafts((d) => ({ ...d, [`int-${i}`]: e.target.value }));
+                        setIntegration((p) => ({
+                          ...p,
+                          cards: p.cards.map((c, idx) => idx === i ? { ...c, points: e.target.value.split("\n").map(p => p.trim()).filter(Boolean) } : c)
+                        }));
+                      }}
+                      onBlur={() => setPointsDrafts((d) => ({ ...d, [`int-${i}`]: undefined }))}
                       className={inputClass}
                       rows={3}
                       placeholder="Points (one per line)"

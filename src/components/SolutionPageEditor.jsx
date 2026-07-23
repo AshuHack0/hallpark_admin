@@ -294,11 +294,18 @@ function RelatedServicesPicker({ currentSlug, selected, allDetails, onChange }) 
 // shows these groups (in this order); each card is assigned to one of them.
 // `cards` is passed so we can warn when deleting a group still in use.
 // eslint-disable-next-line react/prop-types
-function CategoryManager({ groups, arGroups, cards, onChange, onArChange }) {
+function CategoryManager({ groups, arGroups, cards, onChange, onArChange, onGroupRenamed }) {
   const list = Array.isArray(groups) ? groups : [];
   const arList = Array.isArray(arGroups) ? arGroups : [];
   const usage = (name) => (cards ?? []).filter((c) => (c.group || "") === name).length;
-  const rename = (i, value) => onChange(list.map((g, idx) => (idx === i ? value : g)));
+  // Renaming a category must also re-point every card assigned to it —
+  // otherwise the cards stop matching and fall into the generic bucket
+  // ("ungrouped after saving").
+  const rename = (i, value) => {
+    const oldName = list[i];
+    onChange(list.map((g, idx) => (idx === i ? value : g)));
+    if (oldName && oldName !== value) onGroupRenamed?.(oldName, value);
+  };
   const renameAr = (i, value) => {
     const next = [...arList];
     while (next.length <= i) next.push("");
@@ -1621,6 +1628,12 @@ export default function SolutionPageEditor() {
           <CategoryManager
             groups={solutions.groups}
             arGroups={solutions.ar?.groups}
+            onGroupRenamed={(oldName, newName) =>
+              setSolutions((p) => ({
+                ...p,
+                cards: (p.cards ?? []).map((c) => ((c.group || "") === oldName ? { ...c, group: newName } : c)),
+              }))
+            }
             cards={solutions.cards}
             onChange={(groups) => setSolutions((p) => ({ ...p, groups }))}
             onArChange={(arGroups) => setSolutions((p) => ({ ...p, ar: { ...(p.ar ?? {}), groups: arGroups } }))}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   ExternalLink,
   Plus,
@@ -74,6 +74,28 @@ function PreviewRow({ label, value, multiline }) {
 }
 
 const emptyHighlight = { line1: "", line2: "", line1Ar: "", line2Ar: "" };
+
+// Provides the page's save action to every section card, so each section
+// shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
 
 export default function AboutPageEditor() {
   const slug = "about";
@@ -872,6 +894,17 @@ export default function AboutPageEditor() {
           ? storyParagraphCount
           : 0;
 
+  // Page-level save used by the sticky Save button and every section's
+  // SectionSaveButton — validates the hero title, then persists the page.
+  function handleSave() {
+    if (!content.hero.title?.trim()) {
+      setError("Hero title is required — add a hero title before saving the page.");
+      return;
+    }
+    setError("");
+    void persistSections(content, "Page saved successfully.", published);
+  }
+
   if (loading) {
     return <p className="text-slate-500">Loading about page…</p>;
   }
@@ -885,6 +918,7 @@ export default function AboutPageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -894,29 +928,23 @@ export default function AboutPageEditor() {
         </div>
       </div>
 
-      {error ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">{error}</div>
-      ) : null}
-      {success ? (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">✅ {success}</div>
-      ) : null}
-
-      {/* Save Button */}
-      <button
-        onClick={() => {
-          if (!content.hero.title?.trim()) {
-            setError("Hero title is required — add a hero title before saving the page.");
-            return;
-          }
-          setError("");
-          void persistSections(content, "Page saved successfully.", published);
-        }}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {error ? (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">{error}</div>
+        ) : null}
+        {success ? (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">✅ {success}</div>
+        ) : null}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
         {/* Hero */}
@@ -933,6 +961,7 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("hero")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.hero.title} />
@@ -973,6 +1002,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("mission")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.mission.title} />
@@ -1001,6 +1031,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("vision")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.vision.title} />
@@ -1086,6 +1117,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("story")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.story.title} />
@@ -1109,6 +1141,7 @@ export default function AboutPageEditor() {
               Edit section
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("whatWeDo")}
           <div className="mb-4 grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.whatWeDo.title} />
@@ -1170,6 +1203,7 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("technology")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.technology.title} />
@@ -1196,6 +1230,7 @@ export default function AboutPageEditor() {
               Edit
             </button>
           </div>
+          <SectionSaveButton />
           {renderEnabledToggle("cta")}
           <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
             <PreviewRow label="Title" value={content.cta.title} />
@@ -2165,5 +2200,6 @@ export default function AboutPageEditor() {
         </p>
       </Modal>
     </div>
+    </SectionSaveContext.Provider>
   );
 }

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
+import { CsvInput } from "./ListInput.jsx";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -100,6 +101,28 @@ const DEFAULT_SERVICE = {
   subCategories: [],
 };
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -114,7 +137,12 @@ function CollapsibleSection({ title, children, defaultOpen = false }) {
           className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
-      {isOpen && <div className="border-t border-slate-200 px-4 py-4 sm:px-5">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 px-4 py-4 sm:px-5">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -181,10 +209,6 @@ export default function ServicePageEditor() {
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
   const [quoteForm, setQuoteForm] = useState(DEFAULT_QUOTE_FORM);
   const [gridHeader, setGridHeader] = useState({});
-  // Raw text drafts for the comma-separated chips inputs — lets the admin type
-  // spaces freely; the parsed arrays update alongside, display after blur.
-  const [chipsDraft, setChipsDraft] = useState(null);
-  const [chipsArDraft, setChipsArDraft] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -475,6 +499,7 @@ export default function ServicePageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -484,27 +509,27 @@ export default function ServicePageEditor() {
         </div>
       </div>
 
-      {/* Status Messages */}
-      {success && (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {success && (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+            ❌ {error}
+          </div>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
 
@@ -539,26 +564,22 @@ export default function ServicePageEditor() {
           </div>
           <div>
             <label className={labelClass}>Service Chips (comma-separated)</label>
-            <input
-              value={chipsDraft ?? (Array.isArray(hero.chips) ? hero.chips.join(", ") : "")}
-              onChange={(e) => {
-                setChipsDraft(e.target.value);
-                updateHero("chips", e.target.value.split(",").map((s) => s.trim()));
-              }}
-              onBlur={() => setChipsDraft(null)}
+            {/* keepEmpty: empty entries survive so EN and AR chip lists stay
+                index-aligned. */}
+            <CsvInput
+              keepEmpty
+              value={hero.chips}
+              onChange={(arr) => updateHero("chips", arr)}
               className={inputClass}
               placeholder="Self-Parking, Valet Service, EV Charging, Car Storage, Airport Parking"
               maxLength={FIELD_LIMITS.long}
             />
             <label className={labelClass} style={{ marginTop: 6 }}>Service Chips — Arabic (comma-separated, same order)</label>
-            <input
-              dir="rtl"
-              value={chipsArDraft ?? (Array.isArray(hero.ar?.chips) ? hero.ar.chips.join("، ") : "")}
-              onChange={(e) => {
-                setChipsArDraft(e.target.value);
-                updateHero("ar", { ...(hero.ar ?? {}), chips: e.target.value.split(/،|,/).map((s) => s.trim()) });
-              }}
-              onBlur={() => setChipsArDraft(null)}
+            <CsvInput
+              arabic
+              keepEmpty
+              value={hero.ar?.chips}
+              onChange={(arr) => updateHero("ar", { ...(hero.ar ?? {}), chips: arr })}
               className={inputClass}
               style={{ borderColor: "#16a34a" }}
               maxLength={FIELD_LIMITS.long}
@@ -1466,5 +1487,6 @@ export default function ServicePageEditor() {
       </CollapsibleSection>
       </div>
     </div>
+    </SectionSaveContext.Provider>
   );
 }

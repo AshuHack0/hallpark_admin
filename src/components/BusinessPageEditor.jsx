@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
+import { CsvInput } from "./ListInput.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
 
@@ -252,6 +253,28 @@ const DEFAULT_CTA = {
   image: "/hf_20260327_064457_c75923ba-dc06-4c6e-9b63-fa181e94bcfa.png",
 };
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, isOpen, onToggle, children }) {
   return (
     <div className="mb-6 rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -262,7 +285,12 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
         <h2 className="text-xl font-bold text-[#050A13]">{title}</h2>
         <ChevronDown className={`h-5 w-5 text-slate-500 transition ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="border-t border-slate-200 px-6 pb-6">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 px-6 pb-6">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -354,11 +382,6 @@ export default function BusinessPageEditor() {
   // sets the global error banner anymore, so only the value is kept.
   const [error] = useState("");
   const [uploadProgress, setUploadProgress] = useState({});
-  // Raw text drafts for comma-separated inputs (keyed per field) — lets the
-  // admin type spaces freely; parsed arrays update alongside, display on blur.
-  const [csvDrafts, setCsvDrafts] = useState({});
-  const setCsvDraft = (key, value) => setCsvDrafts((p) => ({ ...p, [key]: value }));
-  const clearCsvDraft = (key) => setCsvDrafts((p) => ({ ...p, [key]: undefined }));
   // Per-field upload errors (same keys as uploadProgress) so validation
   // problems show right next to the field they belong to, not at the page top.
   const [uploadErrors, setUploadErrors] = useState({});
@@ -544,6 +567,7 @@ export default function BusinessPageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -553,27 +577,27 @@ export default function BusinessPageEditor() {
         </div>
       </div>
 
-      {/* Status Messages */}
-      {success && (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {success && (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+            ❌ {error}
+          </div>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
         {/* 1. Hero Section */}
@@ -622,24 +646,21 @@ export default function BusinessPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Checklist Items (comma-separated)</label>
-              <input
-                value={csvDrafts["hero-features"] ?? (Array.isArray(sections.hero?.features) ? sections.hero.features.join(", ") : "")}
-                onChange={(e) => {
-                  setCsvDraft("hero-features", e.target.value);
-                  setSections({ ...sections, hero: { ...sections.hero, features: e.target.value.split(",").map((x) => x.trim()) } });
-                }}
-                onBlur={() => clearCsvDraft("hero-features")}
+              {/* keepEmpty: empty entries survive so EN and AR lists stay
+                  index-aligned. */}
+              <CsvInput
+                keepEmpty
+                value={sections.hero?.features}
+                onChange={(arr) => setSections({ ...sections, hero: { ...sections.hero, features: arr } })}
                 className={inputClass}
                 maxLength={FIELD_LIMITS.long}
               />
               <label className={labelClass} style={{ marginTop: 6 }}>Checklist Items — Arabic (comma-separated, same order)</label>
-              <input dir="rtl"
-                value={csvDrafts["hero-features-ar"] ?? (Array.isArray(sections.hero?.ar?.features) ? sections.hero.ar.features.join("، ") : "")}
-                onChange={(e) => {
-                  setCsvDraft("hero-features-ar", e.target.value);
-                  setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), features: e.target.value.split(/،|,/).map((x) => x.trim()) } } });
-                }}
-                onBlur={() => clearCsvDraft("hero-features-ar")}
+              <CsvInput
+                arabic
+                keepEmpty
+                value={sections.hero?.ar?.features}
+                onChange={(arr) => setSections({ ...sections, hero: { ...sections.hero, ar: { ...(sections.hero?.ar ?? {}), features: arr } } })}
                 className={inputClass} style={{ borderColor: "#16a34a" }} maxLength={FIELD_LIMITS.long}
               />
             </div>
@@ -1477,27 +1498,22 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Benefits (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={csvDrafts[`benefits-${i}`] ?? (Array.isArray(item.benefits) ? item.benefits.join(", ") : "")}
-                    onChange={(e) => {
-                      setCsvDraft(`benefits-${i}`, e.target.value);
-                      update(i, { benefits: e.target.value.split(",").map((b) => b.trim()) });
-                    }}
-                    onBlur={() => clearCsvDraft(`benefits-${i}`)}
+                  {/* keepEmpty: empty entries survive so EN and AR lists stay
+                      index-aligned. */}
+                  <CsvInput
+                    keepEmpty
+                    value={item.benefits}
+                    onChange={(arr) => update(i, { benefits: arr })}
                     className={inputClass}
                     maxLength={FIELD_LIMITS.item}
                   />
                   <CharCount value={Array.isArray(item.benefits) ? item.benefits.join(", ") : ""} max={FIELD_LIMITS.item} />
                   <label className={labelClass} style={{ marginTop: 6 }}>Benefits — Arabic (comma-separated, same order)</label>
-                  <input dir="rtl"
-                    type="text"
-                    value={csvDrafts[`benefits-ar-${i}`] ?? (Array.isArray(item.ar?.benefits) ? item.ar.benefits.join("، ") : "")}
-                    onChange={(e) => {
-                      setCsvDraft(`benefits-ar-${i}`, e.target.value);
-                      update(i, { ar: { ...(item.ar ?? {}), benefits: e.target.value.split(/،|,/).map((b) => b.trim()) } });
-                    }}
-                    onBlur={() => clearCsvDraft(`benefits-ar-${i}`)}
+                  <CsvInput
+                    arabic
+                    keepEmpty
+                    value={item.ar?.benefits}
+                    onChange={(arr) => update(i, { ar: { ...(item.ar ?? {}), benefits: arr } })}
                     className={inputClass}
                     style={{ borderColor: "#16a34a" }}
                     maxLength={FIELD_LIMITS.item}
@@ -2560,5 +2576,6 @@ export default function BusinessPageEditor() {
         </CollapsibleSection>
       </div>
     </div>
+    </SectionSaveContext.Provider>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -308,6 +308,28 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
   );
 }
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -320,7 +342,12 @@ function CollapsibleSection({ title, children, defaultOpen = false }) {
         <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-slate-500">{title}</h3>
         <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
-      {isOpen && <div className="border-t border-slate-200 p-5">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 p-5">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -1077,6 +1104,7 @@ export default function HomePageEditor() {
   const prog = (i, f) => uploadProgress[`${i}-${f}`];
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -1086,27 +1114,27 @@ export default function HomePageEditor() {
         </div>
       </div>
 
-      {/* Status Messages */}
-      {success && (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {success && (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+            ❌ {error}
+          </div>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
 
@@ -2649,7 +2677,6 @@ export default function HomePageEditor() {
               onChange={(v) => setHalaParkInAction((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleHalaParkImageUpload(file)}
             />
-
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>
               <button
@@ -3032,5 +3059,6 @@ export default function HomePageEditor() {
         </CollapsibleSection>
       </div>
     </div>
+    </SectionSaveContext.Provider>
   );
 }

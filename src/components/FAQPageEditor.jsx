@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { Save, Loader2, Plus, Trash2, Pencil, ChevronDown, Upload } from "lucide-react";
 import {
   Building2,
@@ -103,6 +103,28 @@ const FAQ_ICON_COMPONENTS = {
   Truck,
 };
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, isOpen, onToggle, children }) {
   return (
     <div className="mb-6 rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -113,7 +135,12 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
         <h2 className="text-xl font-bold text-[#050A13]">{title}</h2>
         <ChevronDown className={`h-5 w-5 text-slate-500 transition ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="border-t border-slate-200 px-6 pb-6">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 px-6 pb-6">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -467,6 +494,7 @@ export default function FAQPageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -476,27 +504,27 @@ export default function FAQPageEditor() {
         </div>
       </div>
 
-      {/* Status Messages */}
-      {success && (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {success && (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+            ❌ {error}
+          </div>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
         {/* Hero Section */}
@@ -1087,5 +1115,6 @@ export default function FAQPageEditor() {
         </div>
       )}
     </div>
+    </SectionSaveContext.Provider>
   );
 }

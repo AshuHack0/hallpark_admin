@@ -285,7 +285,7 @@ export default function SettingsPageEditor() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur py-3 border-b border-slate-200/70 mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#050A13]">Site Settings</h1>
           <p className="text-sm text-slate-500">Global assets shown across the site (navbar &amp; footer).</p>
@@ -305,6 +305,17 @@ export default function SettingsPageEditor() {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="mb-4 text-lg font-semibold text-[#050A13]">Logo</h2>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
 
         {/* Preview */}
         <div className="mb-4 flex items-center gap-4">
@@ -371,6 +382,17 @@ export default function SettingsPageEditor() {
       {/* ---------------- Floating App Buttons (bottom-right) ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-1 text-lg font-semibold text-[#050A13]">Floating Buttons (bottom-right)</h2>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
         <p className="mb-4 text-xs text-slate-500">The floating action buttons shown on every page. Each shows only when its link is set — leave blank to hide.</p>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -489,6 +511,17 @@ export default function SettingsPageEditor() {
       {/* ---------------- Footer: Tagline & Contact ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-1 text-lg font-semibold text-[#050A13]">Footer — Tagline &amp; Contact</h2>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
         <p className="mb-4 text-xs text-slate-500">Empty fields are hidden on the site.</p>
 
         <label className="block">
@@ -543,10 +576,21 @@ export default function SettingsPageEditor() {
       <div className={cardClass}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-[#050A13]">Footer — Social Links</h2>
-          <button onClick={addSocial} className={addBtnClass}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={handleSave}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            <button onClick={addSocial} className={addBtnClass}>
             <Plus className="h-3.5 w-3.5" />
             Add Social Link
           </button>
+          </div>
         </div>
 
         {socials.length === 0 ? (
@@ -599,10 +643,21 @@ export default function SettingsPageEditor() {
       <div className={cardClass}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-[#050A13]">Footer — Quick Links</h2>
-          <button onClick={addQuickLink} className={addBtnClass}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={handleSave}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            <button onClick={addQuickLink} className={addBtnClass}>
             <Plus className="h-3.5 w-3.5" />
             Add Link
           </button>
+          </div>
         </div>
 
         <label className="block">
@@ -673,6 +728,17 @@ export default function SettingsPageEditor() {
       {/* ---------------- Footer: App Block ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-4 text-lg font-semibold text-[#050A13]">Footer — App Block</h2>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
 
         <label className="block">
           <span className={labelClass}>App Heading</span>
@@ -771,6 +837,17 @@ export default function SettingsPageEditor() {
       {/* ---------------- Footer: Bottom Bar ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-4 text-lg font-semibold text-[#050A13]">Footer — Bottom Bar</h2>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
 
         <label className="block">
           <span className={labelClass}>Rights Text</span>

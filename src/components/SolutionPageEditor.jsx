@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -6,6 +6,7 @@ import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { FRONTEND_PAGES } from "../constants/pages.js";
+import { LinesTextarea } from "./ListInput.jsx";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
@@ -843,6 +844,28 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
   );
 }
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -855,7 +878,12 @@ function CollapsibleSection({ title, children, defaultOpen = false }) {
         <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
         <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
-      {isOpen && <div className="border-t border-slate-200 px-4 py-4 sm:px-5">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 px-4 py-4 sm:px-5">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -883,9 +911,6 @@ export default function SolutionPageEditor() {
   const [challenges, setChallenges] = useState(DEFAULT_CHALLENGES);
   const [solutions, setSolutions] = useState(DEFAULT_SOLUTIONS);
   const [integration, setIntegration] = useState(DEFAULT_INTEGRATION);
-  // Raw text drafts for the "one per line" points textareas — lets the admin
-  // press Enter / type spaces freely; the parsed arrays update alongside.
-  const [pointsDrafts, setPointsDrafts] = useState({});
   const [trust, setTrust] = useState(DEFAULT_TRUST);
   const [seamless, setSeamless] = useState(DEFAULT_SEAMLESS);
   const [features, setFeatures] = useState(DEFAULT_FEATURES);
@@ -1204,6 +1229,7 @@ export default function SolutionPageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -1213,26 +1239,27 @@ export default function SolutionPageEditor() {
         </div>
       </div>
 
-      {success && (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {success && (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-700">
+            ❌ {error}
+          </div>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div className="space-y-6">
 
@@ -2122,19 +2149,12 @@ export default function SolutionPageEditor() {
                       rows={2}
                       placeholder="Gradient (e.g., from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20)"
                     />
-                    {/* Draft-while-typing: parsing per keystroke eats Enter and
-                        trailing spaces; keep raw text while focused, normalize
-                        into the points array alongside + on blur. */}
-                    <textarea
-                      value={pointsDrafts[`int-${i}`] ?? (Array.isArray(card.points) ? card.points.join("\n") : "")}
-                      onChange={(e) => {
-                        setPointsDrafts((d) => ({ ...d, [`int-${i}`]: e.target.value }));
-                        setIntegration((p) => ({
-                          ...p,
-                          cards: p.cards.map((c, idx) => idx === i ? { ...c, points: e.target.value.split("\n").map(p => p.trim()).filter(Boolean) } : c)
-                        }));
-                      }}
-                      onBlur={() => setPointsDrafts((d) => ({ ...d, [`int-${i}`]: undefined }))}
+                    <LinesTextarea
+                      value={card.points}
+                      onChange={(arr) => setIntegration((p) => ({
+                        ...p,
+                        cards: p.cards.map((c, idx) => idx === i ? { ...c, points: arr } : c)
+                      }))}
                       className={inputClass}
                       rows={3}
                       placeholder="Points (one per line)"
@@ -3156,5 +3176,6 @@ export default function SolutionPageEditor() {
         />
       )}
     </div>
+    </SectionSaveContext.Provider>
   );
 }

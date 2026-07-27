@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
+import { CsvInput } from "./ListInput.jsx";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -105,6 +106,28 @@ function mergeContactSections(raw = {}) {
   };
 }
 
+// Provides the page's save action to every CollapsibleSection, so each open
+// section shows its own Save button (same action — saves the whole page).
+const SectionSaveContext = createContext(null);
+
+function SectionSaveButton() {
+  const save = useContext(SectionSaveContext);
+  if (!save) return null;
+  return (
+    <div className="mb-4 flex justify-end">
+      <button
+        type="button"
+        onClick={save.onSave}
+        disabled={save.saving}
+        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+      >
+        {save.saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+        {save.saving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function CollapsibleSection({ title, isOpen, onToggle, children }) {
   return (
     <div className="mb-6 rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -115,7 +138,12 @@ function CollapsibleSection({ title, isOpen, onToggle, children }) {
         <h2 className="text-xl font-bold text-[#050A13]">{title}</h2>
         <ChevronDown className={`h-5 w-5 text-slate-500 transition ${isOpen ? "rotate-180" : ""}`} />
       </button>
-      {isOpen && <div className="border-t border-slate-200 px-6 pb-6 pt-4">{children}</div>}
+      {isOpen && (
+        <div className="border-t border-slate-200 px-6 pb-6 pt-4">
+          <SectionSaveButton />
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -149,10 +177,6 @@ export default function ContactPageEditor() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [openSections, setOpenSections] = useState({ hero: true });
-  // Raw text drafts for the comma-separated subjects inputs — lets the admin
-  // type spaces freely; the parsed arrays update alongside, display after blur.
-  const [subjectsDraft, setSubjectsDraft] = useState(null);
-  const [subjectsArDraft, setSubjectsArDraft] = useState(null);
 
   useEffect(() => {
     document.title = "Contact — HalaPark Admin";
@@ -311,6 +335,7 @@ export default function ContactPageEditor() {
   }
 
   return (
+    <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
@@ -322,26 +347,27 @@ export default function ContactPageEditor() {
         </div>
       </div>
 
-      {error ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">
-          {error}
-        </div>
-      ) : null}
-      {success ? (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
-          ✅ {success}
-        </div>
-      ) : null}
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
-      >
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
+      {/* Status Messages + Save Button (sticky) */}
+      <div className="sticky top-0 z-40 -mx-2 flex flex-wrap items-center gap-3 rounded-b-xl bg-white/90 px-2 py-3 backdrop-blur border-b border-slate-200/70">
+        {error ? (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">
+            {error}
+          </div>
+        ) : null}
+        {success ? (
+          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700">
+            ✅ {success}
+          </div>
+        ) : null}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       <div>
         {/* Hero */}
@@ -691,17 +717,12 @@ export default function ContactPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Subjects (comma-separated)</label>
-              <input
-                type="text"
-                value={subjectsDraft ?? (Array.isArray(sections.form.subjects) ? sections.form.subjects.join(", ") : "")}
-                onChange={(e) => {
-                  setSubjectsDraft(e.target.value);
-                  setForm((p) => ({
-                    ...p,
-                    subjects: e.target.value.split(",").map((s) => s.trim()),
-                  }));
-                }}
-                onBlur={() => setSubjectsDraft(null)}
+              {/* keepEmpty: empty entries survive so EN and AR subject lists
+                  stay index-aligned. */}
+              <CsvInput
+                keepEmpty
+                value={sections.form.subjects}
+                onChange={(arr) => setForm((p) => ({ ...p, subjects: arr }))}
                 className={inputClass}
                 placeholder="General Inquiry, Support, Partnership"
                 maxLength={FIELD_LIMITS.summary}
@@ -713,26 +734,11 @@ export default function ContactPageEditor() {
               <label className={labelClass} style={{ marginTop: 6 }}>
                 Subjects — Arabic (comma-separated, same order)
               </label>
-              <input
-                type="text"
-                dir="rtl"
-                value={
-                  subjectsArDraft ??
-                  (Array.isArray(sections.form.ar?.subjects)
-                    ? sections.form.ar.subjects.join("، ")
-                    : "")
-                }
-                onChange={(e) => {
-                  setSubjectsArDraft(e.target.value);
-                  setForm((p) => ({
-                    ...p,
-                    ar: {
-                      ...(p.ar ?? {}),
-                      subjects: e.target.value.split(/،|,/).map((s) => s.trim()),
-                    },
-                  }));
-                }}
-                onBlur={() => setSubjectsArDraft(null)}
+              <CsvInput
+                arabic
+                keepEmpty
+                value={sections.form.ar?.subjects}
+                onChange={(arr) => setForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subjects: arr } }))}
                 className={inputClass}
                 style={{ borderColor: "#16a34a" }}
                 maxLength={FIELD_LIMITS.summary}
@@ -969,5 +975,6 @@ export default function ContactPageEditor() {
         </CollapsibleSection>
       </div>
     </div>
+    </SectionSaveContext.Provider>
   );
 }

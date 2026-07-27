@@ -3,6 +3,7 @@ import { Save, Loader2, Upload, Plus, Trash2 } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
+import { confirmDelete } from "../lib/confirmDelete";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -449,7 +450,7 @@ export default function SettingsPageEditor() {
                 />
                 <button
                   type="button"
-                  onClick={() => setSections((p) => ({ ...p, floatingApp: { ...(p.floatingApp ?? {}), stores: p.floatingApp.stores.filter((_, idx) => idx !== i) } }))}
+                  onClick={() => { if (!confirmDelete("this store")) return; setSections((p) => ({ ...p, floatingApp: { ...(p.floatingApp ?? {}), stores: p.floatingApp.stores.filter((_, idx) => idx !== i) } })); }}
                   className="rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -644,7 +645,7 @@ export default function SettingsPageEditor() {
                       maxLength={FIELD_LIMITS.link}
                     />
                     <button
-                      onClick={() => removeSocial(index)}
+                      onClick={() => { if (!confirmDelete("this social link")) return; removeSocial(index); }}
                       className="shrink-0 rounded-lg border border-slate-200 p-2 text-slate-400 hover:border-red-300 hover:text-red-500"
                       title="Delete social link"
                     >
@@ -707,7 +708,7 @@ export default function SettingsPageEditor() {
             <div key={index} className={rowCardClass}>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold text-slate-600">Link {index + 1}</p>
-                <button onClick={() => removeQuickLink(index)} className={deleteBtnClass}>
+                <button onClick={() => { if (!confirmDelete("this quick link")) return; removeQuickLink(index); }} className={deleteBtnClass}>
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
                 </button>

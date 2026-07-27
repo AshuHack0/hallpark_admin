@@ -19,6 +19,7 @@ import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { confirmDelete } from "../lib/confirmDelete";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
 const inputClass =
@@ -372,7 +373,9 @@ export default function AboutPageEditor() {
     setDeleteModalOpen(true);
   }
 
-  function confirmDelete() {
+  // Executes the deletion picked in the delete-confirm modal (renamed from
+  // `confirmDelete` so it doesn't shadow the shared confirmDelete helper).
+  function handleDeleteConfirmed() {
     if (!deleteTarget) return;
     const { type, index } = deleteTarget;
 
@@ -847,7 +850,7 @@ export default function AboutPageEditor() {
                     Edit
                   </button>
                   {/* Hidden (not just disabled) at the minimum count — a visible
-                      no-op Delete button confuses editors. confirmDelete keeps
+                      no-op Delete button confuses editors. handleDeleteConfirmed keeps
                       the min-count guard as a backstop. */}
                   {paragraphs.length > minCount ? (
                     <button
@@ -1394,7 +1397,7 @@ export default function AboutPageEditor() {
                   <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
                     Slide {i + 1}
                   </p>
-                  <button type="button" onClick={() => removeHeroSlide(i)} className={btnDanger}>
+                  <button type="button" onClick={() => { if (!confirmDelete("this hero slide")) return; removeHeroSlide(i); }} className={btnDanger}>
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
                   </button>
@@ -2182,7 +2185,7 @@ export default function AboutPageEditor() {
             </button>
             <button
               type="button"
-              onClick={confirmDelete}
+              onClick={handleDeleteConfirmed}
               disabled={
                 saving ||
                 (deleteTarget?.type?.endsWith("Paragraph") && deleteParagraphMinCount <= 1)

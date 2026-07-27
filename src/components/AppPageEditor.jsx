@@ -3,6 +3,7 @@ import { Save, ExternalLink, Loader2, Plus, Trash2, ChevronDown, Upload } from "
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
+import { confirmDelete } from "../lib/confirmDelete";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
@@ -140,6 +141,8 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
   };
 
   const removeItem = (index) => {
+    // eslint-disable-next-line react/prop-types
+    if (!confirmDelete(`this ${title.toLowerCase()}`)) return;
     onItemsChange(items.filter((_, i) => i !== index));
   };
 
@@ -375,6 +378,7 @@ export default function AppPageEditor() {
     }));
   }
   function removeHeroStat(i) {
+    if (!confirmDelete("this stat")) return;
     setSections((prev) => ({
       ...prev,
       hero: { ...prev.hero, stats: (prev.hero.stats || []).filter((_, idx) => idx !== i) },
@@ -396,6 +400,7 @@ export default function AppPageEditor() {
     }));
   }
   function removeHeroCard(i) {
+    if (!confirmDelete("this card")) return;
     setSections((prev) => ({
       ...prev,
       hero: { ...prev.hero, cards: (prev.hero.cards || []).filter((_, idx) => idx !== i) },

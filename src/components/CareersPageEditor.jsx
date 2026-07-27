@@ -17,6 +17,7 @@ import { DEFAULT_CAREERS_SECTIONS, mergeCareersSections } from "../constants/car
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
+import { confirmDelete } from "../lib/confirmDelete";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -256,7 +257,9 @@ export default function CareersPageEditor() {
     setDeleteModalOpen(true);
   }
 
-  function confirmDelete() {
+  // Runs the deletion after the user confirms in the "Delete item?" modal.
+  // (Named to avoid clashing with the imported confirmDelete helper.)
+  function handleConfirmedDelete() {
     if (!deleteTarget) return;
     const { type, index } = deleteTarget;
 
@@ -736,7 +739,7 @@ export default function CareersPageEditor() {
                       }}
                     />
                   </label>
-                  <button type="button" onClick={() => removeHeroImage(i)} className={btnDanger}>
+                  <button type="button" onClick={() => { if (!confirmDelete("this image")) return; removeHeroImage(i); }} className={btnDanger}>
                     <Trash2 className="h-3.5 w-3.5" /> Delete
                   </button>
                 </div>
@@ -1073,7 +1076,8 @@ export default function CareersPageEditor() {
               <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Opportunity {i + 1}</p>
-                  <button type="button" onClick={() => removeOpportunity(i)} className={btnDanger}>
+                  {/* NOTE: removeOpportunity persists immediately (auto-save) — confirm is critical here. */}
+                  <button type="button" onClick={() => { if (!confirmDelete("this opportunity (removed from the live site immediately)")) return; removeOpportunity(i); }} className={btnDanger}>
                     <Trash2 className="h-3.5 w-3.5" /> Delete
                   </button>
                 </div>
@@ -2153,7 +2157,7 @@ export default function CareersPageEditor() {
             </button>
             <button
               type="button"
-              onClick={confirmDelete}
+              onClick={handleConfirmedDelete}
               disabled={saving || (deleteTarget?.type === "paragraph" && paragraphCount <= 1)}
               className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
             >

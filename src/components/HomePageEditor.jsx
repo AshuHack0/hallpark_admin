@@ -4,6 +4,7 @@ import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
+import { confirmDelete } from "../lib/confirmDelete";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -482,6 +483,7 @@ export default function HomePageEditor() {
   }
 
   function removeWhyItem(i) {
+    if (!confirmDelete("this feature item")) return;
     setWhyHalapark((prev) => ({
       ...prev,
       items: (prev.items ?? []).filter((_, idx) => idx !== i),
@@ -528,6 +530,7 @@ export default function HomePageEditor() {
     setHowItWorks((prev) => ({ ...prev, steps: [...(prev.steps ?? []), { title: "", description: "" }] }));
   }
   function removeHowStep(i) {
+    if (!confirmDelete("this step")) return;
     setHowItWorks((prev) => ({ ...prev, steps: (prev.steps ?? []).filter((_, idx) => idx !== i) }));
   }
 
@@ -580,6 +583,7 @@ export default function HomePageEditor() {
     setGlobalMobility((prev) => ({ ...prev, capabilities: [...(prev.capabilities ?? []), { title: "", description: "" }] }));
   }
   function removeCapability(i) {
+    if (!confirmDelete("this capability")) return;
     setGlobalMobility((prev) => ({ ...prev, capabilities: (prev.capabilities ?? []).filter((_, idx) => idx !== i) }));
   }
 
@@ -593,6 +597,7 @@ export default function HomePageEditor() {
     setGlobalMobility((prev) => ({ ...prev, impactStats: [...(prev.impactStats ?? []), { value: "", label: "", icon: "building" }] }));
   }
   function removeImpactStat(i) {
+    if (!confirmDelete("this stat")) return;
     setGlobalMobility((prev) => ({ ...prev, impactStats: (prev.impactStats ?? []).filter((_, idx) => idx !== i) }));
   }
 
@@ -607,6 +612,7 @@ export default function HomePageEditor() {
     setGlobalMobility((prev) => ({ ...prev, mapNodes: [...(prev.mapNodes ?? []), { id: "", label: "", x: 50, y: 50 }] }));
   }
   function removeMapNode(i) {
+    if (!confirmDelete("this location")) return;
     setGlobalMobility((prev) => ({ ...prev, mapNodes: (prev.mapNodes ?? []).filter((_, idx) => idx !== i) }));
   }
   function updateMapLink(i, field, value) {
@@ -619,6 +625,7 @@ export default function HomePageEditor() {
     setGlobalMobility((prev) => ({ ...prev, mapLinks: [...(prev.mapLinks ?? []), { from: "", to: "", curve: -12 }] }));
   }
   function removeMapLink(i) {
+    if (!confirmDelete("this connection")) return;
     setGlobalMobility((prev) => ({ ...prev, mapLinks: (prev.mapLinks ?? []).filter((_, idx) => idx !== i) }));
   }
 
@@ -632,6 +639,7 @@ export default function HomePageEditor() {
     setHalaParkInAction((prev) => ({ ...prev, storeLinks: [...(prev.storeLinks ?? []), { icon: "", alt: "", eyebrow: "Download Now On", label: "" }] }));
   }
   function removeStoreLink(i) {
+    if (!confirmDelete("this store link")) return;
     setHalaParkInAction((prev) => ({ ...prev, storeLinks: (prev.storeLinks ?? []).filter((_, idx) => idx !== i) }));
   }
 
@@ -663,6 +671,7 @@ export default function HomePageEditor() {
   }
 
   function removeSlide(index) {
+    if (!confirmDelete("this slide")) return;
     setSlides((prev) => {
       if (prev.length <= 1) {
         setError("At least one hero slide is required — you can't remove the last one.");
@@ -719,6 +728,7 @@ export default function HomePageEditor() {
     }));
   }
   function removeServiceCard(i) {
+    if (!confirmDelete("this service card")) return;
     setGoodLookingServices((prev) => ({
       ...prev,
       cards: (prev.cards ?? []).filter((_, idx) => idx !== i),
@@ -761,6 +771,7 @@ export default function HomePageEditor() {
     }));
   }
   function removeLogo(i) {
+    if (!confirmDelete("this logo")) return;
     setClientsPartners((prev) => ({
       ...prev,
       logos: (prev.logos ?? []).filter((_, idx) => idx !== i),
@@ -1342,12 +1353,13 @@ export default function HomePageEditor() {
               <div key={i} className="relative grid gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-[140px_1fr]">
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    if (!confirmDelete("this highlight")) return;
                     setWhoWeAre((prev) => ({
                       ...prev,
                       highlights: (prev.highlights ?? []).filter((_, idx) => idx !== i),
-                    }))
-                  }
+                    }));
+                  }}
                   title="Delete highlight"
                   className="absolute right-2 top-2 z-10 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
                 >
@@ -3038,12 +3050,13 @@ export default function HomePageEditor() {
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
+                        if (!confirmDelete("this social link")) return;
                         setPromoPopup((prev) => ({
                           ...prev,
                           socials: (prev.socials ?? []).filter((_, idx) => idx !== i),
-                        }))
-                      }
+                        }));
+                      }}
                       className="rounded-md border border-slate-300 px-2 py-1.5 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600"
                     >
                       Remove

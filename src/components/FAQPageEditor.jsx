@@ -27,6 +27,7 @@ import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/ap
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { confirmDelete } from "../lib/confirmDelete";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -629,7 +630,7 @@ export default function FAQPageEditor() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => removeCategory(categoryIndex)}
+                      onClick={() => { if (!confirmDelete("this category")) return; removeCategory(categoryIndex); }}
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -692,7 +693,7 @@ export default function FAQPageEditor() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => removeQuestion(categoryIndex, itemIndex)}
+                            onClick={() => { if (!confirmDelete("this question")) return; removeQuestion(categoryIndex, itemIndex); }}
                             className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -1071,6 +1072,7 @@ export default function FAQPageEditor() {
                         <button
                           type="button"
                           onClick={() => {
+                            if (!confirmDelete("this video")) return;
                             setNewQuestionForm({
                               ...newQuestionForm,
                               videos: newQuestionForm.videos.filter((_, vi) => vi !== videoIndex),

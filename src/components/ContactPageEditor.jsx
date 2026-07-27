@@ -3,6 +3,7 @@ import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
+import { confirmDelete } from "../lib/confirmDelete";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
 
@@ -521,7 +522,7 @@ export default function ContactPageEditor() {
                   <p className="text-sm font-semibold text-slate-700">Detail {i + 1}</p>
                   <button
                     type="button"
-                    onClick={() => removeDetailItem(i)}
+                    onClick={() => { if (!confirmDelete("this contact detail")) return; removeDetailItem(i); }}
                     className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"
                     title="Delete this detail"
                   >

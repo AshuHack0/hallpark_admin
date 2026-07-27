@@ -6,6 +6,7 @@ import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
+import { confirmDelete } from "../lib/confirmDelete";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -327,6 +328,8 @@ function ArrayItemEditor({ items, onItemsChange, renderItem, defaultItem, title,
   };
 
   const removeItem = (index) => {
+    // eslint-disable-next-line react/prop-types
+    if (!confirmDelete(`this ${title.toLowerCase()}`)) return;
     onItemsChange(items.filter((_, i) => i !== index));
   };
 
@@ -797,7 +800,7 @@ export default function BusinessPageEditor() {
                       ) : (<Upload className="h-3.5 w-3.5" />)}
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeckImageUpload(di, f); e.target.value = ""; }} />
                     </label>
-                    <button type="button" onClick={() => setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).filter((_, idx) => idx !== di) } })} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
+                    <button type="button" onClick={() => { if (!confirmDelete("this deck image")) return; setSections({ ...sections, hero: { ...sections.hero, deckImages: (sections.hero?.deckImages ?? []).filter((_, idx) => idx !== di) } }); }} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -852,7 +855,7 @@ export default function BusinessPageEditor() {
                     <div key={oi} className="flex items-center gap-2">
                       <input value={opt.label ?? ""} onChange={(e) => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).map((o, idx) => idx === oi ? { ...o, label: e.target.value } : o))} className={inputClass} placeholder="Solution name (English)" maxLength={FIELD_LIMITS.item} />
                       <input dir="rtl" value={opt.ar ?? ""} onChange={(e) => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).map((o, idx) => idx === oi ? { ...o, ar: e.target.value } : o))} className={inputClass} style={{ borderColor: "#16a34a" }} placeholder="بالعربية" maxLength={FIELD_LIMITS.item} />
-                      <button type="button" onClick={() => setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).filter((_, idx) => idx !== oi))} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => { if (!confirmDelete("this option")) return; setHeroOptions("proposalOptions", (sections.hero?.proposalOptions ?? []).filter((_, idx) => idx !== oi)); }} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   ))}
                 </div>
@@ -902,7 +905,7 @@ export default function BusinessPageEditor() {
                     <div key={oi} className="flex items-center gap-2">
                       <input value={opt.label ?? ""} onChange={(e) => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).map((o, idx) => idx === oi ? { ...o, label: e.target.value } : o))} className={inputClass} placeholder="Topic (English)" maxLength={FIELD_LIMITS.item} />
                       <input dir="rtl" value={opt.ar ?? ""} onChange={(e) => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).map((o, idx) => idx === oi ? { ...o, ar: e.target.value } : o))} className={inputClass} style={{ borderColor: "#16a34a" }} placeholder="بالعربية" maxLength={FIELD_LIMITS.item} />
-                      <button type="button" onClick={() => setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).filter((_, idx) => idx !== oi))} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => { if (!confirmDelete("this topic")) return; setHeroOptions("consultationTopics", (sections.hero?.consultationTopics ?? []).filter((_, idx) => idx !== oi)); }} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   ))}
                 </div>
@@ -1605,7 +1608,7 @@ export default function BusinessPageEditor() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Stat {i + 1}</p>
                       <button
                         type="button"
-                        onClick={() => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } })}
+                        onClick={() => { if (!confirmDelete("this stat")) return; setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, stats: sections.partnersShowcase.stats.filter((_, idx) => idx !== i) } }); }}
                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -1827,6 +1830,7 @@ export default function BusinessPageEditor() {
                       </label>
                       <button
                         onClick={() => {
+                          if (!confirmDelete("this partner")) return;
                           const updated = sections.partnersShowcase.partners.row1.filter((_, idx) => idx !== i);
                           setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row1: updated } } });
                         }}
@@ -1945,6 +1949,7 @@ export default function BusinessPageEditor() {
                       </label>
                       <button
                         onClick={() => {
+                          if (!confirmDelete("this partner")) return;
                           const updated = sections.partnersShowcase.partners.row2.filter((_, idx) => idx !== i);
                           setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, partners: { ...sections.partnersShowcase.partners, row2: updated } } });
                         }}
@@ -2206,7 +2211,7 @@ export default function BusinessPageEditor() {
                         />
                         <button
                           type="button"
-                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          onClick={() => { if (!confirmDelete("this benefit")) return; setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } }); }}
                           className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -2316,7 +2321,7 @@ export default function BusinessPageEditor() {
                         />
                         <button
                           type="button"
-                          onClick={() => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } })}
+                          onClick={() => { if (!confirmDelete("this benefit")) return; setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } }); }}
                           className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

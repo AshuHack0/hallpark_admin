@@ -3,6 +3,7 @@ import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
+import { confirmDelete } from "../lib/confirmDelete";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
@@ -179,7 +180,7 @@ function ArrayItemEditor({ label, items, onAdd, onRemove, onUpdate, renderItem }
           </div>
           <button
             type="button"
-            onClick={() => onRemove(i)}
+            onClick={() => { if (!confirmDelete(`this ${(label || "item").toLowerCase()}`)) return; onRemove(i); }}
             className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -598,6 +599,18 @@ export default function ServicePageEditor() {
             <CharCount value={hero.chipsMore ?? ""} max={FIELD_LIMITS.label} />
             <ArInput label="Chips More" kind="label" value={hero.ar?.chipsMore} onChange={(v) => updateHero("ar", { ...(hero.ar ?? {}), chipsMore: v })} />
           </div>
+          <div>
+            <label className={labelClass}>&quot;+N More&quot; Pill Link (optional — makes the pill clickable)</label>
+            <input
+              value={hero.chipsMoreLink ?? ""}
+              onChange={(e) => updateHero("chipsMoreLink", e.target.value)}
+              className={inputClass}
+              placeholder="/services or https://…"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(hero.chipsMoreLink ?? "")} />
+            <p className="mt-1 text-[11px] text-slate-400">Leave empty to keep the pill as plain text.</p>
+          </div>
 
           {/* CTA buttons — each shows only when it has a label */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -650,7 +663,7 @@ export default function ServicePageEditor() {
                 <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-[11px] font-semibold text-slate-500">Slide {i + 1}</span>
-                    <button type="button" onClick={() => removeHeroSlide(i)} className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600">
+                    <button type="button" onClick={() => { if (!confirmDelete("this hero slide")) return; removeHeroSlide(i); }} className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600">
                       <Trash2 className="h-3 w-3" /> Remove
                     </button>
                   </div>
@@ -998,7 +1011,7 @@ export default function ServicePageEditor() {
                           />
                           <button
                             type="button"
-                            onClick={() => removeServiceCategory(i, j)}
+                            onClick={() => { if (!confirmDelete("this sub-category")) return; removeServiceCategory(i, j); }}
                             className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -1026,7 +1039,7 @@ export default function ServicePageEditor() {
 
               <button
                 type="button"
-                onClick={() => removeService(i)}
+                onClick={() => { if (!confirmDelete("this service")) return; removeService(i); }}
                 className="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -1125,7 +1138,7 @@ export default function ServicePageEditor() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Partner {i + 1}</p>
                       <button
                         type="button"
-                        onClick={() => removePartner(i)}
+                        onClick={() => { if (!confirmDelete("this partner")) return; removePartner(i); }}
                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -1307,7 +1320,7 @@ export default function ServicePageEditor() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Item {i + 1}</p>
                     <button
                       type="button"
-                      onClick={() => setTrustSection((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                      onClick={() => { if (!confirmDelete("this trust item")) return; setTrustSection((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) })); }}
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete

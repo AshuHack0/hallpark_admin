@@ -5,6 +5,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
+import { confirmDelete } from "../lib/confirmDelete";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { LinesTextarea } from "./ListInput.jsx";
 
@@ -245,7 +246,7 @@ function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, 
                 <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
                   {showStepNumber ? `Step ${i + 1}` : `Item ${i + 1}`}
                 </span>
-                <button type="button" onClick={() => remove(i)} className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100">
+                <button type="button" onClick={() => { if (!confirmDelete(showStepNumber ? "this step" : "this item")) return; remove(i); }} className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100">
                   <Trash2 className="h-3 w-3" /> Delete
                 </button>
               </div>
@@ -1386,7 +1387,7 @@ export default function SolutionPageEditor() {
                           )}
                           <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleShowcaseImageUpload(col, idx, f); e.target.value = ""; }} />
                         </label>
-                        <button type="button" onClick={() => removeShowcaseImage(col, idx)} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
+                        <button type="button" onClick={() => { if (!confirmDelete("this showcase image")) return; removeShowcaseImage(col, idx); }} className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-2 text-red-500 hover:bg-red-100">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -1578,7 +1579,7 @@ export default function SolutionPageEditor() {
                   />
                   <button
                     type="button"
-                    onClick={() => setChallenges((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                    onClick={() => { if (!confirmDelete("this challenge point")) return; setChallenges((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) })); }}
                     className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -1699,6 +1700,7 @@ export default function SolutionPageEditor() {
                     <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
                     <button
                       onClick={() => {
+                        if (!confirmDelete("this solution card")) return;
                         // Deleting a card also deletes its detail page (after
                         // confirming) so orphaned "static" details never pile up.
                         const removeDetailToo =
@@ -1912,10 +1914,10 @@ export default function SolutionPageEditor() {
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-semibold text-slate-600">Advantage {ai + 1}</p>
                     <button
-                      onClick={() => setSolutions((p) => ({
+                      onClick={() => { if (!confirmDelete("this advantage")) return; setSolutions((p) => ({
                         ...p,
                         advantages: { ...p.advantages, items: p.advantages.items.filter((_, idx) => idx !== ai) },
-                      }))}
+                      })); }}
                       className="rounded p-1 text-red-600 transition hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -2053,10 +2055,10 @@ export default function SolutionPageEditor() {
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
                     <button
-                      onClick={() => setIntegration((p) => ({
+                      onClick={() => { if (!confirmDelete("this integration card")) return; setIntegration((p) => ({
                         ...p,
                         cards: p.cards.filter((_, idx) => idx !== i)
-                      }))}
+                      })); }}
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -2272,11 +2274,11 @@ export default function SolutionPageEditor() {
                       <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Point {i + 1}</span>
                       <button
                         type="button"
-                        onClick={() => setTrust((p) => ({
+                        onClick={() => { if (!confirmDelete("this key point")) return; setTrust((p) => ({
                           ...p,
                           keyPoints: (p.keyPoints ?? []).filter((_, idx) => idx !== i),
                           ar: { ...(p.ar ?? {}), keyPoints: (p.ar?.keyPoints ?? []).filter((_, idx) => idx !== i) },
-                        }))}
+                        })); }}
                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
                       >
                         <Trash2 className="h-3 w-3" /> Delete
@@ -2372,7 +2374,7 @@ export default function SolutionPageEditor() {
                       <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Item {i + 1}</span>
                       <button
                         type="button"
-                        onClick={() => setSeamless((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) }))}
+                        onClick={() => { if (!confirmDelete("this integration item")) return; setSeamless((p) => ({ ...p, items: (p.items ?? []).filter((_, idx) => idx !== i) })); }}
                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100"
                       >
                         <Trash2 className="h-3 w-3" /> Delete
@@ -2564,7 +2566,7 @@ export default function SolutionPageEditor() {
                       maxLength={FIELD_LIMITS.item}
                     />
                     <button
-                      onClick={() => setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) }))}
+                      onClick={() => { if (!confirmDelete("this industry")) return; setFeatures((p) => ({ ...p, industries: p.industries.filter((_, idx) => idx !== ii) })); }}
                       className="shrink-0 rounded p-1.5 text-red-600 transition hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -2703,7 +2705,7 @@ export default function SolutionPageEditor() {
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-semibold text-slate-600">Step {si + 1}</p>
                     <button
-                      onClick={() => setDeployment((p) => ({ ...p, steps: p.steps.filter((_, idx) => idx !== si) }))}
+                      onClick={() => { if (!confirmDelete("this deployment step")) return; setDeployment((p) => ({ ...p, steps: p.steps.filter((_, idx) => idx !== si) })); }}
                       className="rounded p-1 text-red-600 transition hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -2877,11 +2879,11 @@ export default function SolutionPageEditor() {
                     />
                     <button
                       type="button"
-                      onClick={() => setWhy((p) => ({
+                      onClick={() => { if (!confirmDelete("this point")) return; setWhy((p) => ({
                         ...p,
                         points: (p.points ?? []).filter((_, idx) => idx !== i),
                         ar: { ...(p.ar ?? {}), points: (p.ar?.points ?? []).filter((_, idx) => idx !== i) },
-                      }))}
+                      })); }}
                       className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

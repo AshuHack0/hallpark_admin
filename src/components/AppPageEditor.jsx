@@ -1381,20 +1381,22 @@ export default function AppPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>Steps (comma-separated)</label>
-                  <input
-                    type="text"
-                    value={Array.isArray(item.steps) ? item.steps.join(", ") : ""}
-                    onChange={(e) => update(i, { steps: e.target.value.split(",").map((s) => s.trim()) })}
+                  {/* keepEmpty preserves EN↔AR index alignment (original parsing
+                      kept empty entries too). */}
+                  <CsvInput
+                    keepEmpty
+                    value={item.steps}
+                    onChange={(steps) => update(i, { steps })}
                     className={inputClass}
                     maxLength={FIELD_LIMITS.subtitle}
                   />
                   <CharCount value={Array.isArray(item.steps) ? item.steps.join(", ") : ""} max={FIELD_LIMITS.subtitle} />
                   <label className={labelClass} style={{ marginTop: 6 }}>Steps — Arabic (comma-separated, same order)</label>
-                  <input
-                    type="text"
-                    dir="rtl"
-                    value={Array.isArray(item.ar?.steps) ? item.ar.steps.join("، ") : ""}
-                    onChange={(e) => update(i, { ar: { ...(item.ar ?? {}), steps: e.target.value.split(/،|,/).map((s) => s.trim()) } })}
+                  <CsvInput
+                    arabic
+                    keepEmpty
+                    value={item.ar?.steps}
+                    onChange={(steps) => update(i, { ar: { ...(item.ar ?? {}), steps } })}
                     className={inputClass}
                     style={{ borderColor: "#16a34a" }}
                     maxLength={FIELD_LIMITS.subtitle}

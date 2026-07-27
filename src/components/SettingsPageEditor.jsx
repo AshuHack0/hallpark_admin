@@ -456,6 +456,26 @@ export default function SettingsPageEditor() {
                 </button>
               </div>
 
+              {/* Optional custom label (EN + AR) — defaults to the store's brand name */}
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                <input
+                  value={store.label ?? ""}
+                  onChange={(e) => setSections((p) => ({ ...p, floatingApp: { ...(p.floatingApp ?? {}), stores: p.floatingApp.stores.map((s, idx) => idx === i ? { ...s, label: e.target.value } : s) } }))}
+                  className={inputClass}
+                  placeholder="Label (optional — defaults to store name)"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <input
+                  dir="rtl"
+                  value={store.ar?.label ?? ""}
+                  onChange={(e) => setSections((p) => ({ ...p, floatingApp: { ...(p.floatingApp ?? {}), stores: p.floatingApp.stores.map((s, idx) => idx === i ? { ...s, ar: { ...(s.ar ?? {}), label: e.target.value } } : s) } }))}
+                  className={inputClass}
+                  style={{ borderColor: "#16a34a" }}
+                  placeholder="التسمية بالعربية (اختياري)"
+                  maxLength={FIELD_LIMITS.label}
+                />
+              </div>
+
               {/* Custom icon (optional — overrides the built-in store glyph) */}
               <div className="mt-2 flex items-center gap-3">
                 <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">

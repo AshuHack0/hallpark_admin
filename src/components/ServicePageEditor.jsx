@@ -257,33 +257,43 @@ function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, 
   );
 }
 
-// Picker for "Other Related Services" — choose other service detail slugs to
-// cross-link. `allDetails` is the full list (options exclude the current one).
-// Only LIVE services are offered — a detail must belong to a current service
-// card (`cardSlugs`); orphaned/seeded detail pages are not selectable.
+// Picker for "Other Related Services" — choose OTHER SERVICES to cross-link.
+// Options come from the services list itself (any service with a slug, except
+// the current one). The public site only renders a related link once that
+// service has its own detail page, so picking one "early" is safe — the link
+// appears when its detail exists.
 // eslint-disable-next-line react/prop-types
-function RelatedServicesPicker({ currentSlug, selected, allDetails, cardSlugs, onChange }) {
+function RelatedServicesPicker({ currentSlug, selected, services, allDetails, onChange }) {
   const chosen = Array.isArray(selected) ? selected : [];
-  const options = (allDetails ?? []).filter(
-    (d) => d.slug && d.slug !== currentSlug && (!cardSlugs || cardSlugs.has(d.slug)),
-  );
+  const detailSlugs = new Set((allDetails ?? []).map((d) => (d?.slug || "").trim()).filter(Boolean));
+  const options = (services ?? [])
+    .map((s) => ({ slug: (s?.slug || "").trim(), name: (s?.name || "").trim() }))
+    .filter((s) => s.slug && s.name && s.slug !== currentSlug);
+  const slugless = (services ?? []).filter((s) => (s?.name || "").trim() && !(s?.slug || "").trim());
   const toggle = (slug) => onChange(chosen.includes(slug) ? chosen.filter((s) => s !== slug) : [...chosen, slug]);
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
       <p className="mb-2 text-xs font-semibold text-slate-600">Pick related services ({chosen.length} selected)</p>
       {options.length === 0 ? (
-        <p className="text-xs text-slate-400">No other services with a detail page yet. Add more first.</p>
+        <p className="text-xs text-slate-400">No other services with a slug yet. Give each service a slug (or open its detail page once to auto-generate it).</p>
       ) : (
         <div className="max-h-44 space-y-1 overflow-y-auto">
-          {options.map((d) => (
-            <label key={d.slug} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-slate-50">
-              <input type="checkbox" checked={chosen.includes(d.slug)} onChange={() => toggle(d.slug)} className="h-4 w-4 accent-[#0088FF]" />
-              <span className="truncate text-slate-700">{d.title || d.slug}</span>
-              <span className="ml-auto shrink-0 text-[10px] text-slate-400">/{d.slug}</span>
+          {options.map((s) => (
+            <label key={s.slug} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-slate-50">
+              <input type="checkbox" checked={chosen.includes(s.slug)} onChange={() => toggle(s.slug)} className="h-4 w-4 accent-[#0088FF]" />
+              <span className="truncate text-slate-700">{s.name}</span>
+              <span className="ml-auto shrink-0 text-[10px] text-slate-400">
+                /{s.slug}{!detailSlugs.has(s.slug) ? " · no detail page yet" : ""}
+              </span>
             </label>
           ))}
         </div>
       )}
+      {slugless.length > 0 ? (
+        <p className="mt-2 text-[11px] text-amber-600">
+          {slugless.length} service{slugless.length === 1 ? " has" : "s have"} no slug and can&apos;t be listed — open their detail page once (auto-generates the slug) or set it manually.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -292,7 +302,7 @@ function RelatedServicesPicker({ currentSlug, selected, allDetails, cardSlugs, o
 // returns it via onSave; the parent merges it into `serviceDetails` (persisted
 // on the page's main "Save Changes").
 // eslint-disable-next-line react/prop-types
-function ServiceDetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClose }) {
+function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, onClose }) {
   const [draft, setDraft] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
@@ -704,8 +714,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave,
           <RelatedServicesPicker
             currentSlug={draft.slug}
             selected={draft.relatedServices ?? []}
+            services={services}
             allDetails={allDetails}
-            cardSlugs={cardSlugs}
             onChange={(slugs) => setField("relatedServices", slugs)}
           />
         </div>
@@ -2289,14 +2299,7 @@ export default function ServicePageEditor() {
           initial={editingDetail.draft}
           isNew={editingDetail.isNew}
           allDetails={serviceDetails}
-          cardSlugs={new Set(
-            services
-              .map((s) => ((s.slug || "").trim() || slugify(s.name || "")).trim())
-              .filter(Boolean)
-              // The service being edited may not have a detail yet, but its
-              // slug is always live once saved.
-              .concat(editingDetail.slug ? [editingDetail.slug] : []),
-          )}
+          services={services}
           onSave={saveDetailFromModal}
           onClose={() => setEditingDetail(null)}
         />

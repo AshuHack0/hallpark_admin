@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown } from "lucide-react";
+import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
@@ -7,6 +7,7 @@ import { confirmDelete } from "../lib/confirmDelete";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
+import { FRONTEND_PAGES } from "../constants/pages.js";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -101,6 +102,635 @@ const DEFAULT_SERVICE = {
   subCategoriesLabel: "",
   subCategories: [],
 };
+
+// Detail (blog-style) pages rendered at /services/[slug]. Empty by default —
+// loadData() pulls the real list from the DB (sections.serviceDetails).
+const DEFAULT_SERVICE_DETAILS = [];
+
+const slugify = (s = "") =>
+  s
+    .toLowerCase()
+    .replace(/&/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+function makeBlankServiceDetail() {
+  return {
+    slug: "",
+    eyebrow: "New Service",
+    image: "/image.png",
+    // 1. Banner
+    title: "New Service",
+    subtitle: "",
+    shortDescription: "",
+    intro: "",
+    ctaLabel: "Contact Us",
+    ctaLink: "/contact",
+    // 2. Why X Matters
+    whyHeading: "",
+    whyBody: "",
+    whyImage: "",
+    // 3. Problem We Face
+    problemHeading: "Problem We Face",
+    problemBody: "",
+    problemImage: "",
+    // 4. Our Solution
+    solutionHeading: "Our Solution",
+    solutionBody: "",
+    solutionImage: "",
+    // 5. Key Benefits — [{ title, description }]
+    benefitsHeading: "Key Benefits",
+    keyBenefits: [],
+    // 6. How It Works — steps [{ title, description }] OR a paragraph
+    howItWorksHeading: "How It Works",
+    howItWorksBody: "",
+    steps: [],
+    // 7. Other Related Services — array of slugs
+    relatedHeading: "Other Related Services",
+    relatedServices: [],
+    ar: {},
+  };
+}
+
+// Reusable page-link picker for CTA link fields. Renders a <select> of the
+// configured FRONTEND_PAGES paths plus an "Other…" option that reveals a free
+// text input — so existing custom/non-listed links are preserved and editable.
+// eslint-disable-next-line react/prop-types
+function PageLinkSelect({ value, onChange }) {
+  const val = value ?? "";
+  const pagePaths = FRONTEND_PAGES.map((p) => p.path);
+  const isKnown = val === "" || pagePaths.includes(val);
+  const [custom, setCustom] = useState(!isKnown);
+  const handleSelect = (e) => {
+    const next = e.target.value;
+    if (next === "__other__") {
+      setCustom(true);
+      return;
+    }
+    setCustom(false);
+    onChange(next);
+  };
+  return (
+    <div className="space-y-2">
+      <select value={custom ? "__other__" : val} onChange={handleSelect} className={inputClass}>
+        <option value="">— Select a page —</option>
+        {FRONTEND_PAGES.map((p) => (
+          <option key={p.slug} value={p.path}>{p.name} ({p.path})</option>
+        ))}
+        <option value="__other__">Other… (custom URL)</option>
+      </select>
+      {custom && (
+        <>
+          <input
+            value={val}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClass}
+            placeholder="/custom-path or https://…"
+            maxLength={FIELD_LIMITS.link}
+          />
+          <FieldError error={validateUrl(val)} />
+        </>
+      )}
+    </div>
+  );
+}
+
+// Editor for a bilingual list of { title, description } objects (Key Benefits,
+// How-It-Works steps). EN fields live on the item; AR fields live on a parallel
+// `ar.<field>` array by index.
+// eslint-disable-next-line react/prop-types
+function ObjListEditor({ label, items, arItems, onItemsChange, onArItemsChange, showStepNumber }) {
+  const list = Array.isArray(items) ? items : [];
+  const arList = Array.isArray(arItems) ? arItems : [];
+  const setItem = (i, patch) => onItemsChange(list.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
+  const setAr = (i, patch) => {
+    const next = [...arList];
+    while (next.length <= i) next.push({});
+    next[i] = { ...(next[i] ?? {}), ...patch };
+    onArItemsChange(next);
+  };
+  const add = () => onItemsChange([...list, { title: "", description: "" }]);
+  const remove = (i) => {
+    onItemsChange(list.filter((_, idx) => idx !== i));
+    onArItemsChange(arList.filter((_, idx) => idx !== i));
+  };
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3" data-item-list-root>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs font-semibold text-slate-600">{label} ({list.length})</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            add();
+            scrollToNewItem(e);
+          }}
+          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add
+        </button>
+      </div>
+      <div className="space-y-3">
+        {list.length === 0 ? (
+          <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400">No items yet.</p>
+        ) : (
+          list.map((item, i) => (
+            <div key={i} data-new-item-row className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                  {showStepNumber ? `Step ${i + 1}` : `Item ${i + 1}`}
+                </span>
+                <button type="button" onClick={() => { if (!confirmDelete(showStepNumber ? "this step" : "this item")) return; remove(i); }} className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100">
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+              <label className={labelClass}>Title</label>
+              <input value={item.title ?? ""} onChange={(e) => setItem(i, { title: e.target.value })} className={inputClass} maxLength={FIELD_LIMITS.heading} />
+              <ArInput label="Title" kind="heading" value={arList[i]?.title} onChange={(v) => setAr(i, { title: v })} />
+              <label className={labelClass} style={{ marginTop: 6 }}>Description</label>
+              <textarea value={item.description ?? ""} onChange={(e) => setItem(i, { description: e.target.value })} className={inputClass} rows={2} maxLength={FIELD_LIMITS.summary} />
+              <ArInput label="Description" kind="summary" multiline value={arList[i]?.description} onChange={(v) => setAr(i, { description: v })} />
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Picker for "Other Related Services" — choose other service detail slugs to
+// cross-link. `allDetails` is the full list (options exclude the current one).
+// Only LIVE services are offered — a detail must belong to a current service
+// card (`cardSlugs`); orphaned/seeded detail pages are not selectable.
+// eslint-disable-next-line react/prop-types
+function RelatedServicesPicker({ currentSlug, selected, allDetails, cardSlugs, onChange }) {
+  const chosen = Array.isArray(selected) ? selected : [];
+  const options = (allDetails ?? []).filter(
+    (d) => d.slug && d.slug !== currentSlug && (!cardSlugs || cardSlugs.has(d.slug)),
+  );
+  const toggle = (slug) => onChange(chosen.includes(slug) ? chosen.filter((s) => s !== slug) : [...chosen, slug]);
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <p className="mb-2 text-xs font-semibold text-slate-600">Pick related services ({chosen.length} selected)</p>
+      {options.length === 0 ? (
+        <p className="text-xs text-slate-400">No other services with a detail page yet. Add more first.</p>
+      ) : (
+        <div className="max-h-44 space-y-1 overflow-y-auto">
+          {options.map((d) => (
+            <label key={d.slug} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-slate-50">
+              <input type="checkbox" checked={chosen.includes(d.slug)} onChange={() => toggle(d.slug)} className="h-4 w-4 accent-[#0088FF]" />
+              <span className="truncate text-slate-700">{d.title || d.slug}</span>
+              <span className="ml-auto shrink-0 text-[10px] text-slate-400">/{d.slug}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Full add/edit modal for a single service detail page. Edits a local draft and
+// returns it via onSave; the parent merges it into `serviceDetails` (persisted
+// on the page's main "Save Changes").
+// eslint-disable-next-line react/prop-types
+function ServiceDetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClose }) {
+  const [draft, setDraft] = useState(initial);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const [err, setErr] = useState("");
+  // Per-field image upload progress, keyed by a progress key (e.g.
+  // "detail-whyImage"). null = idle; a number = uploading at that %.
+  const [fieldUpload, setFieldUpload] = useState({});
+
+  const setField = (field, value) => setDraft((d) => ({ ...d, [field]: value }));
+
+  async function handleUpload(file) {
+    const verr = validateImageFile(file);
+    if (verr) { setErr(verr); return; }
+    setErr("");
+    setUploading(true);
+    setUploadPct(0);
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) => setUploadPct(pct));
+      setField("image", url);
+    } catch {
+      setErr("Image upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  // Upload an image into a named draft field (whyImage / problemImage /
+  // solutionImage), tracking progress under `progressKey`.
+  async function handleFieldUpload(file, field, progressKey) {
+    const verr = validateImageFile(file);
+    if (verr) { setErr(verr); return; }
+    setErr("");
+    setFieldUpload((m) => ({ ...m, [progressKey]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setFieldUpload((m) => ({ ...m, [progressKey]: pct })),
+      );
+      setField(field, url);
+    } catch {
+      setErr("Image upload failed. Please try again.");
+    } finally {
+      setFieldUpload((m) => { const next = { ...m }; delete next[progressKey]; return next; });
+    }
+  }
+
+  function handleSubmit() {
+    if (!draft.slug?.trim()) {
+      setErr("A slug is required (the URL: /services/<slug>).");
+      return;
+    }
+    const cleanedSlug = slugify(draft.slug);
+    onSave({ ...draft, slug: cleanedSlug });
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div>
+            <h3 className="text-lg font-bold text-[#050A13]">
+              {isNew ? "Add Service Detail" : "Edit Service Detail"}
+            </h3>
+            <p className="text-xs text-slate-500">
+              Shown at <code className="rounded bg-slate-100 px-1 py-0.5">/services/{draft.slug || "<slug>"}</code>
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Body (scrollable) */}
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+          {err && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm font-medium text-red-700">
+              {err}
+            </div>
+          )}
+
+          {/* Slug + Eyebrow */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Slug (URL) *</label>
+              <div className="flex gap-2">
+                <input
+                  value={draft.slug ?? ""}
+                  onChange={(e) => setField("slug", e.target.value)}
+                  className={inputClass}
+                  placeholder="valet-service"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <button
+                  type="button"
+                  onClick={() => setField("slug", slugify(draft.title || draft.eyebrow))}
+                  className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:text-[#0088FF]"
+                  title="Generate slug from title"
+                >
+                  Auto
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Eyebrow (card label)</label>
+              <input
+                value={draft.eyebrow ?? ""}
+                onChange={(e) => setField("eyebrow", e.target.value)}
+                className={inputClass}
+                placeholder="Valet Service"
+                maxLength={FIELD_LIMITS.label}
+              />
+              <CharCount value={draft.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Eyebrow" kind="label" value={draft.ar?.eyebrow} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), eyebrow: v })} />
+            </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className={labelClass}>Title</label>
+            <input
+              value={draft.title ?? ""}
+              onChange={(e) => setField("title", e.target.value)}
+              className={inputClass}
+              placeholder="Premium Valet, On Demand"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={draft.title ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Title" kind="heading" value={draft.ar?.title} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), title: v })} />
+          </div>
+
+          {/* ── 1. BANNER ─────────────────────────────────────────────── */}
+          <p className="pt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">1 · Banner</p>
+          <div>
+            <label className={labelClass}>Subtitle (eyebrow above title)</label>
+            <input
+              value={draft.subtitle ?? ""}
+              onChange={(e) => setField("subtitle", e.target.value)}
+              className={inputClass}
+              placeholder="Smart Parking, Made Personal"
+              maxLength={FIELD_LIMITS.subtitle}
+            />
+            <CharCount value={draft.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
+            <ArInput label="Subtitle" kind="subtitle" value={draft.ar?.subtitle} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), subtitle: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Short Description</label>
+            <textarea
+              value={draft.shortDescription ?? ""}
+              onChange={(e) => setField("shortDescription", e.target.value)}
+              className={inputClass}
+              rows={2}
+              placeholder="Book, park, and go — the full service in a few taps..."
+            />
+            <ArInput label="Short Description" kind="long" limit={100000} multiline value={draft.ar?.shortDescription} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), shortDescription: v })} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>CTA Label</label>
+              <input value={draft.ctaLabel ?? ""} onChange={(e) => setField("ctaLabel", e.target.value)} className={inputClass} placeholder="Contact Us" maxLength={FIELD_LIMITS.button} />
+              <CharCount value={draft.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+              <ArInput label="CTA Label" kind="button" value={draft.ar?.ctaLabel} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), ctaLabel: v })} />
+            </div>
+            <div>
+              <label className={labelClass}>CTA Link</label>
+              <PageLinkSelect value={draft.ctaLink} onChange={(v) => setField("ctaLink", v)} />
+            </div>
+          </div>
+
+          {/* Banner Image */}
+          <div>
+            <label className={labelClass}>Banner Image (falls back to the service card&apos;s image)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.image && draft.image !== "/image.png" ? (
+                  <img src={draft.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input
+                  value={draft.image ?? ""}
+                  onChange={(e) => setField("image", e.target.value)}
+                  className={inputClass}
+                  placeholder="Image URL"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(draft.image ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploading ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadPct}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 2. WHY X MATTERS ──────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">2 · Why It Matters</p>
+          <div>
+            <label className={labelClass}>Why Heading</label>
+            <input value={draft.whyHeading ?? ""} onChange={(e) => setField("whyHeading", e.target.value)} className={inputClass} placeholder="Why Valet Service Matters?" maxLength={FIELD_LIMITS.heading} />
+            <CharCount value={draft.whyHeading ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Why Heading" kind="heading" value={draft.ar?.whyHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Why Body (use blank lines to split paragraphs)</label>
+            <textarea value={draft.whyBody ?? ""} onChange={(e) => setField("whyBody", e.target.value)} className={inputClass} rows={5} />
+            <ArInput label="Why Body" kind="long" limit={100000} multiline value={draft.ar?.whyBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), whyBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Why-Section Image (optional — defaults to banner image)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.whyImage ? (
+                  <img src={draft.whyImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.whyImage ?? ""} onChange={(e) => setField("whyImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.whyImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-whyImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-whyImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-whyImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "whyImage", "detail-whyImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 3. PROBLEM WE FACE ────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">3 · Problem We Face</p>
+          <div>
+            <label className={labelClass}>Problem Heading</label>
+            <input value={draft.problemHeading ?? ""} onChange={(e) => setField("problemHeading", e.target.value)} className={inputClass} placeholder="Problem We Face" maxLength={FIELD_LIMITS.heading} />
+            <ArInput label="Problem Heading" kind="heading" value={draft.ar?.problemHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Problem Body (blank lines split paragraphs)</label>
+            <textarea value={draft.problemBody ?? ""} onChange={(e) => setField("problemBody", e.target.value)} className={inputClass} rows={4} />
+            <ArInput label="Problem Body" kind="long" limit={100000} multiline value={draft.ar?.problemBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), problemBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Problem Image (optional)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.problemImage ? (
+                  <img src={draft.problemImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.problemImage ?? ""} onChange={(e) => setField("problemImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.problemImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-problemImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-problemImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-problemImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "problemImage", "detail-problemImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 4. OUR SOLUTION ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">4 · Our Solution</p>
+          <div>
+            <label className={labelClass}>Solution Heading</label>
+            <input value={draft.solutionHeading ?? ""} onChange={(e) => setField("solutionHeading", e.target.value)} className={inputClass} placeholder="Our Solution" maxLength={FIELD_LIMITS.heading} />
+            <ArInput label="Solution Heading" kind="heading" value={draft.ar?.solutionHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionHeading: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Solution Body (blank lines split paragraphs)</label>
+            <textarea value={draft.solutionBody ?? ""} onChange={(e) => setField("solutionBody", e.target.value)} className={inputClass} rows={4} />
+            <ArInput label="Solution Body" kind="long" limit={100000} multiline value={draft.ar?.solutionBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), solutionBody: v })} />
+          </div>
+          <div>
+            <label className={labelClass}>Our Solution Image (optional)</label>
+            <div className="flex items-start gap-3">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                {draft.solutionImage ? (
+                  <img src={draft.solutionImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={draft.solutionImage ?? ""} onChange={(e) => setField("solutionImage", e.target.value)} className={inputClass} placeholder="Image URL" maxLength={FIELD_LIMITS.link} />
+                <FieldError error={validateUrl(draft.solutionImage ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {typeof fieldUpload["detail-solutionImage"] === "number" ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {fieldUpload["detail-solutionImage"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={typeof fieldUpload["detail-solutionImage"] === "number"}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFieldUpload(file, "solutionImage", "detail-solutionImage");
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 5. KEY BENEFITS ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">5 · Key Benefits / What&apos;s Included</p>
+          <div>
+            <label className={labelClass}>Benefits Heading</label>
+            <input value={draft.benefitsHeading ?? ""} onChange={(e) => setField("benefitsHeading", e.target.value)} className={inputClass} placeholder="Key Benefits" maxLength={FIELD_LIMITS.heading} />
+            <ArInput label="Benefits Heading" kind="heading" value={draft.ar?.benefitsHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), benefitsHeading: v })} />
+          </div>
+          <ObjListEditor
+            label="Key Benefits"
+            items={draft.keyBenefits ?? []}
+            arItems={draft.ar?.keyBenefits ?? []}
+            onItemsChange={(items) => setField("keyBenefits", items)}
+            onArItemsChange={(items) => setField("ar", { ...(draft.ar ?? {}), keyBenefits: items })}
+          />
+
+          {/* ── 6. HOW IT WORKS ───────────────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">6 · How It Works</p>
+          <div>
+            <label className={labelClass}>How It Works Heading</label>
+            <input value={draft.howItWorksHeading ?? ""} onChange={(e) => setField("howItWorksHeading", e.target.value)} className={inputClass} placeholder="How It Works" maxLength={FIELD_LIMITS.heading} />
+            <ArInput label="How It Works Heading" kind="heading" value={draft.ar?.howItWorksHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksHeading: v })} />
+          </div>
+          <p className="text-[11px] text-slate-400">Add numbered Steps below, OR leave steps empty and write a single paragraph.</p>
+          <ObjListEditor
+            label="Steps"
+            showStepNumber
+            items={draft.steps ?? []}
+            arItems={draft.ar?.steps ?? []}
+            onItemsChange={(items) => setField("steps", items)}
+            onArItemsChange={(items) => setField("ar", { ...(draft.ar ?? {}), steps: items })}
+          />
+          <div>
+            <label className={labelClass}>How It Works Paragraph (used only if no Steps)</label>
+            <textarea value={draft.howItWorksBody ?? ""} onChange={(e) => setField("howItWorksBody", e.target.value)} className={inputClass} rows={3} />
+            <ArInput label="How It Works Body" kind="long" limit={100000} multiline value={draft.ar?.howItWorksBody} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), howItWorksBody: v })} />
+          </div>
+
+          {/* ── 7. OTHER RELATED SERVICES ─────────────────────────────── */}
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">7 · Other Related Services</p>
+          <div>
+            <label className={labelClass}>Related Heading</label>
+            <input value={draft.relatedHeading ?? ""} onChange={(e) => setField("relatedHeading", e.target.value)} className={inputClass} placeholder="Other Related Services" maxLength={FIELD_LIMITS.heading} />
+            <ArInput label="Related Heading" kind="heading" value={draft.ar?.relatedHeading} onChange={(v) => setField("ar", { ...(draft.ar ?? {}), relatedHeading: v })} />
+          </div>
+          <RelatedServicesPicker
+            currentSlug={draft.slug}
+            selected={draft.relatedServices ?? []}
+            allDetails={allDetails}
+            cardSlugs={cardSlugs}
+            onChange={(slugs) => setField("relatedServices", slugs)}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-5 py-4">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={uploading}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-5 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            {isNew ? "Add detail" : "Apply changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Provides the page's save action to every CollapsibleSection, so each open
 // section shows its own Save button (same action — saves the whole page).
@@ -210,6 +840,9 @@ export default function ServicePageEditor() {
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
   const [quoteForm, setQuoteForm] = useState(DEFAULT_QUOTE_FORM);
   const [gridHeader, setGridHeader] = useState({});
+  const [serviceDetails, setServiceDetails] = useState(DEFAULT_SERVICE_DETAILS);
+  // Detail modal: editingDetail = { slug, draft, isNew } | null
+  const [editingDetail, setEditingDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -252,6 +885,11 @@ export default function ServicePageEditor() {
           ar: { ...DEFAULT_QUOTE_FORM.ar, ...(data.page.sections.quoteForm?.ar ?? {}) },
         });
         setGridHeader(data.page.sections.servicesGridHeader || {});
+        setServiceDetails(
+          Array.isArray(data.page.sections.serviceDetails)
+            ? data.page.sections.serviceDetails
+            : DEFAULT_SERVICE_DETAILS,
+        );
       }
     } catch (err) {
       setError("Failed to load page data");
@@ -277,7 +915,7 @@ export default function ServicePageEditor() {
       setError("");
       setSuccess("");
       await api.updatePage("services", {
-        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader },
+        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader, serviceDetails },
       });
       setSuccess("Service page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -352,6 +990,53 @@ export default function ServicePageEditor() {
 
   function removeService(i) {
     setServices((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  // Open the detail-page editor modal for a given service card. Finds the
+  // matching detail by slug, or seeds a new one from the service's own fields.
+  // Also backfills the service's slug when missing (slugify(name)) — the
+  // detail page is keyed by slug, so a service with no slug can't link to it.
+  function openDetailForService(service, index) {
+    const serviceSlug = (service.slug || "").trim() || slugify(service.name || "");
+    if (!serviceSlug) {
+      setError("Give the service a Name (or Slug) first — the detail page URL is built from it.");
+      return;
+    }
+    if ((service.slug || "").trim() !== serviceSlug) {
+      updateService(index, "slug", serviceSlug);
+    }
+    const existing = serviceDetails.find((d) => d.slug === serviceSlug);
+    if (existing) {
+      setEditingDetail({ slug: serviceSlug, draft: { ...existing }, isNew: false });
+    } else {
+      setEditingDetail({
+        slug: serviceSlug,
+        isNew: true,
+        draft: {
+          ...makeBlankServiceDetail(),
+          slug: serviceSlug,
+          eyebrow: service.name || "New Service",
+          title: service.name || "New Service Detail",
+          intro: service.fullDesc || "",
+          image:
+            service.mediaType !== "video" && (service.mediaSrc || "").trim()
+              ? service.mediaSrc
+              : "/image.png",
+        },
+      });
+    }
+  }
+
+  // Merge the modal's draft back into `serviceDetails` by slug (update or append).
+  function saveDetailFromModal(updated) {
+    setServiceDetails((list) => {
+      const idx = list.findIndex((d) => d.slug === updated.slug);
+      if (idx === -1) return [...list, updated];
+      const next = [...list];
+      next[idx] = updated;
+      return next;
+    });
+    setEditingDetail(null);
   }
 
   function updateServiceIncluded(i, j, value) {
@@ -852,7 +1537,10 @@ export default function ServicePageEditor() {
           </button>
         </div>
 
-        {services.map((service, i) => (
+        {services.map((service, i) => {
+          const serviceSlug = (service.slug || "").trim() || slugify(service.name || "");
+          const hasDetail = Boolean(serviceSlug) && serviceDetails.some((d) => d.slug === serviceSlug);
+          return (
           <CollapsibleSection key={i} title={`Service: ${service.name || `#${i + 1}`}`}>
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
@@ -1058,9 +1746,49 @@ export default function ServicePageEditor() {
                 </>
               )}
 
+              {/* Edit this service's detail page (/services/<slug>) */}
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-[#0088FF]/20 bg-[#F4F9FF] px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-[#0078E0]">
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${hasDetail ? "bg-emerald-500" : "bg-slate-300"}`}
+                      title={hasDetail ? "Has a detail page" : "No detail page yet"}
+                    />
+                    Detail Page
+                  </p>
+                  <p className="truncate text-[11px] text-slate-500">
+                    {hasDetail
+                      ? `Has its own page at /services/${serviceSlug} — edit it.`
+                      : "No detail page yet — the card opens the popup. Add one."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openDetailForService(service, i)}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  {hasDetail ? "Edit Detail Page" : "Add Detail Page"}
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={() => { if (!confirmDelete("this service")) return; removeService(i); }}
+                onClick={() => {
+                  // ONE decision: Cancel anywhere = NOTHING is deleted. A
+                  // service's detail page is deleted along with it so orphaned
+                  // details never pile up.
+                  const ok = hasDetail
+                    ? window.confirm(
+                        `Delete this service AND its detail page (/services/${serviceSlug})?\n\nThis can't be undone after you save the page.`,
+                      )
+                    : confirmDelete("this service");
+                  if (!ok) return;
+                  removeService(i);
+                  if (hasDetail) {
+                    setServiceDetails((list) => list.filter((d) => d.slug !== serviceSlug));
+                  }
+                }}
                 className="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -1068,7 +1796,8 @@ export default function ServicePageEditor() {
               </button>
             </div>
           </CollapsibleSection>
-        ))}
+          );
+        })}
       </div>
 
       {/* PARTNERS SECTION */}
@@ -1554,6 +2283,24 @@ export default function ServicePageEditor() {
         </div>
       </CollapsibleSection>
       </div>
+
+      {editingDetail && (
+        <ServiceDetailEditModal
+          initial={editingDetail.draft}
+          isNew={editingDetail.isNew}
+          allDetails={serviceDetails}
+          cardSlugs={new Set(
+            services
+              .map((s) => ((s.slug || "").trim() || slugify(s.name || "")).trim())
+              .filter(Boolean)
+              // The service being edited may not have a detail yet, but its
+              // slug is always live once saved.
+              .concat(editingDetail.slug ? [editingDetail.slug] : []),
+          )}
+          onSave={saveDetailFromModal}
+          onClose={() => setEditingDetail(null)}
+        />
+      )}
     </div>
     </SectionSaveContext.Provider>
   );

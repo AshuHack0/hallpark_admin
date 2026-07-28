@@ -409,6 +409,19 @@ export default function HomePageEditor() {
     });
   }
 
+  // Services from the Services page — offered as a per-card "fill from" picker
+  // in the Home Services section so the admin doesn't retype existing services.
+  const [availableServices, setAvailableServices] = useState([]);
+  useEffect(() => {
+    api
+      .getPage("services")
+      .then((data) => {
+        const list = data.page?.sections?.services;
+        setAvailableServices(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setAvailableServices([]));
+  }, []);
+
   useEffect(() => {
     document.title = "Home — HalaPark Admin";
     setLoading(true);
@@ -1503,6 +1516,17 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={it.subtitle ?? ""} max={FIELD_LIMITS.subtitle} />
                   <ArInput label="Subtitle" kind="subtitle" multiline value={it.ar?.subtitle} onChange={(v) => updateWhyItem(i, "ar", { ...(it.ar ?? {}), subtitle: v })} />
+                  <div>
+                    <label className={labelClass}>Learn More Link (defaults to /contact)</label>
+                    <input
+                      value={it.href ?? ""}
+                      onChange={(e) => updateWhyItem(i, "href", e.target.value)}
+                      maxLength={FIELD_LIMITS.link}
+                      className={inputClass}
+                      placeholder="/services or https://…"
+                    />
+                    <FieldError error={validateUrl(it.href ?? "")} />
+                  </div>
                   <FieldError error={validateUrl(it.image ?? "")} />
                   <div className="flex items-center gap-2">
                     <input
@@ -1968,6 +1992,55 @@ export default function HomePageEditor() {
                     </button>
                   </div>
                   <div className="grid gap-2">
+                    {availableServices.length > 0 ? (
+                      <div>
+                        <label className={labelClass}>Fill from a Services-page service</label>
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            const svc = availableServices[Number(e.target.value)];
+                            if (!svc) return;
+                            // Copy the picked service into this card (still
+                            // editable afterwards). The card links to that
+                            // service's popup on the Services page.
+                            setGoodLookingServices((p) => ({
+                              ...p,
+                              cards: (p.cards ?? []).map((c, idx) =>
+                                idx === i
+                                  ? {
+                                      ...c,
+                                      slug: svc.slug ?? "",
+                                      name: svc.name ?? "",
+                                      // Services store their text as `fullDesc`
+                                      // (no summary/description2 fields) — map
+                                      // it into both home-card descriptions.
+                                      summary: svc.summary || svc.fullDesc || svc.description || "",
+                                      description2: svc.description2 || svc.summary || svc.fullDesc || "",
+                                      mediaType: svc.mediaType || "image",
+                                      mediaSrc: svc.mediaSrc || "",
+                                      href: svc.slug ? `/services?open=${svc.slug}` : "",
+                                      ar: {
+                                        ...(svc.ar ?? {}),
+                                        summary: svc.ar?.summary || svc.ar?.fullDesc || "",
+                                        description2: svc.ar?.description2 || svc.ar?.summary || svc.ar?.fullDesc || "",
+                                      },
+                                    }
+                                  : c,
+                              ),
+                            }));
+                          }}
+                          className={inputClass}
+                        >
+                          <option value="">— Select a service to copy its content —</option>
+                          {availableServices.map((s, si) =>
+                            (s?.name || "").trim() ? (
+                              <option key={`${s.slug || s.name}-${si}`} value={si}>{s.name}</option>
+                            ) : null,
+                          )}
+                        </select>
+                        <p className="mt-1 text-[11px] text-slate-400">Copies name, descriptions, media and link from the selected service — you can still edit everything after.</p>
+                      </div>
+                    ) : null}
                     <input
                       value={card.name ?? ""}
                       onChange={(e) => updateServiceCard(i, "name", e.target.value)}
@@ -1998,6 +2071,17 @@ export default function HomePageEditor() {
                     />
                     <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description 2 (Arabic)</label>
                     <RichTextArea value={card.ar?.description2 ?? ""} onChange={(v) => updateServiceCard(i, "ar", { ...(card.ar ?? {}), description2: v })} maxLength={FIELD_LIMITS.summary} rows={3} dir="rtl" variant="arabic" />
+                    <div>
+                      <label className={labelClass}>Card Link (arrow / whole card — defaults to /services)</label>
+                      <input
+                        value={card.href ?? ""}
+                        onChange={(e) => updateServiceCard(i, "href", e.target.value)}
+                        maxLength={FIELD_LIMITS.link}
+                        className={inputClass}
+                        placeholder="/services or https://…"
+                      />
+                      <FieldError error={validateUrl(card.href ?? "")} />
+                    </div>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
                         <label className={labelClass}>Slug (link)</label>

@@ -1700,19 +1700,20 @@ export default function SolutionPageEditor() {
                     <p className="text-sm font-semibold text-slate-700">Card {i + 1}</p>
                     <button
                       onClick={() => {
-                        if (!confirmDelete("this solution card")) return;
-                        // Deleting a card also deletes its detail page (after
-                        // confirming) so orphaned "static" details never pile up.
-                        const removeDetailToo =
-                          hasDetail &&
-                          window.confirm(
-                            `This card has a detail page (/solutions/${cardSlug}). Delete the detail page too?\n\nOK = delete both · Cancel = keep the detail page`,
-                          );
+                        // ONE decision: Cancel anywhere = NOTHING is deleted.
+                        // A card's detail page is deleted along with it so
+                        // orphaned "static" details never pile up.
+                        const ok = hasDetail
+                          ? window.confirm(
+                              `Delete this solution card AND its detail page (/solutions/${cardSlug})?\n\nThis can't be undone after you save the page.`,
+                            )
+                          : confirmDelete("this solution card");
+                        if (!ok) return;
                         setSolutions((p) => ({
                           ...p,
                           cards: p.cards.filter((_, idx) => idx !== i)
                         }));
-                        if (removeDetailToo) {
+                        if (hasDetail) {
                           setDetails((list) => list.filter((d) => d.slug !== cardSlug));
                         }
                       }}

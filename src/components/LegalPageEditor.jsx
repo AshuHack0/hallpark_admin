@@ -3,12 +3,13 @@ import { useParams } from "react-router-dom";
 import { Save, Loader2 } from "lucide-react";
 import { api } from "../lib/api";
 import { FIELD_LIMITS, CharCount, ArInput } from "./CappedField";
+import RichHtmlEditor from "./RichHtmlEditor.jsx";
 
 // Shared editor for the long-text legal pages: Terms & Conditions, Privacy
-// Policy, Refund Policy. Each page stores a single `legal` section with a plain
-// text `title` + `body` (and an Arabic sibling under `ar`). The body is a plain
-// textarea with NO character limit — normal users paste long documents; the
-// public page renders it with `whitespace-pre-line` so line breaks are kept.
+// Policy, Refund Policy. Each page stores a single `legal` section with a
+// `title` + rich-HTML `body` (and an Arabic sibling under `ar`), edited with
+// TinyMCE. The public page renders the HTML (with a plain-text fallback for
+// bodies saved before the rich editor existed).
 
 const PAGE_TITLES = {
   "terms-conditions": "Terms & Conditions",
@@ -19,11 +20,6 @@ const PAGE_TITLES = {
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
-// Green RTL Arabic textarea — matches the ArInput look but WITHOUT a maxLength,
-// because legal bodies must not be length-capped.
-const arTextareaClass =
-  "w-full rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-2.5 text-sm text-right outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-300/30";
-
 const DEFAULT_LEGAL = { title: "", body: "", ar: { title: "", body: "" } };
 
 export default function LegalPageEditor() {
@@ -119,31 +115,27 @@ export default function LegalPageEditor() {
         <ArInput label="Page Heading" kind="heading" value={legal.ar?.title} onChange={(v) => setArField("title", v)} />
       </div>
 
-      {/* Body text */}
+      {/* Body — rich text (TinyMCE). Headings, bold, lists, links, tables. */}
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
         <label className={labelClass}>Body Text</label>
         <p className="mb-2 text-xs text-slate-400">
-          Plain text only — no coding needed. Line breaks and blank lines between paragraphs are preserved on the website.
+          Format the document with headings, bold, lists, links and tables — it renders on the website exactly as styled here.
         </p>
-        <textarea
-          className={inputClass}
-          rows={18}
+        <RichHtmlEditor
           value={legal.body ?? ""}
-          onChange={(e) => setField("body", e.target.value)}
+          onChange={(html) => setField("body", html)}
           placeholder={`Paste the ${pageName} text here…`}
         />
 
-        {/* Arabic body — no length cap; blank falls back to nothing (never English). */}
-        <div className="mt-4">
+        {/* Arabic body — blank shows nothing on the Arabic site (never English). */}
+        <div className="mt-6">
           <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
             Body Text (Arabic)
           </label>
-          <textarea
-            dir="rtl"
-            className={arTextareaClass}
-            rows={18}
+          <RichHtmlEditor
+            rtl
             value={legal.ar?.body ?? ""}
-            onChange={(e) => setArField("body", e.target.value)}
+            onChange={(html) => setArField("body", html)}
             placeholder="اتركه فارغًا لعدم عرض النص العربي"
           />
         </div>

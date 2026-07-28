@@ -380,6 +380,48 @@ export default function SettingsPageEditor() {
         </label>
       </div>
 
+      {/* ---------------- Navbar (Get In Touch button) ---------------- */}
+      <div className={cardClass}>
+        <h2 className="mb-4 text-lg font-semibold text-[#050A13]">Navbar — Get In Touch Button</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className={labelClass}>Button Label</span>
+            <input
+              value={sections.navbar?.ctaLabel ?? ""}
+              onChange={(e) => setSections((prev) => ({ ...prev, navbar: { ...(prev.navbar ?? {}), ctaLabel: e.target.value } }))}
+              className={inputClass}
+              placeholder="Get In Touch"
+              maxLength={FIELD_LIMITS.button}
+            />
+            <CharCount value={sections.navbar?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
+          </label>
+          <label className="block">
+            <span className={labelClass}>Button Label (Arabic)</span>
+            <input
+              dir="rtl"
+              value={sections.navbar?.ar?.ctaLabel ?? ""}
+              onChange={(e) => setSections((prev) => ({ ...prev, navbar: { ...(prev.navbar ?? {}), ar: { ...(prev.navbar?.ar ?? {}), ctaLabel: e.target.value } } }))}
+              className={inputClass}
+              style={{ borderColor: "#16a34a" }}
+              placeholder="تواصل معنا"
+              maxLength={FIELD_LIMITS.button}
+            />
+          </label>
+        </div>
+        <label className="mt-4 block">
+          <span className={labelClass}>Button Link</span>
+          <input
+            value={sections.navbar?.ctaLink ?? ""}
+            onChange={(e) => setSections((prev) => ({ ...prev, navbar: { ...(prev.navbar ?? {}), ctaLink: e.target.value } }))}
+            className={inputClass}
+            placeholder="/contact"
+            maxLength={FIELD_LIMITS.link}
+          />
+          <FieldError error={validateUrl(sections.navbar?.ctaLink ?? "")} />
+          <p className="mt-1 text-[11px] text-slate-500">Shown top-right on every page (and inside the mobile menu). Empty fields keep the built-in &quot;Get In Touch&quot; / &quot;تواصل معنا&quot; and /contact link.</p>
+        </label>
+      </div>
+
       {/* ---------------- Floating App Buttons (bottom-right) ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-1 text-lg font-semibold text-[#050A13]">Floating Buttons (bottom-right)</h2>

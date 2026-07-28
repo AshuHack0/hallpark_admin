@@ -5,6 +5,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
+import { scrollToNewItem } from "../lib/scrollToNewItem";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -2164,10 +2165,40 @@ export default function HomePageEditor() {
               <ArInput label="Subtitle" kind="subtitle" multiline value={solutionIntegration.ar?.subtitle} onChange={(v) => setSolutionIntegration((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))} />
             </div>
 
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Solution Cards</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Solution Cards ({(solutionIntegration.solutionCards ?? []).length})</p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  setSolutionIntegration((p) => ({
+                    ...p,
+                    solutionCards: [...(p.solutionCards ?? []), { id: "barrier", title: "", description: "", iconImage: "", href: "", ar: {} }],
+                  }));
+                  scrollToNewItem(e);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Card
+              </button>
+            </div>
             {(solutionIntegration.solutionCards ?? []).map((card, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Card {i + 1}</p>
+              <div key={i} data-new-item-row className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Card {i + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!confirmDelete("this solution card")) return;
+                      setSolutionIntegration((p) => ({
+                        ...p,
+                        solutionCards: (p.solutionCards ?? []).filter((_, idx) => idx !== i),
+                      }));
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
                 <div className="grid gap-2">
                   <input
                     value={card.title ?? ""}

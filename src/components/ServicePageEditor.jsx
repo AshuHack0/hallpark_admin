@@ -97,8 +97,6 @@ const DEFAULT_SERVICE = {
   mediaType: "image",
   mediaSrc: "",
   fullDesc: "",
-  whatsIncluded: [],
-  includedLabel: "What's Included",
   subCategoriesLabel: "",
   subCategories: [],
 };
@@ -668,7 +666,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
           </div>
 
           {/* ── 5. KEY BENEFITS ───────────────────────────────────────── */}
-          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">5 · Key Benefits / What&apos;s Included</p>
+          <p className="pt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0088FF]">5 · Key Benefits</p>
           <div>
             <label className={labelClass}>Benefits Heading</label>
             <input value={draft.benefitsHeading ?? ""} onChange={(e) => setField("benefitsHeading", e.target.value)} className={inputClass} placeholder="Key Benefits" maxLength={FIELD_LIMITS.heading} />
@@ -804,41 +802,6 @@ function EnabledToggle({ section, setSection }) {
       />
       Show this section on the website
     </label>
-  );
-}
-
-function ArrayItemEditor({ label, items, onAdd, onRemove, onUpdate, renderItem }) {
-  return (
-    <div className="space-y-3" data-item-list-root>
-      <div>
-        <label className={labelClass}>{label}</label>
-      </div>
-      {items.map((item, i) => (
-        <div key={i} data-new-item-row className="flex gap-2">
-          <div className="flex-1">
-            {renderItem(item, i, onUpdate)}
-          </div>
-          <button
-            type="button"
-            onClick={() => { if (!confirmDelete(`this ${(label || "item").toLowerCase()}`)) return; onRemove(i); }}
-            className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={(e) => {
-          onAdd();
-          scrollToNewItem(e);
-        }}
-        className="inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]"
-      >
-        <Plus className="h-3.5 w-3.5" />
-        Add {label}
-      </button>
-    </div>
   );
 }
 
@@ -1047,53 +1010,6 @@ export default function ServicePageEditor() {
       return next;
     });
     setEditingDetail(null);
-  }
-
-  function updateServiceIncluded(i, j, value) {
-    setServices((prev) =>
-      prev.map((srv, idx) =>
-        idx === i
-          ? { ...srv, whatsIncluded: srv.whatsIncluded.map((item, jdx) => (jdx === j ? value : item)) }
-          : srv
-      )
-    );
-  }
-
-  // Arabic for a "What's Included" item lives in a parallel array on
-  // `service.ar.whatsIncluded` (Shape A). Blank AR falls back to nothing on the
-  // site (strict Arabic), never the English item.
-  function updateServiceIncludedAr(i, j, value) {
-    setServices((prev) =>
-      prev.map((srv, idx) => {
-        if (idx !== i) return srv;
-        const arList = Array.isArray(srv.ar?.whatsIncluded) ? [...srv.ar.whatsIncluded] : [];
-        while (arList.length <= j) arList.push("");
-        arList[j] = value;
-        return { ...srv, ar: { ...(srv.ar ?? {}), whatsIncluded: arList } };
-      })
-    );
-  }
-
-  function removeServiceIncluded(i, j) {
-    setServices((prev) =>
-      prev.map((srv, idx) => {
-        if (idx !== i) return srv;
-        const arList = Array.isArray(srv.ar?.whatsIncluded) ? srv.ar.whatsIncluded.filter((_, jdx) => jdx !== j) : [];
-        return {
-          ...srv,
-          whatsIncluded: srv.whatsIncluded.filter((_, jdx) => jdx !== j),
-          ar: { ...(srv.ar ?? {}), whatsIncluded: arList },
-        };
-      })
-    );
-  }
-
-  function addServiceIncluded(i) {
-    setServices((prev) =>
-      prev.map((srv, idx) =>
-        idx === i ? { ...srv, whatsIncluded: [...(srv.whatsIncluded || []), ""] } : srv
-      )
-    );
   }
 
   function updateServiceCategory(i, j, field, value) {
@@ -1660,47 +1576,6 @@ export default function ServicePageEditor() {
               {uploadErrors[`service-${i}-image`] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`service-${i}-image`]}</p>
               ) : null}
-
-              <div>
-                <label className={labelClass}>Included Label</label>
-                <input
-                  value={service.includedLabel ?? ""}
-                  onChange={(e) => updateService(i, "includedLabel", e.target.value)}
-                  className={inputClass}
-                  placeholder="What's Included"
-                  maxLength={FIELD_LIMITS.label}
-                />
-                <CharCount value={service.includedLabel ?? ""} max={FIELD_LIMITS.label} />
-                <ArInput label="Included Label" kind="label" value={service.ar?.includedLabel} onChange={(v) => updateService(i, "ar", { ...(service.ar ?? {}), includedLabel: v })} />
-              </div>
-
-              <ArrayItemEditor
-                label="What's Included Items"
-                items={service.whatsIncluded || []}
-                onAdd={() => addServiceIncluded(i)}
-                onRemove={(j) => removeServiceIncluded(i, j)}
-                onUpdate={(j, val) => updateServiceIncluded(i, j, val)}
-                renderItem={(item, j) => (
-                  <>
-                    <textarea
-                      value={item ?? ""}
-                      onChange={(e) => updateServiceIncluded(i, j, e.target.value)}
-                      className={inputClass}
-                      rows={2}
-                      placeholder="Feature item..."
-                      maxLength={FIELD_LIMITS.item}
-                    />
-                    <CharCount value={item ?? ""} max={FIELD_LIMITS.item} />
-                    <ArInput
-                      label="Included Item"
-                      kind="item"
-                      multiline
-                      value={service.ar?.whatsIncluded?.[j]}
-                      onChange={(v) => updateServiceIncludedAr(i, j, v)}
-                    />
-                  </>
-                )}
-              />
 
               {(service.subCategories?.length ?? 0) > 0 && (
                 <>

@@ -1161,6 +1161,34 @@ export default function SolutionPageEditor() {
     }
   }
 
+  // Upload an icon image for an Advantages item, keyed advantage-${i}-icon.
+  async function handleAdvantageIconUpload(index, file) {
+    const key = `advantage-${index}-icon`;
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setSolutions((p) => ({
+        ...p,
+        advantages: {
+          ...(p.advantages ?? { items: [] }),
+          items: (p.advantages?.items ?? []).map((a, i) => (i === index ? { ...a, iconImage: url } : a)),
+        },
+      }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(section, cardIndex, file) {
     const key = `${section}-${cardIndex}`;
     const err = validateImageFile(file);
@@ -1923,6 +1951,55 @@ export default function SolutionPageEditor() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                  </div>
+                  {/* Icon image (shown above the title on the detail pages) */}
+                  <div className="mb-2">
+                    <label className={labelClass}>Icon Image</label>
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {adv.iconImage ? (
+                          <img src={adv.iconImage} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-slate-300">
+                            <ImageIcon className="h-5 w-5" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          value={adv.iconImage ?? ""}
+                          onChange={(e) => setSolutions((p) => ({
+                            ...p,
+                            advantages: { ...p.advantages, items: p.advantages.items.map((a, idx) => idx === ai ? { ...a, iconImage: e.target.value } : a) },
+                          }))}
+                          className={inputClass}
+                          placeholder="Icon image URL"
+                          maxLength={FIELD_LIMITS.link}
+                        />
+                        <FieldError error={validateUrl(adv.iconImage ?? "")} />
+                        <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                          {uploadProgress[`advantage-${ai}-icon`] !== undefined ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> {uploadProgress[`advantage-${ai}-icon`]}%</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" /> Upload image</>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={uploadProgress[`advantage-${ai}-icon`] !== undefined}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleAdvantageIconUpload(ai, file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        {uploadErrors[`advantage-${ai}-icon`] ? (
+                          <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`advantage-${ai}-icon`]}</p>
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
                   <input
                     value={adv.title ?? ""}

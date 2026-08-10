@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, ExternalLink, User, Mail, Phone, MapPin, Briefcase, MessageSquare, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, ExternalLink, User, Mail, Phone, MapPin, Briefcase, MessageSquare, FileText, Calendar, Megaphone } from "lucide-react";
 import { api } from "../lib/api";
 
 const STATUS_OPTIONS = ["new", "reviewed", "contacted", "closed"];
@@ -150,6 +150,8 @@ function ApplicationDetail({ app, onBack, onStatusChange, onDelete }) {
           <DetailField icon={Phone}       label="Phone"     value={app.phone}    href={`tel:${app.phone}`} />
           <DetailField icon={MapPin}      label="Location"  value={app.location} />
           <DetailField icon={Briefcase}   label="Department" value={app.department} />
+          <DetailField icon={Calendar}    label="Birth Date" value={app.birthDate} />
+          <DetailField icon={Megaphone}   label="How did they hear about us?" value={app.hearAbout} />
           {app.linkedIn && (
             <div className="sm:col-span-2">
               <DetailField icon={ExternalLink} label="LinkedIn" value={app.linkedIn} href={app.linkedIn} />

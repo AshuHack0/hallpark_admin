@@ -1552,6 +1552,19 @@ export default function AppPageEditor() {
               <CharCount value={sections.serviceTabs?.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
               <ArInput label="CTA Label" kind="button" value={sections.serviceTabs?.ar?.ctaLabel} onChange={(v) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ar: { ...(sections.serviceTabs?.ar ?? {}), ctaLabel: v } } })} />
             </div>
+            <div>
+              <label className={labelClass}>Main CTA Button Link</label>
+              <input
+                type="text"
+                value={sections.serviceTabs?.ctaLink ?? ""}
+                onChange={(e) => setSections({ ...sections, serviceTabs: { ...sections.serviceTabs, ctaLink: e.target.value } })}
+                className={inputClass}
+                placeholder="/contact or https://…"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <p className="mt-1 text-[11px] text-slate-400">Where the button goes (page path or full URL). Leave blank and the button does nothing on click.</p>
+              <FieldError error={validateUrl(sections.serviceTabs?.ctaLink ?? "")} />
+            </div>
           </div>
         </CollapsibleSection>
 

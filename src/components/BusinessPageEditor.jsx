@@ -2178,6 +2178,37 @@ export default function BusinessPageEditor() {
                   <ArInput label="Parking Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.parkingPartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerSubtitle: v } } })} multiline={false} />
                 </div>
                 <div>
+                  <label className={labelClass}>Background Image (shown in a triangular shape behind the card)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={sections.transformParking.parkingPartnerBgImage ?? ""}
+                      onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerBgImage: e.target.value } })}
+                      className={inputClass}
+                      placeholder="https://… or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("transformParking", "parkingPartnerBgImage", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(sections.transformParking.parkingPartnerBgImage ?? "")} />
+                  {uploadErrors["transformParking-parkingPartnerBgImage"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-parkingPartnerBgImage"]}</p>
+                  ) : null}
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
+                </div>
+                <div>
                   <label className={labelClass}>Description</label>
                   <RichTextArea
                     value={sections.transformParking.parkingPartnerDescription ?? ""}
@@ -2275,6 +2306,37 @@ export default function BusinessPageEditor() {
                   />
                   <CharCount value={sections.transformParking.servicePartnerSubtitle} max={FIELD_LIMITS.subtitle} />
                   <ArInput label="Service Partner Subtitle" kind="subtitle" value={sections.transformParking.ar?.servicePartnerSubtitle} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerSubtitle: v } } })} multiline={false} />
+                </div>
+                <div>
+                  <label className={labelClass}>Background Image (shown in a triangular shape behind the card)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={sections.transformParking.servicePartnerBgImage ?? ""}
+                      onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerBgImage: e.target.value } })}
+                      className={inputClass}
+                      placeholder="https://… or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload("transformParking", "servicePartnerBgImage", file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <FieldError error={validateUrl(sections.transformParking.servicePartnerBgImage ?? "")} />
+                  {uploadErrors["transformParking-servicePartnerBgImage"] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-servicePartnerBgImage"]}</p>
+                  ) : null}
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
                 </div>
                 <div>
                   <label className={labelClass}>Description 1</label>

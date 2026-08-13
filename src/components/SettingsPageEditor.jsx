@@ -854,7 +854,7 @@ export default function SettingsPageEditor() {
           </p>
         </label>
 
-        <label className="mt-4 block">
+        <div className="mt-4 block">
           <span className={labelClass}>QR Code Image (optional — overrides the auto-generated QR)</span>
           <div className="flex items-center gap-2">
             <input
@@ -864,7 +864,7 @@ export default function SettingsPageEditor() {
               placeholder="QR image URL or upload"
               maxLength={FIELD_LIMITS.link}
             />
-            <span className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
+            <label className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
               qrPct !== undefined
                 ? "cursor-not-allowed border-slate-200 text-slate-400"
                 : "cursor-pointer border-[#0088FF]/30 bg-[#EEF6FF] text-[#0088FF] hover:bg-[#dcecff]"
@@ -885,7 +885,7 @@ export default function SettingsPageEditor() {
                   if (file) handleQrUpload(file);
                 }}
               />
-            </span>
+            </label>
           </div>
           <FieldError error={validateUrl(footer.qrImage)} />
           {uploadErrors["footer-qr"] ? (
@@ -894,7 +894,7 @@ export default function SettingsPageEditor() {
           <p className="mt-1 text-[11px] text-slate-500">
             Upload your own QR code image. When empty, a QR is generated automatically from the App Download URL.
           </p>
-        </label>
+        </div>
       </div>
 
       {/* ---------------- Footer: Bottom Bar ---------------- */}

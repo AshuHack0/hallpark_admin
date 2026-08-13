@@ -2396,6 +2396,12 @@ export default function AppPageEditor() {
                         maxLength={FIELD_LIMITS.label}
                       />
                       <CharCount value={item.label ?? ""} max={FIELD_LIMITS.label} />
+                      <ArInput
+                        label="Label"
+                        kind="label"
+                        value={item.ar?.label}
+                        onChange={(v) => update(i, { ar: { ...(item.ar ?? {}), label: v } })}
+                      />
                     </div>
                     <div>
                       <label className={labelClass}>Icon Image</label>

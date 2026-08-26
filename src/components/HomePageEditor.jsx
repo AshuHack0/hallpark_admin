@@ -548,6 +548,31 @@ export default function HomePageEditor() {
     setHowItWorks((prev) => ({ ...prev, steps: (prev.steps ?? []).filter((_, idx) => idx !== i) }));
   }
 
+  // Custom icon upload for a How It Works step. iconImage overrides the
+  // built-in (Search/Book/Park) icon.
+  async function handleHowStepIconUpload(i, file) {
+    const key = `how-step-${i}-icon`;
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      updateHowStep(i, "iconImage", url);
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   function updateBlackBannerCta(i, field, value) {
     setBlackBanner((prev) => ({
       ...prev,
@@ -1817,6 +1842,17 @@ export default function HomePageEditor() {
                   />
                   <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
                   <RichTextArea value={step.ar?.description ?? ""} onChange={(v) => updateHowStep(i, "ar", { ...(step.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+                  <MediaField
+                    label="Custom Icon (optional — overrides the default step icon)"
+                    value={step.iconImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress[`how-step-${i}-icon`] !== undefined}
+                    uploadError={uploadErrors[`how-step-${i}-icon`]}
+                    progress={uploadProgress[`how-step-${i}-icon`]}
+                    onChange={(v) => updateHowStep(i, "iconImage", v)}
+                    onUpload={(file) => handleHowStepIconUpload(i, file)}
+                  />
                 </div>
               </div>
             ))}

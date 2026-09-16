@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import PartnerFormToggle from "./PartnerFormToggle";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -1693,11 +1694,13 @@ export default function HomePageEditor() {
                   />
                   <CharCount value={card.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
                   <ArInput label="CTA Label" kind="button" value={card.ar?.ctaLabel} onChange={(v) => updateAiCard(i, "ar", { ...(card.ar ?? {}), ctaLabel: v })} />
+                  <PartnerFormToggle checked={card.popup} onChange={(v) => updateAiCard(i, "popup", v)} />
                   <input
                     value={card.href ?? ""}
                     onChange={(e) => updateAiCard(i, "href", e.target.value)}
                     maxLength={FIELD_LIMITS.link}
-                    className={inputClass}
+                    className={`${inputClass} ${card.popup ? "opacity-50" : ""}`}
+                    disabled={Boolean(card.popup)}
                     placeholder="Link href"
                   />
                   <CharCount value={card.href ?? ""} max={FIELD_LIMITS.link} />

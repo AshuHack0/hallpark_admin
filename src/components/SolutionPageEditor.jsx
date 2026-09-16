@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import PartnerFormToggle from "./PartnerFormToggle";
 import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -19,7 +20,7 @@ const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em]
 function PageLinkSelect({ value, onChange }) {
   const val = value ?? "";
   const pagePaths = FRONTEND_PAGES.map((p) => p.path);
-  const isKnown = val === "" || pagePaths.includes(val);
+  const isKnown = val === "" || val === "#partner-form" || pagePaths.includes(val);
   const [custom, setCustom] = useState(!isKnown);
   const handleSelect = (e) => {
     const next = e.target.value;
@@ -37,6 +38,7 @@ function PageLinkSelect({ value, onChange }) {
         {FRONTEND_PAGES.map((p) => (
           <option key={p.slug} value={p.path}>{p.name} ({p.path})</option>
         ))}
+        <option value="#partner-form">Partnership Form (opens popup)</option>
         <option value="__other__">Other… (custom URL)</option>
       </select>
       {custom && (
@@ -3157,7 +3159,10 @@ export default function SolutionPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Primary Button Link</label>
-              <PageLinkSelect value={cta.primaryLink} onChange={(v) => setCtA((p) => ({ ...p, primaryLink: v }))} />
+              <PartnerFormToggle checked={cta.primaryPopup} onChange={(v) => setCtA((p) => ({ ...p, primaryPopup: v }))} />
+              {cta.primaryPopup ? null : (
+                <PageLinkSelect value={cta.primaryLink} onChange={(v) => setCtA((p) => ({ ...p, primaryLink: v }))} />
+              )}
             </div>
           </div>
 
@@ -3177,7 +3182,10 @@ export default function SolutionPageEditor() {
             </div>
             <div>
               <label className={labelClass}>Secondary Button Link</label>
-              <PageLinkSelect value={cta.secondaryLink} onChange={(v) => setCtA((p) => ({ ...p, secondaryLink: v }))} />
+              <PartnerFormToggle checked={cta.secondaryPopup} onChange={(v) => setCtA((p) => ({ ...p, secondaryPopup: v }))} />
+              {cta.secondaryPopup ? null : (
+                <PageLinkSelect value={cta.secondaryLink} onChange={(v) => setCtA((p) => ({ ...p, secondaryLink: v }))} />
+              )}
             </div>
           </div>
 

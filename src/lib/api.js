@@ -109,6 +109,13 @@ export const api = {
       body: JSON.stringify({ status }),
     }),
   deleteConsultation: (id) => request(`/api/admin/consultations/${id}`, { method: "DELETE" }),
+  partnerRequests: () => request("/api/admin/partner-requests"),
+  updatePartnerRequestStatus: (id, status) =>
+    request(`/api/admin/partner-requests/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  deletePartnerRequest: (id) => request(`/api/admin/partner-requests/${id}`, { method: "DELETE" }),
 };
 
 /**

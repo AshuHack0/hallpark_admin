@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import PartnerFormToggle from "./PartnerFormToggle";
 import {
   ExternalLink,
   Plus,
@@ -1243,11 +1244,11 @@ export default function AboutPageEditor() {
             </div>
             <PreviewRow
               label="Primary button"
-              value={`${content.cta.primaryCtaText} → ${content.cta.primaryCtaLink}`}
+              value={`${content.cta.primaryCtaText} → ${content.cta.primaryCtaPopup ? "Partnership Form popup" : content.cta.primaryCtaLink}`}
             />
             <PreviewRow
               label="Secondary button"
-              value={`${content.cta.secondaryCtaText} → ${content.cta.secondaryCtaLink}`}
+              value={`${content.cta.secondaryCtaText} → ${content.cta.secondaryCtaPopup ? "Partnership Form popup" : content.cta.secondaryCtaLink}`}
             />
           </div>
         </div>
@@ -1989,12 +1990,17 @@ export default function AboutPageEditor() {
             <CharCount value={ctaForm.primaryCtaText} max={FIELD_LIMITS.button} />
             <ArInput label="Primary CTA" kind="button" value={ctaForm.ar?.primaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), primaryCtaText: v } }))} />
           </label>
+          <PartnerFormToggle
+            checked={ctaForm.primaryCtaPopup}
+            onChange={(v) => setCtaForm((p) => ({ ...p, primaryCtaPopup: v }))}
+          />
           <label className="grid gap-1">
             <span className={labelClass}>Primary button link</span>
             <input
               value={ctaForm.primaryCtaLink}
               onChange={(e) => setCtaForm((p) => ({ ...p, primaryCtaLink: e.target.value }))}
-              className={inputClass}
+              className={`${inputClass} ${ctaForm.primaryCtaPopup ? "opacity-50" : ""}`}
+              disabled={Boolean(ctaForm.primaryCtaPopup)}
               placeholder="/contact"
               maxLength={FIELD_LIMITS.link}
             />
@@ -2012,12 +2018,17 @@ export default function AboutPageEditor() {
             <CharCount value={ctaForm.secondaryCtaText} max={FIELD_LIMITS.button} />
             <ArInput label="Secondary CTA" kind="button" value={ctaForm.ar?.secondaryCtaText} onChange={(v) => setCtaForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), secondaryCtaText: v } }))} />
           </label>
+          <PartnerFormToggle
+            checked={ctaForm.secondaryCtaPopup}
+            onChange={(v) => setCtaForm((p) => ({ ...p, secondaryCtaPopup: v }))}
+          />
           <label className="grid gap-1">
             <span className={labelClass}>Secondary button link</span>
             <input
               value={ctaForm.secondaryCtaLink}
               onChange={(e) => setCtaForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
-              className={inputClass}
+              className={`${inputClass} ${ctaForm.secondaryCtaPopup ? "opacity-50" : ""}`}
+              disabled={Boolean(ctaForm.secondaryCtaPopup)}
               placeholder="/contact"
               maxLength={FIELD_LIMITS.link}
             />

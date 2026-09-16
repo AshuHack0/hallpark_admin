@@ -422,6 +422,66 @@ export default function SettingsPageEditor() {
         </label>
       </div>
 
+      {/* ---------------- Partnership Form (site-wide popup) ---------------- */}
+      <div className={cardClass}>
+        <h2 className="mb-1 text-lg font-semibold text-[#050A13]">Partnership Form (Popup)</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          One reusable &quot;Become a Partner&quot; popup for the whole website. Partner buttons have an
+          <strong> &quot;Open Partnership Form popup&quot;</strong> tick box next to their link — tick it to open this form.
+          For any other button, set its link to <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-[#0088FF]">#partner-form</code>.
+          A shareable link like <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-[#0088FF]">/business#partner-form</code> opens
+          the page with the popup already open. Submissions appear under <strong>Partner Requests</strong>.
+        </p>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0088FF] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+        {[
+          { key: "heading", label: "Popup Heading", placeholder: "Become a Partner", max: FIELD_LIMITS.heading, kind: "heading" },
+          { key: "subtitle", label: "Popup Subtitle", placeholder: "Share a few details and our partnerships team will get in touch.", max: FIELD_LIMITS.subtitle, kind: "subtitle", multiline: true },
+          { key: "successTitle", label: "Success Title", placeholder: "Request Received!", max: FIELD_LIMITS.heading, kind: "heading" },
+          { key: "successMessage", label: "Success Message", placeholder: "Thank you for your interest in partnering with HalaPark…", max: FIELD_LIMITS.description, kind: "description", multiline: true },
+        ].map((f) => (
+          <div key={f.key} className="mb-4">
+            <span className={labelClass}>{f.label}</span>
+            {f.multiline ? (
+              <textarea
+                rows={2}
+                value={sections.partnershipForm?.[f.key] ?? ""}
+                onChange={(e) => setSections((prev) => ({ ...prev, partnershipForm: { ...(prev.partnershipForm ?? {}), [f.key]: e.target.value } }))}
+                className={inputClass}
+                placeholder={f.placeholder}
+                maxLength={f.max}
+              />
+            ) : (
+              <input
+                value={sections.partnershipForm?.[f.key] ?? ""}
+                onChange={(e) => setSections((prev) => ({ ...prev, partnershipForm: { ...(prev.partnershipForm ?? {}), [f.key]: e.target.value } }))}
+                className={inputClass}
+                placeholder={f.placeholder}
+                maxLength={f.max}
+              />
+            )}
+            <CharCount value={sections.partnershipForm?.[f.key] ?? ""} max={f.max} />
+            <ArInput
+              label={f.label}
+              kind={f.kind}
+              multiline={Boolean(f.multiline)}
+              value={sections.partnershipForm?.ar?.[f.key]}
+              onChange={(v) => setSections((prev) => ({ ...prev, partnershipForm: { ...(prev.partnershipForm ?? {}), ar: { ...(prev.partnershipForm?.ar ?? {}), [f.key]: v } } }))}
+            />
+          </div>
+        ))}
+        <p className="text-[11px] text-slate-500">Form fields: Full Name, Company Name, Email Address, Phone Number (+971), How Can We Help?, Supporting Document (optional).</p>
+      </div>
+
       {/* ---------------- Floating App Buttons (bottom-right) ---------------- */}
       <div className={cardClass}>
         <h2 className="mb-1 text-lg font-semibold text-[#050A13]">Floating Buttons (bottom-right)</h2>

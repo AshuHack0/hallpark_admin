@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import PartnerFormToggle from "./PartnerFormToggle";
 import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -1687,11 +1688,16 @@ export default function BusinessPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>CTA Link</label>
+                <PartnerFormToggle
+                  checked={sections.partnersShowcase.ctaPopup}
+                  onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaPopup: v } })}
+                />
                 <input
                   type="text"
                   value={sections.partnersShowcase.ctaLink ?? ""}
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaLink: e.target.value } })}
-                  className={inputClass}
+                  className={`${inputClass} ${sections.partnersShowcase.ctaPopup ? "opacity-50" : ""}`}
+                  disabled={Boolean(sections.partnersShowcase.ctaPopup)}
                   placeholder="/contact"
                   maxLength={FIELD_LIMITS.link}
                 />
@@ -2041,11 +2047,16 @@ export default function BusinessPageEditor() {
               </div>
               <div>
                 <label className={labelClass}>CTA Link</label>
+                <PartnerFormToggle
+                  checked={sections.partnersShowcase.ctaSectionPopup}
+                  onChange={(v) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSectionPopup: v } })}
+                />
                 <input
                   type="text"
                   value={sections.partnersShowcase.ctaSectionLink ?? ""}
                   onChange={(e) => setSections({ ...sections, partnersShowcase: { ...sections.partnersShowcase, ctaSectionLink: e.target.value } })}
-                  className={inputClass}
+                  className={`${inputClass} ${sections.partnersShowcase.ctaSectionPopup ? "opacity-50" : ""}`}
+                  disabled={Boolean(sections.partnersShowcase.ctaSectionPopup)}
                   placeholder="/contact"
                   maxLength={FIELD_LIMITS.link}
                 />
@@ -2266,11 +2277,16 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>CTA Button Link</label>
+                  <PartnerFormToggle
+                    checked={sections.transformParking.parkingPartnerCtaPopup}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaPopup: v } })}
+                  />
                   <input
                     type="text"
                     value={sections.transformParking.parkingPartnerCtaLink ?? ""}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerCtaLink: e.target.value } })}
-                    className={inputClass}
+                    className={`${inputClass} ${sections.transformParking.parkingPartnerCtaPopup ? "opacity-50" : ""}`}
+                    disabled={Boolean(sections.transformParking.parkingPartnerCtaPopup)}
                     maxLength={FIELD_LIMITS.link}
                     placeholder="/contact"
                   />
@@ -2407,11 +2423,16 @@ export default function BusinessPageEditor() {
                 </div>
                 <div>
                   <label className={labelClass}>CTA Button Link</label>
+                  <PartnerFormToggle
+                    checked={sections.transformParking.servicePartnerCtaPopup}
+                    onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaPopup: v } })}
+                  />
                   <input
                     type="text"
                     value={sections.transformParking.servicePartnerCtaLink ?? ""}
                     onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerCtaLink: e.target.value } })}
-                    className={inputClass}
+                    className={`${inputClass} ${sections.transformParking.servicePartnerCtaPopup ? "opacity-50" : ""}`}
+                    disabled={Boolean(sections.transformParking.servicePartnerCtaPopup)}
                     maxLength={FIELD_LIMITS.link}
                     placeholder="/contact"
                   />

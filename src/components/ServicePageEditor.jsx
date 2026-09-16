@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import PartnerFormToggle from "./PartnerFormToggle";
 import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, Pencil, X, ImageIcon } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
@@ -157,7 +158,7 @@ function makeBlankServiceDetail() {
 function PageLinkSelect({ value, onChange }) {
   const val = value ?? "";
   const pagePaths = FRONTEND_PAGES.map((p) => p.path);
-  const isKnown = val === "" || pagePaths.includes(val);
+  const isKnown = val === "" || val === "#partner-form" || pagePaths.includes(val);
   const [custom, setCustom] = useState(!isKnown);
   const handleSelect = (e) => {
     const next = e.target.value;
@@ -175,6 +176,7 @@ function PageLinkSelect({ value, onChange }) {
         {FRONTEND_PAGES.map((p) => (
           <option key={p.slug} value={p.path}>{p.name} ({p.path})</option>
         ))}
+        <option value="#partner-form">Partnership Form (opens popup)</option>
         <option value="__other__">Other… (custom URL)</option>
       </select>
       {custom && (
@@ -1878,17 +1880,22 @@ export default function ServicePageEditor() {
               </div>
               <div>
                 <label className={labelClass}>Link URL</label>
+                <PartnerFormToggle
+                  checked={partnersSection.ctaPopup}
+                  onChange={(v) => setPartnersSection((p) => ({ ...p, ctaPopup: v }))}
+                />
                 <input
                   value={partnersSection.ctaLink ?? ""}
                   onChange={(e) => setPartnersSection((p) => ({ ...p, ctaLink: e.target.value }))}
-                  className={inputClass}
+                  className={`${inputClass} ${partnersSection.ctaPopup ? "opacity-50" : ""}`}
+                  disabled={Boolean(partnersSection.ctaPopup)}
                   placeholder="/contact"
                   maxLength={FIELD_LIMITS.link}
                 />
                 <FieldError error={validateUrl(partnersSection.ctaLink ?? "")} />
               </div>
             </div>
-            <p className="text-[11px] text-slate-400">Leave the fields empty to hide the line. The link opens the Contact page by default — the Contact page itself is editable under its own tab.</p>
+            <p className="text-[11px] text-slate-400">Leave the text fields empty to hide the line. Tick “Open Partnership Form popup” to open the Become a Partner form; otherwise the link opens (Contact page by default).</p>
           </div>
         </div>
       </CollapsibleSection>

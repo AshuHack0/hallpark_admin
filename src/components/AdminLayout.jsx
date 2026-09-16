@@ -6,6 +6,7 @@ import {
   MessageSquare,
   FileSignature,
   CalendarClock,
+  Handshake,
   LogOut,
   Globe,
   ChevronDown,
@@ -65,6 +66,10 @@ export default function AdminLayout() {
           <NavLink to="/consultations" className={navLinkClass}>
             <CalendarClock className="h-4 w-4" />
             Consultations
+          </NavLink>
+          <NavLink to="/partner-requests" className={navLinkClass}>
+            <Handshake className="h-4 w-4" />
+            Partner Requests
           </NavLink>
           <NavLink to="/job-applications" className={navLinkClass}>
             <Briefcase className="h-4 w-4" />

@@ -10,6 +10,7 @@ import JobApplicationsPage from "./pages/JobApplicationsPage.jsx";
 import ContactsPage from "./pages/ContactsPage.jsx";
 import ProposalsPage from "./pages/ProposalsPage.jsx";
 import ConsultationsPage from "./pages/ConsultationsPage.jsx";
+import PartnerRequestsPage from "./pages/PartnerRequestsPage.jsx";
 import PageEditorPage from "./pages/PageEditorPage.jsx";
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="contacts" element={<ContactsPage />} />
           <Route path="proposals" element={<ProposalsPage />} />
           <Route path="consultations" element={<ConsultationsPage />} />
+          <Route path="partner-requests" element={<PartnerRequestsPage />} />
           <Route path="job-applications" element={<JobApplicationsPage />} />
           <Route path="pages/:slug" element={<PageEditorPage />} />
         </Route>

@@ -388,8 +388,14 @@ export default function FAQPageEditor() {
   };
 
   const addQuestion = (categoryIndex) => {
-    const question = newQuestionForm.question.trim() || "New question";
-    const answer = newQuestionForm.answer.trim() || "New answer";
+    const question = newQuestionForm.question.trim();
+    // A cleared answer stays cleared — no placeholder text is written back.
+    const answer = newQuestionForm.answer.trim();
+    if (!question) {
+      setError("Enter a question before saving.");
+      return;
+    }
+    setError("");
     // Persist the modal's own video list; drop rows the user left blank.
     const videos = (Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [])
       .map((v) => (v ?? "").trim())

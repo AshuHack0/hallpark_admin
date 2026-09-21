@@ -334,8 +334,14 @@ export default function PageEditorPage() {
   }
 
   function addQuestion(categoryIndex) {
-    const question = newQuestionForm.question.trim() || "New question";
-    const answer = newQuestionForm.answer.trim() || "New answer";
+    const question = newQuestionForm.question.trim();
+    // A cleared answer stays cleared — no placeholder text is written back.
+    const answer = newQuestionForm.answer.trim();
+    if (!question) {
+      setError("Enter a question before saving.");
+      return;
+    }
+    setError("");
     const videoUrl = newQuestionForm.videoUrl.trim();
     const id = toSlug(question) || `q-${Date.now()}`;
     setFaqCategories((prev) =>

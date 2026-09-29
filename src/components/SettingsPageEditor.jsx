@@ -4,6 +4,7 @@ import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
+import PageLinkSelect from "./PageLinkSelect";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -410,14 +411,11 @@ export default function SettingsPageEditor() {
         </div>
         <label className="mt-4 block">
           <span className={labelClass}>Button Link</span>
-          <input
-            value={sections.navbar?.ctaLink ?? ""}
-            onChange={(e) => setSections((prev) => ({ ...prev, navbar: { ...(prev.navbar ?? {}), ctaLink: e.target.value } }))}
-            className={inputClass}
-            placeholder="/contact"
-            maxLength={FIELD_LIMITS.link}
+          <PageLinkSelect
+            value={sections.navbar?.ctaLink}
+            onChange={(v) => setSections((prev) => ({ ...prev, navbar: { ...(prev.navbar ?? {}), ctaLink: v } }))}
+            inputClass={inputClass}
           />
-          <FieldError error={validateUrl(sections.navbar?.ctaLink ?? "")} />
           <p className="mt-1 text-[11px] text-slate-500">Shown top-right on every page (and inside the mobile menu). Empty fields keep the built-in &quot;Get In Touch&quot; / &quot;تواصل معنا&quot; and /contact link.</p>
         </label>
       </div>
@@ -832,17 +830,14 @@ export default function SettingsPageEditor() {
                 value={link.ar?.label}
                 onChange={(v) => updateQuickLinkAr(index, v)}
               />
-              <label className="mt-3 block">
+              <div className="mt-3 block">
                 <span className={labelClass}>Link URL</span>
-                <input
-                  value={link.href ?? ""}
-                  onChange={(e) => updateQuickLink(index, { href: e.target.value })}
-                  className={inputClass}
-                  placeholder="/about or https://…"
-                  maxLength={FIELD_LIMITS.link}
+                <PageLinkSelect
+                  value={link.href}
+                  onChange={(v) => updateQuickLink(index, { href: v })}
+                  inputClass={inputClass}
                 />
-                <FieldError error={validateUrl(link.href)} />
-              </label>
+              </div>
             </div>
           ))}
         </div>

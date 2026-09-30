@@ -37,6 +37,7 @@ import AppPageEditor from "../components/AppPageEditor.jsx";
 import BusinessPageEditor from "../components/BusinessPageEditor.jsx";
 import ServicePageEditor from "../components/ServicePageEditor.jsx";
 import SolutionPageEditor from "../components/SolutionPageEditor.jsx";
+import ParkingLocationsEditor from "../components/ParkingLocationsEditor.jsx";
 import FAQPageEditor from "../components/FAQPageEditor.jsx";
 import ContactPageEditor from "../components/ContactPageEditor.jsx";
 import SettingsPageEditor from "../components/SettingsPageEditor.jsx";
@@ -150,6 +151,10 @@ export default function PageEditorPage() {
 
   if (slug === "solutions") {
     return <SolutionPageEditor />;
+  }
+
+  if (slug === "parking-locations") {
+    return <ParkingLocationsEditor />;
   }
 
   if (slug === "faqs") {

@@ -54,6 +54,7 @@ export const DEFAULT_CAREERS_SECTIONS = {
     title: "",
     subtitle: "",
     description: "",
+    image: "",
     primaryCtaText: "",
     primaryCtaLink: "",
     secondaryCtaText: "",

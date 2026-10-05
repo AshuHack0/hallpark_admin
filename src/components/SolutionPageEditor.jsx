@@ -582,7 +582,7 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
 
           {/* Banner Image */}
           <div>
-            <label className={labelClass}>Banner Image</label>
+            <label className={labelClass}>Hero / Banner Image (top of the solution page)</label>
             <div className="flex items-start gap-3">
               <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                 {draft.image && draft.image !== "/image.png" ? (

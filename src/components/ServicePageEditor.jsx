@@ -88,6 +88,7 @@ const CATEGORY_OPTIONS = [
   { value: "parking", label: "Parking" },
   { value: "valet", label: "Valet & Access" },
   { value: "care", label: "Vehicle Care" },
+  { value: "technical", label: "Technical Service" },
 ];
 
 const DEFAULT_SERVICE = {

@@ -687,7 +687,7 @@ export default function CareersPageEditor() {
           {/* Hero mosaic images */}
           <div className="mt-4">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <p className={labelClass}>Hero Images (mosaic)</p>
+              <p className={labelClass}>Hero Images (slideshow — each one is a slide)</p>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={addHeroImage} className={btnPrimary}>
                   <Plus className="h-3.5 w-3.5" /> Add Image
@@ -1453,19 +1453,15 @@ export default function CareersPageEditor() {
             <FieldError error={validateUrl(heroForm.secondaryCtaLink ?? "")} />
           </label>
 
-          {/* Hero badges (floating cards over the mosaic) */}
+          {/* Only the team tag still shows on the hero — the We're Hiring and
+              Culture cards were removed from the design. */}
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-              Hero Badges
+              Hero Tag
             </p>
             <div className="grid gap-3">
               {[
-                ["teamTag", "Team tag", "label"],
-                ["hiringTitle", "Hiring title", "heading"],
-                ["hiringSub", "Hiring subtext", "subtitle"],
-                ["cultureTag", "Culture tag", "label"],
-                ["cultureTitle", "Culture title", "heading"],
-                ["cultureSub", "Culture subtext", "subtitle"],
+                ["teamTag", "Team tag (shown on the hero photo)", "label"],
               ].map(([key, label, kind]) => (
                 <label key={key} className="grid gap-1">
                   <span className={labelClass}>{label}</span>

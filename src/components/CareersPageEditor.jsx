@@ -413,6 +413,7 @@ export default function CareersPageEditor() {
     setOpenPositionsForm({
       title: content.openPositions?.title ?? "",
       subtitle: content.openPositions?.subtitle ?? "",
+      image: content.openPositions?.image ?? "",
       ar: content.openPositions?.ar ?? {},
     });
     setOpenPositionsModalOpen(true);
@@ -425,6 +426,7 @@ export default function CareersPageEditor() {
         ...content.openPositions,
         title: openPositionsForm.title.trim() || "Open Positions",
         subtitle: openPositionsForm.subtitle.trim(),
+        image: (openPositionsForm.image ?? "").trim(),
         ar: openPositionsForm.ar,
       },
     };
@@ -1701,6 +1703,50 @@ export default function CareersPageEditor() {
               onChange={(v) => setOpenPositionsForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), subtitle: v } }))}
             />
           </label>
+          <div className="grid gap-1">
+            <span className={labelClass}>Section background image (optional)</span>
+            <div className="flex gap-2">
+              <input
+                value={openPositionsForm.image ?? ""}
+                onChange={(e) => setOpenPositionsForm((p) => ({ ...p, image: e.target.value }))}
+                className={inputClass}
+                placeholder="/your-image.png"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                <Upload className="h-3.5 w-3.5" />
+                {uploadProgress["open-positions-bg"] !== undefined ? `${uploadProgress["open-positions-bg"]}%` : null}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      void uploadImageToKey(file, "open-positions-bg", (u) =>
+                        setOpenPositionsForm((p) => ({ ...p, image: u })),
+                      );
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            <FieldError error={validateUrl(openPositionsForm.image ?? "")} />
+            {uploadErrors["open-positions-bg"] ? (
+              <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["open-positions-bg"]}</p>
+            ) : null}
+            <span className="text-[11px] text-slate-400">
+              Sits behind the whole Open Positions section, under a white wash so the text stays readable. Leave empty for a plain white background.
+            </span>
+            {(openPositionsForm.image ?? "").trim() ? (
+              <img
+                src={openPositionsForm.image}
+                alt=""
+                className="mt-2 h-24 w-auto rounded-lg border border-slate-200 bg-white object-contain p-1"
+              />
+            ) : null}
+          </div>
         </div>
       </Modal>
 

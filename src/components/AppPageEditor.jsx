@@ -18,6 +18,7 @@ const DEFAULT_HERO = {
   description: "",
   image: "",
   phoneImage: "",
+  phoneVideo: "",
   ctaLabel: "",
   ctaHref: "",
   stats: [],
@@ -317,6 +318,32 @@ export default function AppPageEditor() {
     );
   }
 
+  // Same flow as handleImageUpload, but validates and uploads as video so the
+  // phone frame can show a clip instead of a screenshot.
+  async function handleVideoUpload(section, field, file) {
+    const key = `${section}-${field}`;
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setSections((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [field]: url },
+      }));
+      setSuccess("Video uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
+      console.error(uploadErr);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(section, field, file) {
     const key = `${section}-${field}`;
     const err = validateImageFile(file);
@@ -613,6 +640,44 @@ export default function AppPageEditor() {
               {uploadErrors["hero-phoneImage"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-phoneImage"]}</p>
               ) : null}
+            </div>
+
+            {/* Phone video — takes priority over the screenshot when set */}
+            <div>
+              <label className={labelClass}>Phone Video (plays inside the frame)</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sections.hero.phoneVideo ?? ""}
+                  onChange={(e) => setSections({ ...sections, hero: { ...sections.hero, phoneVideo: e.target.value } })}
+                  className={inputClass}
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                  {uploadProgress["hero-phoneVideo"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["hero-phoneVideo"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload</>
+                  )}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleVideoUpload("hero", "phoneVideo", file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+              <FieldError error={validateUrl(sections.hero.phoneVideo)} />
+              {uploadErrors["hero-phoneVideo"] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-phoneVideo"]}</p>
+              ) : null}
+              <p className="mt-1 text-[11px] text-slate-400">
+                Optional. When a video is set it plays in the phone instead of the screenshot (muted, looping). Leave empty to use the screenshot. Max 64&nbsp;MB.
+              </p>
             </div>
 
             {/* Stats editor */}

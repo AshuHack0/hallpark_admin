@@ -915,11 +915,32 @@ export default function ServicePageEditor() {
     }));
   }
   function addHeroSlide() {
-    setHero((prev) => ({ ...prev, slides: [...(prev.slides ?? []), { img: "", name: "", tag: "", ar: {} }] }));
+    setHero((prev) => ({ ...prev, slides: [...(prev.slides ?? []), { img: "", video: "", name: "", tag: "", ar: {} }] }));
   }
   function removeHeroSlide(i) {
     setHero((prev) => ({ ...prev, slides: (prev.slides ?? []).filter((_, idx) => idx !== i) }));
   }
+  // Clip for a hero tile — the image stays as its poster frame.
+  async function handleHeroSlideVideoUpload(i, file) {
+    const key = `hero-slide-video-${i}`;
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      updateHeroSlide(i, { video: url });
+      setSuccess("Video uploaded. Remember to Save.");
+    } catch (e) {
+      setUploadError(key, e.message ?? "Upload failed");
+      console.error(e);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleHeroSlideUpload(i, file) {
     const key = `hero-slide-${i}`;
     const err = validateImageFile(file);
@@ -1287,12 +1308,12 @@ export default function ServicePageEditor() {
           {/* Right-side rotating slides */}
           <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
             <div className="flex items-center justify-between">
-              <label className={labelClass} style={{ margin: 0 }}>Right-side Image Slides</label>
+              <label className={labelClass} style={{ margin: 0 }}>Right-side Service Tiles (image or video)</label>
               <button type="button" onClick={addHeroSlide} className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-700">
                 <Plus className="h-3 w-3" /> Add Slide
               </button>
             </div>
-            <p className="mb-2 mt-1 text-[11px] text-slate-400">The rotating cards on the right of the hero. Each needs an image; name &amp; tag are the caption. No slides = the right visual is hidden.</p>
+            <p className="mb-2 mt-1 text-[11px] text-slate-400">The three portrait tiles on the right of the hero, shown side by side. Each needs an image or a video (portrait clips work best); name &amp; tag are the caption. Only the first three are shown. No slides = the right visual is hidden.</p>
             <div className="space-y-3">
               {(Array.isArray(hero.slides) ? hero.slides : []).map((s, i) => (
                 <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
@@ -1322,6 +1343,28 @@ export default function ServicePageEditor() {
                   </div>
                   {uploadErrors[`hero-slide-${i}`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-slide-${i}`]}</p>
+                  ) : null}
+
+                  <label className={`${labelClass} mt-2`}>Video (optional — plays instead of the image)</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={s.video ?? ""}
+                      onChange={(e) => updateHeroSlide(i, { video: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://… or upload"
+                      maxLength={FIELD_LIMITS.link}
+                    />
+                    <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                      {uploadProgress[`hero-slide-video-${i}`] !== undefined ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`hero-slide-video-${i}`]}%</>
+                      ) : (
+                        <><Upload className="h-3.5 w-3.5" />Upload</>
+                      )}
+                      <input type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleHeroSlideVideoUpload(i, f); e.target.value = ""; }} />
+                    </label>
+                  </div>
+                  {uploadErrors[`hero-slide-video-${i}`] ? (
+                    <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-slide-video-${i}`]}</p>
                   ) : null}
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     <div>

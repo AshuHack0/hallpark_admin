@@ -4,7 +4,7 @@ import { Plus, Trash2, Save, ChevronDown, Loader2, Upload, Pencil, X, ImageIcon 
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
-import { validateUrl, validateImageFile } from "../lib/validators";
+import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { confirmDelete } from "../lib/confirmDelete";
 import { FRONTEND_PAGES } from "../constants/pages.js";
@@ -1186,6 +1186,26 @@ export default function SolutionPageEditor() {
     } catch (err) {
       setUploadError(key, err.message ?? "Upload failed");
       console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // Video for the Deployment Journey panel — same flow as the image upload,
+  // but validated and stored as a video.
+  async function handleDeploymentVideoUpload(file) {
+    const key = "deployment-video";
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setDeployment((p) => ({ ...p, video: url }));
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
     } finally {
       setUploadProgress((p) => ({ ...p, [key]: undefined }));
     }
@@ -2894,6 +2914,35 @@ export default function SolutionPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["deployment-0"]}</p>
                   ) : null}
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <label className={labelClass}>Panel Background Video (optional)</label>
+              <div className="space-y-2">
+                <input
+                  value={deployment.video ?? ""}
+                  onChange={(e) => setDeployment((p) => ({ ...p, video: e.target.value }))}
+                  className={inputClass}
+                  placeholder="Video URL (leave blank to use the image)"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <FieldError error={validateUrl(deployment.video ?? "")} />
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["deployment-video"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["deployment-video"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload video</>
+                  )}
+                  <input type="file" accept="video/*" className="hidden" disabled={uploadProgress["deployment-video"] !== undefined}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeploymentVideoUpload(f); e.target.value = ""; }} />
+                </label>
+                {uploadErrors["deployment-video"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["deployment-video"]}</p>
+                ) : null}
+                <p className="text-[11px] text-slate-400">
+                  When set, this plays in the panel instead of the image (muted, looping). The image above is used as its poster frame. Max 64&nbsp;MB.
+                </p>
               </div>
             </div>
           </div>

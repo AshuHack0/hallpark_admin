@@ -253,6 +253,28 @@ export default function FAQPageEditor() {
     }
   }
 
+  // Photo for the shaped panel on the right of the bottom CTA band.
+  async function handleBottomCtaImageUpload(file) {
+    const key = "bottomCta-image";
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setBottomCta((prev) => ({ ...prev, image: url }));
+      setSuccess("Image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
+      console.error(uploadErr);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleImageUpload(field, file) {
     const key = `hero-${field}`;
     const err = validateImageFile(file);
@@ -808,6 +830,37 @@ export default function FAQPageEditor() {
               <CharCount value={bottomCta.description ?? ""} max={FIELD_LIMITS.description} />
               <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
               <RichTextArea value={bottomCta.ar?.description ?? ""} onChange={(v) => setBottomCta({ ...bottomCta, ar: { ...(bottomCta.ar ?? {}), description: v } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+            </div>
+            <div>
+              <label className={labelClass}>Side Image (optional)</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={bottomCta.image ?? ""}
+                  onChange={(e) => setBottomCta({ ...bottomCta, image: e.target.value })}
+                  className={inputClass}
+                  placeholder="https://… or upload"
+                  maxLength={FIELD_LIMITS.link}
+                />
+                <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                  {uploadProgress["bottomCta-image"] !== undefined ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["bottomCta-image"]}%</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" />Upload</>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBottomCtaImageUpload(f); e.target.value = ""; }} />
+                </label>
+              </div>
+              <FieldError error={validateUrl(bottomCta.image ?? "")} />
+              {uploadErrors["bottomCta-image"] ? (
+                <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["bottomCta-image"]}</p>
+              ) : null}
+              <p className="mt-1 text-[11px] text-slate-400">
+                Shown on the right of the band in a curved panel. Leave empty for the decorative rings and question mark.
+              </p>
+              {(bottomCta.image ?? "").trim() ? (
+                <img src={bottomCta.image} alt="" className="mt-2 h-24 w-auto rounded-lg border border-slate-200 bg-white object-contain p-1" />
+              ) : null}
             </div>
             <div>
               <label className={labelClass}>Contact Button Label</label>

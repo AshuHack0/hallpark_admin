@@ -60,6 +60,7 @@ const DEFAULT_CURRENCY = {
   subtitle: "",
   description: "",
   image: "",
+  video: "",
   cardFeatures: [],
   topUpLabel: "",
   topUpSteps: [],
@@ -1923,6 +1924,42 @@ export default function AppPageEditor() {
                 {uploadErrors["currency-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["currency-image"]}</p>
                 ) : null}
+              </div>
+              <div>
+                <label className={labelClass}>Section Video (plays in the phone)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.currency?.video ?? ""}
+                    onChange={(e) => setSections({ ...sections, currency: { ...sections.currency, video: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    {uploadProgress["currency-video"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["currency-video"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload</>
+                    )}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVideoUpload("currency", "video", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(sections.currency?.video)} />
+                {uploadErrors["currency-video"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["currency-video"]}</p>
+                ) : null}
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Optional. When set it plays in the phone instead of the screenshot (muted, looping). The image above is used as its poster frame. Portrait clips work best. Max 64&nbsp;MB.
+                </p>
               </div>
             </div>
 

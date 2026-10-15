@@ -198,6 +198,9 @@ const DEFAULT_GLOBAL_MOBILITY = {
 
 const DEFAULT_HALAPARK_IN_ACTION = {
   heading: "HalaPark In Action",
+  headingAccent: "",
+  eyebrow: "",
+  downloadLabel: "",
   subtitle: "Experience the future of parking management",
   storeLinks: [
     { icon: "/image--04.png", alt: "App Store", label: "App Store" },
@@ -2819,6 +2822,42 @@ export default function HomePageEditor() {
               />
               <CharCount value={halaParkInAction.heading ?? ""} max={FIELD_LIMITS.heading} />
               <ArInput label="Heading" kind="heading" value={halaParkInAction.ar?.heading} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), heading: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Heading — blue second line</label>
+              <input
+                value={halaParkInAction.headingAccent ?? ""}
+                onChange={(e) => setHalaParkInAction((p) => ({ ...p, headingAccent: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
+                className={inputClass}
+                placeholder="in Action"
+              />
+              <CharCount value={halaParkInAction.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Heading accent" kind="heading" value={halaParkInAction.ar?.headingAccent} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), headingAccent: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Eyebrow (small label above the heading)</label>
+              <input
+                value={halaParkInAction.eyebrow ?? ""}
+                onChange={(e) => setHalaParkInAction((p) => ({ ...p, eyebrow: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="Smart Parking. Real Impact."
+              />
+              <CharCount value={halaParkInAction.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Eyebrow" kind="label" value={halaParkInAction.ar?.eyebrow} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), eyebrow: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Label beside the store buttons</label>
+              <input
+                value={halaParkInAction.downloadLabel ?? ""}
+                onChange={(e) => setHalaParkInAction((p) => ({ ...p, downloadLabel: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="Download the HalaPark App"
+              />
+              <CharCount value={halaParkInAction.downloadLabel ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Download label" kind="label" value={halaParkInAction.ar?.downloadLabel} onChange={(v) => setHalaParkInAction((p) => ({ ...p, ar: { ...(p.ar ?? {}), downloadLabel: v } }))} />
             </div>
             <div>
               <label className={labelClass}>Subtitle</label>

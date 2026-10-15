@@ -57,6 +57,7 @@ const DEFAULT_CTA_SECTION = {
   headingGradient: "Parking?",
   subtitle: "Secure, flexible, and smart parking solutions for businesses, residents, airports, and yearly vehicle storage.",
   ctaLabel: "Get a Quote",
+  image: "",
 };
 
 // The "Get a Quote" popup (opened by Get In Touch / CTA buttons). Structural
@@ -921,6 +922,27 @@ export default function ServicePageEditor() {
     setHero((prev) => ({ ...prev, slides: (prev.slides ?? []).filter((_, idx) => idx !== i) }));
   }
   // Clip for a hero tile — the image stays as its poster frame.
+  // Photo for the curved cutout on the Long-Term Parking band.
+  async function handleCtaImageUpload(file) {
+    const key = "cta-image";
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setCtaSection((p) => ({ ...p, image: url }));
+      setSuccess("Image uploaded. Remember to Save.");
+    } catch (e) {
+      setUploadError(key, e.message ?? "Upload failed");
+      console.error(e);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function handleHeroSlideVideoUpload(i, file) {
     const key = `hero-slide-video-${i}`;
     const err = validateVideoFile(file);
@@ -2133,6 +2155,36 @@ export default function ServicePageEditor() {
             />
             <CharCount value={ctaSection.ctaLabel ?? ""} max={FIELD_LIMITS.button} />
             <ArInput label="CTA Label" kind="button" value={ctaSection.ar?.ctaLabel} onChange={(v) => setCtaSection((p) => ({ ...p, ar: { ...(p.ar ?? {}), ctaLabel: v } }))} />
+          </div>
+          <div>
+            <label className={labelClass}>Side Image (optional)</label>
+            <div className="flex gap-2">
+              <input
+                value={ctaSection.image ?? ""}
+                onChange={(e) => setCtaSection((p) => ({ ...p, image: e.target.value }))}
+                className={inputClass}
+                placeholder="https://… or upload"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                {uploadProgress["cta-image"] !== undefined ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["cta-image"]}%</>
+                ) : (
+                  <><Upload className="h-3.5 w-3.5" />Upload</>
+                )}
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCtaImageUpload(f); e.target.value = ""; }} />
+              </label>
+            </div>
+            <FieldError error={validateUrl(ctaSection.image ?? "")} />
+            {uploadErrors["cta-image"] ? (
+              <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
+            ) : null}
+            <p className="mt-1 text-[11px] text-slate-400">
+              Shown on the right of the band inside a large curved cutout, with the text on the left. Leave empty for the plain band with the “P” watermark.
+            </p>
+            {(ctaSection.image ?? "").trim() ? (
+              <img src={ctaSection.image} alt="" className="mt-2 h-24 w-auto rounded-lg border border-slate-200 bg-white object-contain p-1" />
+            ) : null}
           </div>
         </div>
       </CollapsibleSection>

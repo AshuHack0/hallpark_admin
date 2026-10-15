@@ -137,6 +137,7 @@ export default function CareersPageEditor() {
     applyMode: "form",
     applyLink: "/contact",
     status: "active",
+    image: "",
   });
   const [reasonText, setReasonText] = useState("");
   const [reasonTextAr, setReasonTextAr] = useState("");
@@ -448,6 +449,7 @@ export default function CareersPageEditor() {
       applyMode: "form",
       applyLink: "/contact",
       status: "active",
+      image: "",
       ar: {},
     });
     setJobPostModalOpen(true);
@@ -468,6 +470,7 @@ export default function CareersPageEditor() {
       applyMode: item.applyMode ?? "link",
       applyLink: item.applyLink ?? "/contact",
       status: item.status === "closed" ? "closed" : "active",
+      image: item.image ?? "",
       ar: item.ar ?? {},
     });
     setJobPostModalOpen(true);
@@ -498,6 +501,7 @@ export default function CareersPageEditor() {
       applyMode: jobPostForm.applyMode === "form" ? "form" : "link",
       applyLink: jobPostForm.applyLink.trim() || "/contact",
       status: jobPostForm.status === "closed" ? "closed" : "active",
+      image: (jobPostForm.image ?? "").trim(),
       ar: jobPostForm.ar,
     };
 
@@ -1855,6 +1859,46 @@ export default function CareersPageEditor() {
               onChange={(v) => setJobPostForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), employmentType: v } }))}
             />
           </label>
+          <div className="grid gap-1">
+            <span className={labelClass}>Card photo</span>
+            <div className="flex gap-2">
+              <input
+                value={jobPostForm.image ?? ""}
+                onChange={(e) => setJobPostForm((p) => ({ ...p, image: e.target.value }))}
+                className={inputClass}
+                placeholder="/your-image.png"
+                maxLength={FIELD_LIMITS.link}
+              />
+              <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                <Upload className="h-3.5 w-3.5" />
+                {uploadProgress["job-image"] !== undefined ? `${uploadProgress["job-image"]}%` : null}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      void uploadImageToKey(file, "job-image", (u) =>
+                        setJobPostForm((p) => ({ ...p, image: u })),
+                      );
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            <FieldError error={validateUrl(jobPostForm.image ?? "")} />
+            {uploadErrors["job-image"] ? (
+              <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["job-image"]}</p>
+            ) : null}
+            <span className="text-[11px] text-slate-400">
+              Shown at the top of this job&apos;s card. Leave empty and the card starts with the job title.
+            </span>
+            {(jobPostForm.image ?? "").trim() ? (
+              <img src={jobPostForm.image} alt="" className="mt-2 h-24 w-auto rounded-lg border border-slate-200 bg-white object-contain p-1" />
+            ) : null}
+          </div>
           <label className="grid gap-1">
             <span className={labelClass}>Status</span>
             <select

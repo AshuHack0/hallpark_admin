@@ -118,6 +118,9 @@ const DEFAULT_HOW_IT_WORKS = {
 
 const DEFAULT_BLACK_BANNER = {
   title: "AI-Powered Smart Parking Solutions",
+  titleAccent: "",
+  eyebrow: "",
+  features: [],
   description: "Seamlessly manage parking experiences for both customers and landlords through intelligent automation, real-time insights, and optimized operations designed to improve efficiency and performance.",
   ctas: [
     { label: "View for Customers", href: "/solutions?view=customers" },
@@ -1008,6 +1011,33 @@ export default function HomePageEditor() {
     }
   }
 
+  // Icon for one of the four nodes around the banner's circular image.
+  async function handleBannerFeatureIconUpload(index, file) {
+    const key = `blackBanner-feature-${index}`;
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setBlackBanner((prev) => ({
+        ...prev,
+        features: (prev.features ?? []).map((f, i) => (i === index ? { ...f, iconImage: url } : f)),
+      }));
+      setSuccess("Icon uploaded. Remember to Save.");
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleBlackBannerImageUpload(file) {
     const key = "blackBanner-image";
     const err = validateImageFile(file);
@@ -1882,6 +1912,30 @@ export default function HomePageEditor() {
               <ArInput label="Title" kind="heading" multiline value={blackBanner.ar?.title} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
             </div>
             <div>
+              <label className={labelClass}>Title — light blue second line</label>
+              <input
+                value={blackBanner.titleAccent ?? ""}
+                onChange={(e) => setBlackBanner((p) => ({ ...p, titleAccent: e.target.value }))}
+                maxLength={FIELD_LIMITS.heading}
+                className={inputClass}
+                placeholder="Parking Solutions"
+              />
+              <CharCount value={blackBanner.titleAccent ?? ""} max={FIELD_LIMITS.heading} />
+              <ArInput label="Title accent" kind="heading" value={blackBanner.ar?.titleAccent} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleAccent: v } }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Eyebrow (small label above the title)</label>
+              <input
+                value={blackBanner.eyebrow ?? ""}
+                onChange={(e) => setBlackBanner((p) => ({ ...p, eyebrow: e.target.value }))}
+                maxLength={FIELD_LIMITS.label}
+                className={inputClass}
+                placeholder="Smarter parking for a brighter tomorrow"
+              />
+              <CharCount value={blackBanner.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+              <ArInput label="Eyebrow" kind="label" value={blackBanner.ar?.eyebrow} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), eyebrow: v } }))} />
+            </div>
+            <div>
               <label className={labelClass}>Description</label>
               <RichTextArea
                 value={blackBanner.description ?? ""}
@@ -1891,6 +1945,85 @@ export default function HomePageEditor() {
               />
               <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
               <RichTextArea value={blackBanner.ar?.description ?? ""} onChange={(v) => setBlackBanner((p) => ({ ...p, ar: { ...(p.ar ?? {}), description: v } }))} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+            </div>
+            <div data-item-list-root className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <div>
+                  <p className={labelClass} style={{ margin: 0 }}>Circle Labels (up to 4)</p>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    The labelled icons arranged around the circular banner image. Each needs a label; upload an icon or leave it for the built-in mark.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    setBlackBanner((p) => ({ ...p, features: [...(p.features ?? []), { label: "", iconImage: "", ar: { label: "" } }] }));
+                    scrollToNewItem(e);
+                  }}
+                  disabled={(blackBanner.features ?? []).length >= 4}
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-700 disabled:opacity-40"
+                >
+                  <Plus className="h-3 w-3" /> Add Label
+                </button>
+              </div>
+              <div className="space-y-3">
+                {(blackBanner.features ?? []).map((f, i) => (
+                  <div key={i} data-new-item-row className="rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-500">Label {i + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!confirmDelete("this circle label")) return;
+                          setBlackBanner((p) => ({ ...p, features: (p.features ?? []).filter((_, idx) => idx !== i) }));
+                        }}
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-[11px] text-slate-500 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" /> Remove
+                      </button>
+                    </div>
+                    <input
+                      value={f.label ?? ""}
+                      onChange={(e) => setBlackBanner((p) => ({ ...p, features: (p.features ?? []).map((x, idx) => (idx === i ? { ...x, label: e.target.value } : x)) }))}
+                      className={inputClass}
+                      placeholder="AI Monitoring"
+                      maxLength={FIELD_LIMITS.label}
+                    />
+                    <ArInput
+                      label="Label"
+                      kind="label"
+                      value={f.ar?.label}
+                      onChange={(v) => setBlackBanner((p) => ({ ...p, features: (p.features ?? []).map((x, idx) => (idx === i ? { ...x, ar: { ...(x.ar ?? {}), label: v } } : x)) }))}
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        value={f.iconImage ?? ""}
+                        onChange={(e) => setBlackBanner((p) => ({ ...p, features: (p.features ?? []).map((x, idx) => (idx === i ? { ...x, iconImage: e.target.value } : x)) }))}
+                        className={inputClass}
+                        placeholder="Icon URL (optional)"
+                        maxLength={FIELD_LIMITS.link}
+                      />
+                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                        {uploadProgress[`blackBanner-feature-${i}`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`blackBanner-feature-${i}`]}%</>
+                        ) : (
+                          <><Upload className="h-3.5 w-3.5" />Icon</>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleBannerFeatureIconUpload(i, file); e.target.value = ""; }} />
+                      </label>
+                    </div>
+                    {uploadErrors[`blackBanner-feature-${i}`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`blackBanner-feature-${i}`]}</p>
+                    ) : null}
+                    {(f.iconImage ?? "").trim() ? (
+                      <img src={f.iconImage} alt="" className="mt-2 h-10 w-10 rounded-lg border border-slate-200 bg-white object-contain p-1" />
+                    ) : null}
+                  </div>
+                ))}
+                {(blackBanner.features ?? []).length === 0 ? (
+                  <p className="text-[11px] text-slate-400">No labels yet — the circle shows without them.</p>
+                ) : null}
+              </div>
             </div>
             <div>
               <MediaField

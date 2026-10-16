@@ -1129,6 +1129,27 @@ export default function AppPageEditor() {
                 ) : null}
               </div>
 
+              {/* Floating cards beside the phone — shown unless switched off */}
+              <div>
+                <label className={labelClass}>Cards Beside the Phone</label>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { key: "showBookingBadge", text: "Show \"Live booking · 452 spaces nearby\" card" },
+                    { key: "showBrandBadge", text: "Show \"HalaPark · Mobile ready\" card" },
+                  ].map(({ key, text }) => (
+                    <label key={key} className="flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={sections.platform[key] !== false}
+                        onChange={(e) => setSections({ ...sections, platform: { ...sections.platform, [key]: e.target.checked } })}
+                        className="h-4 w-4 rounded border-slate-300 accent-[#0088FF]"
+                      />
+                      {text}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Website screenshot (shown inside the browser-frame mockup) */}
               <div>
                 <label className={labelClass}>Website Screenshot (replaces the built-in login mockup)</label>

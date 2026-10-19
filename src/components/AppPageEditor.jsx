@@ -72,7 +72,12 @@ const DEFAULT_FEATURE_CARDS = [];
 
 const DEFAULT_HALAPARK_IN_ACTION = {
   title: "HalaPark In Action",
+  headingAccent: "",
+  eyebrow: "",
+  downloadLabel: "",
   subtitle: "Experience the future of parking management",
+  image: "",
+  imageAlt: "",
   storeLinks: [
     { icon: "/image--04.png", alt: "App Store", label: "App Store" },
     { icon: "/image 4.png", alt: "Play Store", label: "Play Store" },
@@ -2343,6 +2348,96 @@ export default function AppPageEditor() {
                 />
                 <CharCount value={sections.halapark?.subtitle} max={FIELD_LIMITS.subtitle} />
                 <ArInput label="Subtitle" kind="subtitle" value={sections.halapark?.ar?.subtitle} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), subtitle: v } } })} />
+              </div>
+              <div>
+                <label className={labelClass}>Heading Accent (blue second line, optional)</label>
+                <input
+                  type="text"
+                  value={sections.halapark?.headingAccent ?? ""}
+                  onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, headingAccent: e.target.value } })}
+                  className={inputClass}
+                  placeholder="in Action"
+                  maxLength={FIELD_LIMITS.heading}
+                />
+                <CharCount value={sections.halapark?.headingAccent ?? ""} max={FIELD_LIMITS.heading} />
+                <ArInput label="Heading Accent" kind="heading" value={sections.halapark?.ar?.headingAccent} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), headingAccent: v } } })} />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Eyebrow (small label above the heading, optional)</label>
+                  <input
+                    type="text"
+                    value={sections.halapark?.eyebrow ?? ""}
+                    onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, eyebrow: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Smart parking. Real impact."
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.halapark?.eyebrow ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Eyebrow" kind="label" value={sections.halapark?.ar?.eyebrow} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), eyebrow: v } } })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Download Label (beside the store buttons, optional)</label>
+                  <input
+                    type="text"
+                    value={sections.halapark?.downloadLabel ?? ""}
+                    onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, downloadLabel: e.target.value } })}
+                    className={inputClass}
+                    placeholder="Download the HalaPark App"
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.halapark?.downloadLabel ?? ""} max={FIELD_LIMITS.label} />
+                  <ArInput label="Download Label" kind="label" value={sections.halapark?.ar?.downloadLabel} onChange={(v) => setSections({ ...sections, halapark: { ...sections.halapark, ar: { ...(sections.halapark?.ar ?? {}), downloadLabel: v } } })} />
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>Image (right side — fills the curved shape)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={sections.halapark?.image ?? ""}
+                    onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, image: e.target.value } })}
+                    className={inputClass}
+                    placeholder="https://… (leave empty to hide the image)"
+                    maxLength={FIELD_LIMITS.link}
+                  />
+                  <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+                    {uploadProgress["halapark-image"] !== undefined ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress["halapark-image"]}%</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" />Upload</>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload("halapark", "image", file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                <FieldError error={validateUrl(sections.halapark?.image ?? "")} />
+                {uploadErrors["halapark-image"] ? (
+                  <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["halapark-image"]}</p>
+                ) : null}
+                {sections.halapark?.image ? (
+                  <img src={sections.halapark.image} alt="" className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover" />
+                ) : null}
+              </div>
+              <div>
+                <label className={labelClass}>Image Alt Text</label>
+                <input
+                  type="text"
+                  value={sections.halapark?.imageAlt ?? ""}
+                  onChange={(e) => setSections({ ...sections, halapark: { ...sections.halapark, imageAlt: e.target.value } })}
+                  className={inputClass}
+                  placeholder="HalaPark app in action"
+                  maxLength={FIELD_LIMITS.label}
+                />
+                <CharCount value={sections.halapark?.imageAlt ?? ""} max={FIELD_LIMITS.label} />
               </div>
             </div>
 

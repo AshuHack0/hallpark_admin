@@ -34,6 +34,9 @@ const DEFAULT_FOOTER = {
   appHeading: "",
   appText: "",
   appDownloadUrl: "",
+  appStoreUrl: "",
+  playStoreUrl: "",
+  appGalleryUrl: "",
   rights: "",
   dataSafe: "",
   uaeProud: "",
@@ -895,7 +898,7 @@ export default function SettingsPageEditor() {
         />
 
         <label className="mt-4 block">
-          <span className={labelClass}>App Download URL</span>
+          <span className={labelClass}>QR Code Link</span>
           <input
             value={footer.appDownloadUrl ?? ""}
             onChange={(e) => setFooter({ appDownloadUrl: e.target.value })}
@@ -905,9 +908,49 @@ export default function SettingsPageEditor() {
           />
           <FieldError error={validateUrl(footer.appDownloadUrl)} />
           <p className="mt-1 text-[11px] text-slate-500">
-            Drives the QR code and store links. Leave empty to hide the app column.
+            The link the QR code opens (e.g. a single page that sends users to the right store). Leave empty to hide the QR.
           </p>
         </label>
+
+        {/* One link per store badge — a badge only shows when its link is set. */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <label className="block">
+            <span className={labelClass}>Apple App Store URL</span>
+            <input
+              value={footer.appStoreUrl ?? ""}
+              onChange={(e) => setFooter({ appStoreUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://apps.apple.com/…"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(footer.appStoreUrl)} />
+          </label>
+          <label className="block">
+            <span className={labelClass}>Google Play Store URL</span>
+            <input
+              value={footer.playStoreUrl ?? ""}
+              onChange={(e) => setFooter({ playStoreUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://play.google.com/store/apps/…"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(footer.playStoreUrl)} />
+          </label>
+          <label className="block">
+            <span className={labelClass}>Huawei AppGallery URL</span>
+            <input
+              value={footer.appGalleryUrl ?? ""}
+              onChange={(e) => setFooter({ appGalleryUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://appgallery.huawei.com/…"
+              maxLength={FIELD_LIMITS.link}
+            />
+            <FieldError error={validateUrl(footer.appGalleryUrl)} />
+          </label>
+        </div>
+        <p className="mt-1 text-[11px] text-slate-500">
+          Each store badge links to its own URL and is hidden when that URL is empty. The app column hides when no link is set at all.
+        </p>
 
         <div className="mt-4 block">
           <span className={labelClass}>QR Code Image (optional — overrides the auto-generated QR)</span>

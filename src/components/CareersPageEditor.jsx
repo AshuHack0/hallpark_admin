@@ -1057,6 +1057,36 @@ export default function CareersPageEditor() {
             />
           </label>
         </div>
+          <div>
+            <label className={labelClass}>Roles box label (shown inside every card, e.g. &quot;Opportunities:&quot;)</label>
+            <input
+              value={content.opportunitiesHeader?.rolesLabel ?? ""}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: { ...(prev.opportunitiesHeader ?? {}), rolesLabel: e.target.value },
+                }))
+              }
+              className={inputClass}
+              placeholder="Opportunities:"
+              maxLength={FIELD_LIMITS.label}
+            />
+            <CharCount value={content.opportunitiesHeader?.rolesLabel ?? ""} max={FIELD_LIMITS.label} />
+            <ArInput
+              label="Roles box label"
+              kind="label"
+              value={content.opportunitiesHeader?.ar?.rolesLabel}
+              onChange={(v) =>
+                setContent((prev) => ({
+                  ...prev,
+                  opportunitiesHeader: {
+                    ...(prev.opportunitiesHeader ?? {}),
+                    ar: { ...(prev.opportunitiesHeader?.ar ?? {}), rolesLabel: v },
+                  },
+                }))
+              }
+            />
+          </div>
 
         {/* Opportunities */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -1162,6 +1192,39 @@ export default function CareersPageEditor() {
                     <RichTextArea value={item.description ?? ""} onChange={(v) => updateOpportunity(i, "description", v)} maxLength={FIELD_LIMITS.description} rows={3} />
                     <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Description (Arabic)</label>
                     <RichTextArea value={item.ar?.description ?? ""} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), description: v })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Roles list (shown in the &quot;Opportunities:&quot; box)</label>
+                    <input value={item.roles ?? ""} onChange={(e) => updateOpportunity(i, "roles", e.target.value)} className={inputClass} placeholder="Valet Driver, Valet Team Leader, Site Supervisor" maxLength={FIELD_LIMITS.subtitle} />
+                    <CharCount value={item.roles ?? ""} max={FIELD_LIMITS.subtitle} />
+                    <ArInput label="Roles list" kind="subtitle" value={item.ar?.roles} onChange={(v) => updateOpportunity(i, "ar", { ...(item.ar ?? {}), roles: v })} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Card Photo (fades in from the right, optional)</label>
+                    <div className="flex items-center gap-2">
+                      {item.image ? (
+                        <img src={item.image} alt={`Opportunity ${i + 1} photo`} className="h-10 w-16 shrink-0 rounded-lg border border-slate-200 bg-white object-cover" />
+                      ) : null}
+                      <input value={item.image ?? ""} onChange={(e) => updateOpportunity(i, "image", e.target.value)} className={inputClass} placeholder="https://… (leave empty for a plain pastel card)" maxLength={FIELD_LIMITS.link} />
+                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                        <Upload className="h-3.5 w-3.5" />
+                        {uploadProgress[`opp-${i}-image`] !== undefined ? `${uploadProgress[`opp-${i}-image`]}%` : "Upload"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) void uploadImageToKey(file, `opp-${i}-image`, (u) => updateOpportunity(i, "image", u));
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <FieldError error={validateUrl(item.image ?? "")} />
+                    {uploadErrors[`opp-${i}-image`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`opp-${i}-image`]}</p>
+                    ) : null}
                   </div>
                 </div>
               </div>

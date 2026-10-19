@@ -79,6 +79,7 @@ const DEFAULT_CTA = {
   primaryLink: "",
   secondaryLabel: "",
   secondaryLink: "",
+  image: "",
   ar: { heading: "", headingGradient: "", description: "", primaryLabel: "", secondaryLabel: "" },
 };
 
@@ -1327,6 +1328,20 @@ export default function ParkingLocationsEditor() {
             </div>
           </div>
           <p className="mt-2 text-[11px] text-slate-400">Each button shows only when it has both text and a link.</p>
+          <div className="mt-4">
+            <MediaField
+              label="Side image (optional)"
+              value={sections.cta.image}
+              uploading={uploadProgress["cta-image"] !== undefined}
+              progress={uploadProgress["cta-image"] ?? 0}
+              uploadError={uploadErrors["cta-image"]}
+              onChange={(v) => setSection("cta", (p) => ({ ...p, image: v }))}
+              onUpload={(file) =>
+                handleUpload("cta-image", file, (url) => setSection("cta", (p) => ({ ...p, image: url })))
+              }
+              hint="Shown on the right in a curved container, with the message and buttons on the left. Leave empty for the centred layout."
+            />
+          </div>
         </CollapsibleSection>
       </div>
     </SectionSaveContext.Provider>

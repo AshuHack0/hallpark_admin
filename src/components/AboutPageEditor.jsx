@@ -1297,6 +1297,18 @@ export default function AboutPageEditor() {
             <ArInput label="Title" kind="heading" value={heroForm.ar?.title} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), title: v } }))} />
           </label>
           <label className="grid gap-1">
+            <span className={labelClass}>Title Accent (blue second line, optional)</span>
+            <input
+              value={heroForm.titleAccent ?? ""}
+              onChange={(e) => setHeroForm((p) => ({ ...p, titleAccent: e.target.value }))}
+              className={inputClass}
+              placeholder="Beyond Expectations"
+              maxLength={FIELD_LIMITS.heading}
+            />
+            <CharCount value={heroForm.titleAccent ?? ""} max={FIELD_LIMITS.heading} />
+            <ArInput label="Title Accent" kind="heading" value={heroForm.ar?.titleAccent} onChange={(v) => setHeroForm((p) => ({ ...p, ar: { ...(p.ar ?? {}), titleAccent: v } }))} />
+          </label>
+          <label className="grid gap-1">
             <span className={labelClass}>Tagline</span>
             <input
               value={heroForm.tagline}

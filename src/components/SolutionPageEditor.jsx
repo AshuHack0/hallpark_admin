@@ -2597,7 +2597,7 @@ export default function SolutionPageEditor() {
 
           {/* Background image */}
           <div>
-            <label className={labelClass}>Background Image</label>
+            <label className={labelClass}>Section Image (shown whole in a framed block under the heading — never cropped)</label>
             <div className="flex items-start gap-3">
               <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                 {features.image && features.image !== "/image.png" ? (

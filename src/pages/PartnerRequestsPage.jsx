@@ -142,11 +142,17 @@ function PartnerRequestDetail({ item, onBack, onStatusChange, onDelete }) {
           <DetailField icon={Phone}             label="Phone"        value={item.phone} href={`tel:${(item.phone || "").replace(/\s+/g, "")}`} />
           <DetailField icon={Building2}         label="Company"      value={item.companyName} />
           <DetailField icon={MousePointerClick} label="Opened From"  value={item.source} />
-          {item.document?.url && (
-            <div className="sm:col-span-2">
-              <DetailField icon={Paperclip} label="Supporting Document" value={item.document.name || "View document"} href={item.document.url} />
-            </div>
-          )}
+          {/* Up to 5 documents (new) — plus the legacy single `document` on older records */}
+          {(() => {
+            const docs = [...(Array.isArray(item.documents) ? item.documents : []), ...(item.document?.url ? [item.document] : [])].filter((d) => d?.url);
+            return docs.length > 0 ? (
+              <div className="sm:col-span-2 space-y-2">
+                {docs.map((d, i) => (
+                  <DetailField key={`${d.url}-${i}`} icon={Paperclip} label={docs.length > 1 ? `Supporting Document ${i + 1}` : "Supporting Document"} value={d.name || "View document"} href={d.url} />
+                ))}
+              </div>
+            ) : null;
+          })()}
           {item.message && (
             <div className="sm:col-span-2">
               <div className="flex items-start gap-3">
@@ -257,7 +263,12 @@ export default function PartnerRequestsPage() {
                     <td className="px-4 py-3 text-slate-600">{p.phone}</td>
                     <td className="max-w-[220px] truncate px-4 py-3 text-xs text-slate-500">{p.source || "—"}</td>
                     <td className="px-4 py-3 text-slate-600">
-                      {p.document?.url ? <Paperclip className="h-4 w-4 text-[#0088FF]" aria-label="Has document" /> : "—"}
+                      {(() => {
+                        const n = (Array.isArray(p.documents) ? p.documents.filter((d) => d?.url).length : 0) + (p.document?.url ? 1 : 0);
+                        return n > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-[#0088FF]"><Paperclip className="h-4 w-4" aria-label="Has documents" />{n > 1 ? n : ""}</span>
+                        ) : "—";
+                      })()}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
                     <td className="px-4 py-3 text-xs text-slate-400">{new Date(p.createdAt).toLocaleDateString()}</td>

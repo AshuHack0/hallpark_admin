@@ -1145,6 +1145,12 @@ export default function HomePageEditor() {
       setError(`Global Mobility map connection ${badLink + 1} needs valid From and To locations — pick existing locations or delete the row.`);
       return;
     }
+    // A line from a location to itself has zero length and draws nothing.
+    const selfLink = gmLinks.findIndex((l) => l.from === l.to);
+    if (selfLink !== -1) {
+      setError(`Global Mobility map connection ${selfLink + 1} has the same From and To location — choose two different locations.`);
+      return;
+    }
     const globalMobilityClean = { ...globalMobility, mapNodes: gmNodes, mapLinks: gmLinks };
     setSaving(true);
     try {

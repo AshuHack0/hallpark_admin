@@ -11,6 +11,7 @@
 export const DEFAULT_ABOUT_SECTIONS = {
   hero: {
     title: "",
+    titleAccent: "",
     tagline: "",
     description: "",
     images: [],

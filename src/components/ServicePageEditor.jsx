@@ -83,14 +83,23 @@ const TRUST_ICON_OPTIONS = [
   { value: "Lock", label: "Lock (Secure Access)" },
 ];
 
-// Tab-bar categories for the public Services page. The website builds the tab
-// bar dynamically from the categories actually used by the services.
-const CATEGORY_OPTIONS = [
-  { value: "parking", label: "Parking" },
-  { value: "valet", label: "Valet & Access" },
-  { value: "care", label: "Vehicle Care" },
-  { value: "technical", label: "Technical Service" },
+// Tab-bar categories for the public Services page are editable (section
+// `serviceCategories`). These are only the starting list for a page that has
+// never saved any. The website shows a tab only when it has services.
+const DEFAULT_SERVICE_CATEGORIES = [
+  { key: "parking", label: "Parking", ar: { label: "ركن السيارات" } },
+  { key: "valet", label: "Valet & Access", ar: { label: "صف السيارات والدخول" } },
+  { key: "care", label: "Vehicle Care", ar: { label: "العناية بالمركبة" } },
+  { key: "technical", label: "Technical Service", ar: { label: "الخدمات الفنية" } },
 ];
+
+// "Vehicle Care" → "vehicle-care": the stable id saved on each service.
+const slugifyKey = (v) =>
+  String(v || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
 
 const DEFAULT_SERVICE = {
   id: 1,
@@ -817,6 +826,7 @@ export default function ServicePageEditor() {
   const [ctaSection, setCtaSection] = useState(DEFAULT_CTA_SECTION);
   const [quoteForm, setQuoteForm] = useState(DEFAULT_QUOTE_FORM);
   const [gridHeader, setGridHeader] = useState({});
+  const [serviceCategories, setServiceCategories] = useState(DEFAULT_SERVICE_CATEGORIES);
   const [serviceDetails, setServiceDetails] = useState(DEFAULT_SERVICE_DETAILS);
   // Detail modal: editingDetail = { slug, draft, isNew } | null
   const [editingDetail, setEditingDetail] = useState(null);
@@ -862,6 +872,11 @@ export default function ServicePageEditor() {
           ar: { ...DEFAULT_QUOTE_FORM.ar, ...(data.page.sections.quoteForm?.ar ?? {}) },
         });
         setGridHeader(data.page.sections.servicesGridHeader || {});
+        setServiceCategories(
+          Array.isArray(data.page.sections.serviceCategories) && data.page.sections.serviceCategories.length > 0
+            ? data.page.sections.serviceCategories
+            : DEFAULT_SERVICE_CATEGORIES,
+        );
         setServiceDetails(
           Array.isArray(data.page.sections.serviceDetails)
             ? data.page.sections.serviceDetails
@@ -887,12 +902,37 @@ export default function ServicePageEditor() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    // Tab bar categories: every row needs a label + key, keys must be unique,
+    // and every service must point at a category that still exists.
+    const cats = serviceCategories.map((c) => ({ ...c, key: slugifyKey(c.key || c.label), label: (c.label ?? "").trim() }));
+    const badCat = cats.findIndex((c) => !c.key || !c.label);
+    if (badCat !== -1) {
+      setSuccess("");
+      setError(`Tab bar category #${badCat + 1} needs a label. Enter one or delete the row before saving.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const dupKey = cats.map((c) => c.key).find((k, idx, arr) => arr.indexOf(k) !== idx);
+    if (dupKey) {
+      setSuccess("");
+      setError(`Two tab bar categories share the key "${dupKey}". Give each category a different label/key.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const catKeys = new Set(cats.map((c) => c.key));
+    const orphan = services.findIndex((sv) => !catKeys.has(sv.category));
+    if (orphan !== -1) {
+      setSuccess("");
+      setError(`Service "${services[orphan].name}" uses a tab bar category that no longer exists. Pick another category for it before saving.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     try {
       setSaving(true);
       setError("");
       setSuccess("");
       await api.updatePage("services", {
-        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader, serviceDetails },
+        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader, serviceDetails, serviceCategories: cats },
       });
       setSuccess("Service page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -1457,6 +1497,88 @@ export default function ServicePageEditor() {
       </CollapsibleSection>
 
       {/* SERVICES GRID HEADER */}
+      <CollapsibleSection title="Tab Bar Categories" defaultOpen={false}>
+        <p className="mb-3 text-[11px] text-slate-500">
+          The tabs above the services grid on the website. Add a category here, then pick it in a service&apos;s &quot;Tab Bar Category&quot;. A tab appears on the website only when at least one service uses it. In Arabic, a tab needs its Arabic label to show.
+        </p>
+        <div className="grid gap-3">
+          {serviceCategories.map((cat, i) => {
+            const key = slugifyKey(cat.key || cat.label);
+            const usedBy = services.filter((sv) => sv.category === key).length;
+            return (
+              <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    Category {i + 1} {usedBy > 0 ? `· used by ${usedBy} service${usedBy === 1 ? "" : "s"}` : "· not used yet"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (usedBy > 0) {
+                        setError(`"${cat.label || key}" is used by ${usedBy} service${usedBy === 1 ? "" : "s"}. Move those services to another category first.`);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        return;
+                      }
+                      if (!confirmDelete("this tab bar category")) return;
+                      setServiceCategories((p) => p.filter((_, idx) => idx !== i));
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-[1fr_1fr_220px]">
+                  <div>
+                    <label className={labelClass}>Label</label>
+                    <input
+                      value={cat.label ?? ""}
+                      onChange={(e) =>
+                        setServiceCategories((p) =>
+                          p.map((c, idx) =>
+                            idx === i
+                              ? { ...c, label: e.target.value, key: usedBy > 0 ? c.key : slugifyKey(e.target.value) }
+                              : c,
+                          ),
+                        )
+                      }
+                      className={inputClass}
+                      placeholder="e.g. EV Charging"
+                      maxLength={FIELD_LIMITS.label}
+                    />
+                    <CharCount value={cat.label ?? ""} max={FIELD_LIMITS.label} />
+                  </div>
+                  <div>
+                    <ArInput
+                      label="Label"
+                      kind="label"
+                      value={cat.ar?.label}
+                      onChange={(v) => setServiceCategories((p) => p.map((c, idx) => (idx === i ? { ...c, ar: { ...(c.ar ?? {}), label: v } } : c)))}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Key {usedBy > 0 ? "(locked — in use)" : "(auto from label)"}</label>
+                    <input
+                      value={key}
+                      readOnly={usedBy > 0}
+                      onChange={(e) => setServiceCategories((p) => p.map((c, idx) => (idx === i ? { ...c, key: slugifyKey(e.target.value) } : c)))}
+                      className={`${inputClass} ${usedBy > 0 ? "bg-slate-100 text-slate-500" : ""}`}
+                      placeholder="ev-charging"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setServiceCategories((p) => [...p, { key: "", label: "", ar: { label: "" } }])}
+            className="inline-flex w-fit items-center gap-1 rounded-lg bg-[#0088FF] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Category
+          </button>
+        </div>
+      </CollapsibleSection>
+
       <CollapsibleSection title="Services Grid Header" defaultOpen={false}>
         <EnabledToggle section={gridHeader} setSection={setGridHeader} />
         <div className="grid gap-3">
@@ -1569,16 +1691,17 @@ export default function ServicePageEditor() {
               <div>
                 <label className={labelClass}>Tab Bar Category</label>
                 <select
-                  value={service.category ?? "parking"}
+                  value={service.category ?? ""}
                   onChange={(e) => updateService(i, "category", e.target.value)}
                   className={inputClass}
                 >
-                  {CATEGORY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option value="">— select category —</option>
+                  {serviceCategories.map((opt) => (
+                    <option key={opt.key} value={slugifyKey(opt.key || opt.label)}>{opt.label || opt.key}</option>
                   ))}
                 </select>
                 <p className="mt-1 text-[10px] text-slate-400">
-                  Which tab this service appears under on the website. Tabs show only when they have services.
+                  Which tab this service appears under on the website. Add or rename tabs in &quot;Tab Bar Categories&quot; above. Tabs show only when they have services.
                 </p>
               </div>
 

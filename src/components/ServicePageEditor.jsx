@@ -488,7 +488,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
 
           {/* Banner Image */}
           <div>
-            <label className={labelClass}>Banner Image (falls back to the service card&apos;s image)</label>
+            <label className={labelClass}>Banner Image — detail page only (leave empty to reuse the service card&apos;s image)</label>
             <div className="flex items-start gap-3">
               <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                 {draft.image && draft.image !== "/image.png" ? (

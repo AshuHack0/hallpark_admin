@@ -254,7 +254,13 @@ export default function AppPageEditor() {
     }
     // --- Service Tabs: validate labels, filter blank feature chips ---
     const svc = sections.serviceTabs || {};
-    const svcTabs = Array.isArray(svc.tabs) ? svc.tabs : [];
+    // Clearing the Steps field leaves a single blank entry ([""]) — strip blanks
+    // (keeping the Arabic list aligned) so the website never shows an empty step.
+    const svcTabs = (Array.isArray(svc.tabs) ? svc.tabs : []).map((tb) => {
+      if (!tb || !Array.isArray(tb.steps)) return tb;
+      const keep = tb.steps.map((st, idx) => [st, idx]).filter(([st]) => typeof st === "string" && st.trim());
+      return { ...tb, steps: keep.map(([st]) => st.trim()), ar: { ...(tb.ar ?? {}), steps: keep.map(([, idx]) => tb.ar?.steps?.[idx] ?? "") } };
+    });
     for (let i = 0; i < svcTabs.length; i++) {
       const t = svcTabs[i] || {};
       const hasContent =
@@ -274,6 +280,7 @@ export default function AppPageEditor() {
       ...sections,
       serviceTabs: {
         ...svc,
+        tabs: svcTabs,
         featureChips: filterChips(svc.featureChips),
         ar: { ...(svc.ar ?? {}), featureChips: filterChips(svc.ar?.featureChips) },
       },

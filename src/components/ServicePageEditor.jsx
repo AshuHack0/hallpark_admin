@@ -931,8 +931,11 @@ export default function ServicePageEditor() {
       setSaving(true);
       setError("");
       setSuccess("");
+      const cleanServices = services.map((sv) =>
+        (sv.slug || "").trim() ? { ...sv, slug: slugify(sv.slug) } : sv,
+      );
       await api.updatePage("services", {
-        sections: { hero, services, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader, serviceDetails, serviceCategories: cats },
+        sections: { hero, services: cleanServices, partnersSection, trustSection, ctaSection, quoteForm, servicesGridHeader: gridHeader, serviceDetails, serviceCategories: cats },
       });
       setSuccess("Service page saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -1056,7 +1059,10 @@ export default function ServicePageEditor() {
   // Also backfills the service's slug when missing (slugify(name)) — the
   // detail page is keyed by slug, so a service with no slug can't link to it.
   function openDetailForService(service, index) {
-    const serviceSlug = (service.slug || "").trim() || slugify(service.name || "");
+    // Normalise exactly like the modal does on save (slugify), so a slug typed
+    // with spaces/&/capitals (e.g. "testing&commissioning") still matches its
+    // detail page instead of creating a new unlinked one every time.
+    const serviceSlug = slugify((service.slug || "").trim() || service.name || "");
     if (!serviceSlug) {
       setError("Give the service a Name (or Slug) first — the detail page URL is built from it.");
       return;
@@ -1066,10 +1072,11 @@ export default function ServicePageEditor() {
     }
     const existing = serviceDetails.find((d) => d.slug === serviceSlug);
     if (existing) {
-      setEditingDetail({ slug: serviceSlug, draft: { ...existing }, isNew: false });
+      setEditingDetail({ slug: serviceSlug, index, draft: { ...existing }, isNew: false });
     } else {
       setEditingDetail({
         slug: serviceSlug,
+        index,
         isNew: true,
         draft: {
           ...makeBlankServiceDetail(),
@@ -1088,6 +1095,12 @@ export default function ServicePageEditor() {
 
   // Merge the modal's draft back into `serviceDetails` by slug (update or append).
   function saveDetailFromModal(updated) {
+    // If the slug was changed inside the modal, move the card to it too —
+    // otherwise the card and its page stop matching.
+    const idx = editingDetail?.index;
+    if (typeof idx === "number" && (services[idx]?.slug || "").trim() !== updated.slug) {
+      updateService(idx, "slug", updated.slug);
+    }
     setServiceDetails((list) => {
       const idx = list.findIndex((d) => d.slug === updated.slug);
       if (idx === -1) return [...list, updated];
@@ -1095,6 +1108,10 @@ export default function ServicePageEditor() {
       next[idx] = updated;
       return next;
     });
+    // The modal only stages the page — make the remaining step obvious in the
+    // sticky bar next to the Save button.
+    setError("");
+    setSuccess(`Detail page ${editingDetail?.isNew ? "added" : "updated"} for /services/${updated.slug} — click "Save Changes" to publish it.`);
     setEditingDetail(null);
   }
 
@@ -1654,7 +1671,7 @@ export default function ServicePageEditor() {
         </div>
 
         {services.map((service, i) => {
-          const serviceSlug = (service.slug || "").trim() || slugify(service.name || "");
+          const serviceSlug = slugify((service.slug || "").trim() || service.name || "");
           const hasDetail = Boolean(serviceSlug) && serviceDetails.some((d) => d.slug === serviceSlug);
           return (
           <CollapsibleSection key={i} title={`Service: ${service.name || `#${i + 1}`}`}>
@@ -1680,6 +1697,10 @@ export default function ServicePageEditor() {
                   <input
                     value={service.slug ?? ""}
                     onChange={(e) => updateService(i, "slug", e.target.value)}
+                    onBlur={(e) => {
+                      const clean = slugify(e.target.value);
+                      if (clean !== e.target.value) updateService(i, "slug", clean);
+                    }}
                     className={inputClass}
                     placeholder="self-parking"
                     maxLength={FIELD_LIMITS.label}

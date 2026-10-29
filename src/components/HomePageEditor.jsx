@@ -218,6 +218,7 @@ const DEFAULT_PROMO_POPUP = {
   enabled: false, // off by default — admin turns it on when an offer is ready
   mediaType: "image", // "image" | "video"
   image: "",
+  mobileImage: "", // optional phone artwork; blank → site falls back to `image`
   video: "",
   eyebrow: "",
   heading: "",
@@ -893,8 +894,8 @@ export default function HomePageEditor() {
   }
 
   // Pop-up media upload (image or video → Cloudinary).
-  async function handlePromoUpload(file, resourceType) {
-    const field = resourceType === "video" ? "video" : "image";
+  async function handlePromoUpload(file, resourceType, targetField) {
+    const field = targetField || (resourceType === "video" ? "video" : "image");
     const key = `promo-${field}`;
     const err = resourceType === "video" ? validateVideoFile(file) : validateImageFile(file);
     if (err) { setUploadError(key, err); return; }
@@ -3234,6 +3235,24 @@ export default function HomePageEditor() {
                   onUpload={(file, rt) => handlePromoUpload(file, rt)}
                 />
               )}
+              {promoPopup.mediaType !== "video" ? (
+                <div className="mt-4">
+                  <MediaField
+                    label="Mobile image (optional)"
+                    value={promoPopup.mobileImage ?? ""}
+                    accept="image/*"
+                    resourceType="image"
+                    uploading={uploadProgress["promo-mobileImage"] !== undefined}
+                    uploadError={uploadErrors["promo-mobileImage"]}
+                    progress={uploadProgress["promo-mobileImage"]}
+                    onChange={(v) => setPromoPopup((prev) => ({ ...prev, mobileImage: v }))}
+                    onUpload={(file, rt) => handlePromoUpload(file, rt, "mobileImage")}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Shown on phones instead of the image above. Leave empty to use the same image on mobile.
+                  </p>
+                </div>
+              ) : null}
             </div>
 
             {/* Eyebrow (small label above the heading) */}

@@ -510,6 +510,60 @@ export default function FAQPageEditor() {
     setQuestionModalOpen(true);
   };
 
+  // Optional phone-only variant of an image. `apply(url)` stores it; the site
+  // shows it under 640px wide.
+  async function handleMobileImageUpload(key, file, apply) {
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      apply(url);
+      setSuccess("Mobile image uploaded. Remember to Save.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
+      console.error(uploadErr);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // "Mobile image (optional)" field shown under an image.
+  const mobileImageField = (key, value, apply, shape) => (
+    <div className="mt-3">
+      <label className={labelClass}>Mobile image (optional)</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => apply(e.target.value)}
+          className={inputClass}
+          placeholder="https://… or upload"
+          maxLength={FIELD_LIMITS.link}
+        />
+        <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+          {uploadProgress[key] !== undefined ? (
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[key]}%</>
+          ) : (
+            <><Upload className="h-3.5 w-3.5" />Upload</>
+          )}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleMobileImageUpload(key, f, apply); e.target.value = ""; }} />
+        </label>
+      </div>
+      <FieldError error={validateUrl(value ?? "")} />
+      {uploadErrors[key] ? (
+        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
+      ) : null}
+      <p className="mt-1 text-[11px] text-slate-400">
+        Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
+      </p>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -613,6 +667,7 @@ export default function FAQPageEditor() {
               {uploadErrors["hero-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
               ) : null}
+              {mobileImageField("hero-mobile", hero.mobileImage, (v) => setHero((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040; the text sits on top of it")}
             </div>
           </div>
         </CollapsibleSection>
@@ -855,6 +910,7 @@ export default function FAQPageEditor() {
               {uploadErrors["bottomCta-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["bottomCta-image"]}</p>
               ) : null}
+              {mobileImageField("bottomCta-mobile", bottomCta.mobileImage, (v) => setBottomCta((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900")}
               <p className="mt-1 text-[11px] text-slate-400">
                 Shown on the right of the band in a curved panel. Leave empty for the decorative rings and question mark.
               </p>

@@ -558,6 +558,68 @@ export default function BusinessPageEditor() {
     }
   }
 
+  // Optional phone-only variants. setItemMobile/setSectionMobile store the URL
+  // on an array item or a section object; the site shows it under 640px wide.
+  function setItemMobile(section, i, field, v) {
+    setSections((prev) => ({
+      ...prev,
+      [section]: (prev[section] ?? []).map((it, idx) => (idx === i ? { ...it, [field]: v } : it)),
+    }));
+  }
+  function setSectionMobile(section, field, v) {
+    setSections((prev) => ({ ...prev, [section]: { ...prev[section], [field]: v } }));
+  }
+  async function handleMobileImageUpload(key, file, apply) {
+    const validationError = validateImageFile(file);
+    if (validationError) { setUploadError(key, validationError); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      apply(url);
+      setSuccess("Mobile image uploaded. Remember to Save.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setUploadError(key, err.message ?? "Image upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
+  // "Mobile image (optional)" field shown under an image.
+  const mobileImageField = (key, value, apply, shape) => (
+    <div className="mt-2">
+      <label className={labelClass}>Mobile image (optional)</label>
+      <div className="flex gap-2">
+        <input
+          value={value ?? ""}
+          onChange={(e) => apply(e.target.value)}
+          className={inputClass}
+          placeholder="https://… or upload"
+          maxLength={FIELD_LIMITS.link}
+        />
+        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+          {uploadProgress[key] !== undefined ? (
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[key]}%</>
+          ) : (
+            <><Upload className="h-3.5 w-3.5" />Upload</>
+          )}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleMobileImageUpload(key, f, apply); e.target.value = ""; }} />
+        </label>
+      </div>
+      <FieldError error={validateUrl(value ?? "")} />
+      {uploadErrors[key] ? (
+        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
+      ) : null}
+      <p className="mt-1 text-[11px] text-slate-400">
+        Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
+      </p>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -808,6 +870,7 @@ export default function BusinessPageEditor() {
                   {uploadErrors[`hero-deck-${di}`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-deck-${di}`]}</p>
                   ) : null}
+                  {mobileImageField(`hero-deck-${di}-mobile`, slide.mobileImg, (v) => setSections((prev) => ({ ...prev, hero: { ...prev.hero, deckImages: (prev.hero?.deckImages ?? []).map((s, idx) => (idx === di ? { ...s, mobileImg: v } : s)) } })), "portrait, about 4:5 — e.g. 1080×1330")}
                   </div>
                 ))}
               </div>
@@ -1075,6 +1138,7 @@ export default function BusinessPageEditor() {
                   {uploadErrors["whyChoose-image"] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whyChoose-image"]}</p>
                   ) : null}
+                  {mobileImageField(`whyChoose-${i}-mobile`, sections.whyChoose?.[i]?.mobileImage, (v) => setItemMobile("whyChoose", i, "mobileImage", v), "wide, about 2:1 — e.g. 1200×640")}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the left side of the card. If left blank, the gradient colors below are used instead.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -1249,6 +1313,7 @@ export default function BusinessPageEditor() {
                     {uploadErrors["solutions-image"] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["solutions-image"]}</p>
                     ) : null}
+                    {mobileImageField(`solutions-${i}-mobile`, sections.solutions?.[i]?.mobileImage, (v) => setItemMobile("solutions", i, "mobileImage", v), "wide, about 2:1 — e.g. 1200×640")}
                   </div>
                   <div>
                     <label className={labelClass}>Icon (emoji)</label>
@@ -1465,6 +1530,7 @@ export default function BusinessPageEditor() {
                   {uploadErrors["whoWeWork-image"] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whoWeWork-image"]}</p>
                   ) : null}
+                  {mobileImageField(`whoWeWork-${i}-mobile`, sections.whoWeWork?.[i]?.mobileImage, (v) => setItemMobile("whoWeWork", i, "mobileImage", v), "about square — e.g. 1080×1040")}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the right side of the partner card. Leave blank to render no photo.</p>
                 </div>
                 <div>
@@ -1672,6 +1738,7 @@ export default function BusinessPageEditor() {
                 {uploadErrors["partnersShowcase-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["partnersShowcase-image"]}</p>
                 ) : null}
+                {mobileImageField("partnersShowcase-mobile", sections.partnersShowcase?.mobileImage, (v) => setSectionMobile("partnersShowcase", "mobileImage", v), "about square — e.g. 1080×1040")}
               </div>
               <div>
                 <label className={labelClass}>CTA Label</label>
@@ -2104,6 +2171,7 @@ export default function BusinessPageEditor() {
                 {uploadErrors["partnersShowcase-ctaSection-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["partnersShowcase-ctaSection-image"]}</p>
                 ) : null}
+                {mobileImageField("partnersShowcase-cta-mobile", sections.partnersShowcase?.ctaSection?.mobileImage, (v) => setSections((prev) => ({ ...prev, partnersShowcase: { ...prev.partnersShowcase, ctaSection: { ...(prev.partnersShowcase?.ctaSection ?? {}), mobileImage: v } } })), "fills the band behind the text")}
               </div>
             </div>
           </div>
@@ -2217,6 +2285,7 @@ export default function BusinessPageEditor() {
                   {uploadErrors["transformParking-parkingPartnerBgImage"] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-parkingPartnerBgImage"]}</p>
                   ) : null}
+                  {mobileImageField("transformParking-parkingMobile", sections.transformParking?.parkingPartnerMobileBgImage, (v) => setSectionMobile("transformParking", "parkingPartnerMobileBgImage", v), "16:9 strip across the top of the card — e.g. 1280×720")}
                   <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
                 </div>
                 <div>
@@ -2352,6 +2421,7 @@ export default function BusinessPageEditor() {
                   {uploadErrors["transformParking-servicePartnerBgImage"] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-servicePartnerBgImage"]}</p>
                   ) : null}
+                  {mobileImageField("transformParking-serviceMobile", sections.transformParking?.servicePartnerMobileBgImage, (v) => setSectionMobile("transformParking", "servicePartnerMobileBgImage", v), "16:9 strip across the top of the card — e.g. 1280×720")}
                   <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
                 </div>
                 <div>
@@ -2659,6 +2729,7 @@ export default function BusinessPageEditor() {
               {uploadErrors["cta-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
               ) : null}
+              {mobileImageField("cta-mobile", sections.cta?.mobileImage, (v) => setSectionMobile("cta", "mobileImage", v), "about 8:7 — e.g. 1080×950")}
             </div>
           </div>
         </CollapsibleSection>

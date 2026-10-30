@@ -482,6 +482,48 @@ export default function AppPageEditor() {
     return <div className="py-6 text-red-600">Failed to load page</div>;
   }
 
+  // "Mobile image (optional)" field shown under an image: phones (under 640px)
+  // get this upload instead; empty = the same image on mobile.
+  const mobileImageField = (key, value, onChange, onFile, shape) => (
+    <div className="mt-3">
+      <label className={labelClass}>Mobile image (optional)</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClass}
+          placeholder="https://… or upload"
+          maxLength={FIELD_LIMITS.link}
+        />
+        <label className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff] cursor-pointer">
+          {uploadProgress[key] !== undefined ? (
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[key]}%</>
+          ) : (
+            <><Upload className="h-3.5 w-3.5" />Upload</>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onFile(file);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </div>
+      <FieldError error={validateUrl(value ?? "")} />
+      {uploadErrors[key] ? (
+        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
+      ) : null}
+      <p className="mt-1 text-[11px] text-slate-400">
+        Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
+      </p>
+    </div>
+  );
+
   return (
     <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
     <div className="w-full space-y-6 px-6 py-6">
@@ -1195,6 +1237,13 @@ export default function AppPageEditor() {
                 {uploadErrors["platform-webScreen"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["platform-webScreen"]}</p>
                 ) : null}
+                {mobileImageField(
+                  "platform-mobileWebScreen",
+                  sections.platform.mobileWebScreen,
+                  (v) => setSections((prev) => ({ ...prev, platform: { ...prev.platform, mobileWebScreen: v } })),
+                  (file) => handleImageUpload("platform", "mobileWebScreen", file),
+                  "about 9:10 — e.g. 900×1000",
+                )}
               </div>
 
               {/* App card button */}
@@ -2305,6 +2354,13 @@ export default function AppPageEditor() {
                   {uploadErrors[`feat-card-${i}-img`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-img`]}</p>
                   ) : null}
+                  {mobileImageField(
+                    `feat-card-${i}-mobileImg`,
+                    item.mobileImage,
+                    (v) => update(i, { mobileImage: v }),
+                    (file) => handleArrayImageUpload(`feat-card-${i}-mobileImg`, update, i, "mobileImage", file),
+                    "wide, about 2:1 — e.g. 1140×600",
+                  )}
                 </div>
                 <div>
                   <label className={labelClass}>Preview Type (fallback visual when no Card Image)</label>
@@ -2433,6 +2489,13 @@ export default function AppPageEditor() {
                 {sections.halapark?.image ? (
                   <img src={sections.halapark.image} alt="" className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover" />
                 ) : null}
+                {mobileImageField(
+                  "halapark-mobileImage",
+                  sections.halapark?.mobileImage,
+                  (v) => setSections((prev) => ({ ...prev, halapark: { ...prev.halapark, mobileImage: v } })),
+                  (file) => handleImageUpload("halapark", "mobileImage", file),
+                  "about 4:3 — e.g. 1200×890",
+                )}
               </div>
               <div>
                 <label className={labelClass}>Image Alt Text</label>
@@ -2622,7 +2685,16 @@ export default function AppPageEditor() {
               {uploadErrors["ctaFooter-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["ctaFooter-image"]}</p>
               ) : null}
-              <p className="mt-1 mb-6 text-[11px] text-slate-400">Leave empty to show a plain decorative panel instead.</p>
+              <p className="mt-1 text-[11px] text-slate-400">Leave empty to show a plain decorative panel instead.</p>
+              <div className="mb-6">
+                {mobileImageField(
+                  "ctaFooter-mobileImage",
+                  sections.ctaFooter?.mobileImage,
+                  (v) => setSections((prev) => ({ ...prev, ctaFooter: { ...prev.ctaFooter, mobileImage: v } })),
+                  (file) => handleImageUpload("ctaFooter", "mobileImage", file),
+                  "4:3 — e.g. 1200×900",
+                )}
+              </div>
             </div>
 
             <div>

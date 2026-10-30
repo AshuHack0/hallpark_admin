@@ -313,6 +313,31 @@ export default function AboutPageEditor() {
     }));
   }
 
+  // Phone-only image for a hero slide (hero.images[i].mobileImg).
+  async function uploadHeroSlideMobileImage(index, file) {
+    const key = `about-hero-${index}-mobile`;
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      setHeroForm((p) => ({
+        ...p,
+        images: (p.images ?? []).map((slide, i) => (i === index ? { ...slide, mobileImg: url } : slide)),
+      }));
+      setSuccess("Mobile image uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+      console.error(err);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
+
   async function uploadHeroSlideImage(index, file) {
     const key = `about-hero-${index}`;
     // Slides accept images OR videos — the website renders whichever was uploaded.
@@ -490,6 +515,7 @@ export default function AboutPageEditor() {
       title: content.mission.title,
       subtitle: content.mission.subtitle,
       image: content.mission.image,
+      mobileImage: content.mission.mobileImage ?? "",
       ar: content.mission.ar ?? {},
     });
     setMissionSectionModalOpen(true);
@@ -589,6 +615,7 @@ export default function AboutPageEditor() {
       title: content.vision.title,
       subtitle: content.vision.subtitle,
       image: content.vision.image,
+      mobileImage: content.vision.mobileImage ?? "",
       ar: content.vision.ar ?? {},
     });
     setVisionSectionModalOpen(true);
@@ -688,6 +715,7 @@ export default function AboutPageEditor() {
       title: content.story.title,
       subtitle: content.story.subtitle,
       image: content.story.image,
+      mobileImage: content.story.mobileImage ?? "",
       ar: content.story.ar ?? {},
     });
     setStorySectionModalOpen(true);
@@ -715,6 +743,7 @@ export default function AboutPageEditor() {
       subtitle: content.whatWeDo.subtitle,
       intro: content.whatWeDo.intro,
       image: content.whatWeDo.image,
+      mobileImage: content.whatWeDo.mobileImage ?? "",
       ar: content.whatWeDo.ar ?? {},
     });
     setWhatWeDoSectionModalOpen(true);
@@ -1457,6 +1486,43 @@ export default function AboutPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`about-hero-${i}`]}</p>
                 ) : null}
                 <FieldError error={validateUrl(slide.img)} />
+                {/\.(mp4|webm|mov)(\?|$)/i.test(slide.img ?? "") ? null : (
+                  <div className="mt-2 grid gap-1">
+                    <span className={labelClass}>Mobile image (optional)</span>
+                    <div className="flex gap-2">
+                      <input
+                        value={slide.mobileImg ?? ""}
+                        onChange={(e) => updateHeroSlide(i, { mobileImg: e.target.value })}
+                        maxLength={FIELD_LIMITS.link}
+                        className={inputClass}
+                        placeholder="https://… or upload"
+                      />
+                      <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
+                        {uploadProgress[`about-hero-${i}-mobile`] !== undefined ? (
+                          <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[`about-hero-${i}-mobile`]}%</>
+                        ) : (
+                          <><Upload className="h-3.5 w-3.5" />Upload</>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadProgress[`about-hero-${i}-mobile`] !== undefined}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadHeroSlideMobileImage(i, file);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {uploadErrors[`about-hero-${i}-mobile`] ? (
+                      <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`about-hero-${i}-mobile`]}</p>
+                    ) : null}
+                    <FieldError error={validateUrl(slide.mobileImg)} />
+                    <p className="text-[11px] text-slate-400">Shown on phones instead of the image above (about 5:4 — e.g. 1080×880). Leave empty to use the same image on mobile.</p>
+                  </div>
+                )}
                 <label className="mt-2 grid gap-1">
                   <span className={labelClass}>Label</span>
                   <input
@@ -1580,6 +1646,15 @@ export default function AboutPageEditor() {
             setForm={setMissionSectionForm}
             uploadKey="image-mission"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={missionSectionForm.mobileImage}
+            onChange={(e) => setMissionSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setMissionSectionForm}
+            uploadKey="image-mission-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1637,6 +1712,15 @@ export default function AboutPageEditor() {
             setForm={setVisionSectionForm}
             uploadKey="image-vision"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={visionSectionForm.mobileImage}
+            onChange={(e) => setVisionSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setVisionSectionForm}
+            uploadKey="image-vision-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (shown whole, at its own shape). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1755,6 +1839,15 @@ export default function AboutPageEditor() {
             setForm={setStorySectionForm}
             uploadKey="image-story"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={storySectionForm.mobileImage}
+            onChange={(e) => setStorySectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setStorySectionForm}
+            uploadKey="image-story-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1838,6 +1931,15 @@ export default function AboutPageEditor() {
             setForm={setWhatWeDoSectionForm}
             uploadKey="image-whatWeDo"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={whatWeDoSectionForm.mobileImage}
+            onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setWhatWeDoSectionForm}
+            uploadKey="image-whatWeDo-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (wide, about 7:4 — e.g. 1200×690). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1914,6 +2016,15 @@ export default function AboutPageEditor() {
             setForm={setTechnologyForm}
             uploadKey="image-technology"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={technologyForm.mobileImage}
+            onChange={(e) => setTechnologyForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setTechnologyForm}
+            uploadKey="image-technology-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 7:6 — e.g. 1080×930). Leave empty to use the same image on mobile.</p>
           <label className="grid gap-1">
             <span className={labelClass}>Image badge</span>
             <input
@@ -1991,6 +2102,15 @@ export default function AboutPageEditor() {
             setForm={setCtaForm}
             uploadKey="image-cta"
           />
+          <ImageField
+            label="Mobile image (optional)"
+            value={ctaForm.mobileImage}
+            onChange={(e) => setCtaForm((p) => ({ ...p, mobileImage: e.target.value }))}
+            setForm={setCtaForm}
+            uploadKey="image-cta-mobile"
+            field="mobileImage"
+          />
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (4:3 — e.g. 1200×900). Leave empty to use the same image on mobile.</p>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
             <input

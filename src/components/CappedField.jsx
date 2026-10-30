@@ -22,7 +22,7 @@ const inputClass =
 const UNLIMITED = 100000;
 export const FIELD_LIMITS = {
   label: 40,        // tiny labels, eyebrows, tags, badges
-  button: 30,       // CTA button text
+  button: 40,       // CTA button text (Arabic runs longer than English)
   link: 200,        // URLs / hrefs
   heading: 80,      // section headings / titles
   subtitle: 160,    // subtitles / taglines

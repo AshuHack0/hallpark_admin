@@ -566,6 +566,34 @@ export default function BusinessPageEditor() {
       [section]: (prev[section] ?? []).map((it, idx) => (idx === i ? { ...it, [field]: v } : it)),
     }));
   }
+  // Transform Parking: perks are parallel arrays — English in
+  // transformParking[key], Arabic in transformParking.ar[key], matched by index.
+  function updatePerk(key, idx, lang, value) {
+    setSections((prev) => {
+      const tp = prev.transformParking ?? {};
+      if (lang === "ar") {
+        const list = [...(tp.ar?.[key] ?? [])];
+        while (list.length <= idx) list.push("");
+        list[idx] = value;
+        return { ...prev, transformParking: { ...tp, ar: { ...(tp.ar ?? {}), [key]: list } } };
+      }
+      return { ...prev, transformParking: { ...tp, [key]: (tp[key] ?? []).map((p, i) => (i === idx ? value : p)) } };
+    });
+  }
+  function removePerk(key, idx) {
+    setSections((prev) => {
+      const tp = prev.transformParking ?? {};
+      return {
+        ...prev,
+        transformParking: {
+          ...tp,
+          [key]: (tp[key] ?? []).filter((_, i) => i !== idx),
+          ar: { ...(tp.ar ?? {}), [key]: (tp.ar?.[key] ?? []).filter((_, i) => i !== idx) },
+        },
+      };
+    });
+  }
+
   function setSectionMobile(section, field, v) {
     setSections((prev) => ({ ...prev, [section]: { ...prev[section], [field]: v } }));
   }
@@ -2233,6 +2261,19 @@ export default function BusinessPageEditor() {
               <h3 className="mb-4 text-sm font-semibold text-slate-700">Parking Partner Card</h3>
               <div className="space-y-4">
                 <div>
+                  <label className={labelClass}>Badge (small pill above the title)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerBadge ?? "Parking Partner"}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerBadge: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerBadge ?? "Parking Partner"} max={FIELD_LIMITS.label} />
+                  <ArInput label="Badge (small pill above the title)" kind="label" value={sections.transformParking.ar?.parkingPartnerBadge} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerBadge: v } } })} />
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty to hide it.</p>
+                </div>
+                <div>
                   <label className={labelClass}>Title</label>
                   <input
                     type="text"
@@ -2300,6 +2341,19 @@ export default function BusinessPageEditor() {
                   <RichTextArea value={sections.transformParking.ar?.parkingPartnerDescription ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerDescription: v } } })} maxLength={FIELD_LIMITS.long} rows={4} dir="rtl" variant="arabic" />
                 </div>
                 <div>
+                  <label className={labelClass}>List heading (above the points)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.parkingPartnerPerksLabel ?? "What You Get"}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerksLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.transformParking.parkingPartnerPerksLabel ?? "What You Get"} max={FIELD_LIMITS.label} />
+                  <ArInput label="List heading (above the points)" kind="label" value={sections.transformParking.ar?.parkingPartnerPerksLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), parkingPartnerPerksLabel: v } } })} />
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty to hide it.</p>
+                </div>
+                <div>
                   <div className="mb-2 flex items-center justify-between">
                     <label className={labelClass}>Perks (points)</label>
                     <button
@@ -2313,16 +2367,26 @@ export default function BusinessPageEditor() {
                   <div className="space-y-2">
                     {(sections.transformParking.parkingPartnerPerks ?? []).map((perk, pi) => (
                       <div key={pi} className="flex gap-2">
-                        <input
-                          value={perk ?? ""}
-                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
-                          className={inputClass}
-                          placeholder={`Perk ${pi + 1}`}
-                          maxLength={FIELD_LIMITS.item}
-                        />
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          <input
+                            value={perk ?? ""}
+                            onChange={(e) => updatePerk("parkingPartnerPerks", pi, "en", e.target.value)}
+                            className={inputClass}
+                            placeholder={`Point ${pi + 1}`}
+                            maxLength={FIELD_LIMITS.item}
+                          />
+                          <input
+                            value={sections.transformParking.ar?.parkingPartnerPerks?.[pi] ?? ""}
+                            onChange={(e) => updatePerk("parkingPartnerPerks", pi, "ar", e.target.value)}
+                            className={inputClass}
+                            placeholder={`Point ${pi + 1} (Arabic)`}
+                            maxLength={FIELD_LIMITS.item}
+                            dir="rtl"
+                          />
+                        </div>
                         <button
                           type="button"
-                          onClick={() => { if (!confirmDelete("this benefit")) return; setSections({ ...sections, transformParking: { ...sections.transformParking, parkingPartnerPerks: (sections.transformParking.parkingPartnerPerks ?? []).filter((_, idx) => idx !== pi) } }); }}
+                          onClick={() => { if (!confirmDelete("this benefit")) return; removePerk("parkingPartnerPerks", pi); }}
                           className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -2368,6 +2432,19 @@ export default function BusinessPageEditor() {
             <div>
               <h3 className="mb-4 text-sm font-semibold text-slate-700">Service Partner Card</h3>
               <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Badge (small pill above the title)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerBadge ?? "Service Partner"}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerBadge: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerBadge ?? "Service Partner"} max={FIELD_LIMITS.label} />
+                  <ArInput label="Badge (small pill above the title)" kind="label" value={sections.transformParking.ar?.servicePartnerBadge} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerBadge: v } } })} />
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty to hide it.</p>
+                </div>
                 <div>
                   <label className={labelClass}>Title</label>
                   <input
@@ -2447,6 +2524,19 @@ export default function BusinessPageEditor() {
                   <RichTextArea value={sections.transformParking.ar?.servicePartnerDescription2 ?? ""} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerDescription2: v } } })} maxLength={FIELD_LIMITS.description} rows={3} dir="rtl" variant="arabic" />
                 </div>
                 <div>
+                  <label className={labelClass}>List heading (above the points)</label>
+                  <input
+                    type="text"
+                    value={sections.transformParking.servicePartnerPerksLabel ?? "Partnership Opportunities"}
+                    onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerksLabel: e.target.value } })}
+                    className={inputClass}
+                    maxLength={FIELD_LIMITS.label}
+                  />
+                  <CharCount value={sections.transformParking.servicePartnerPerksLabel ?? "Partnership Opportunities"} max={FIELD_LIMITS.label} />
+                  <ArInput label="List heading (above the points)" kind="label" value={sections.transformParking.ar?.servicePartnerPerksLabel} onChange={(v) => setSections({ ...sections, transformParking: { ...sections.transformParking, ar: { ...(sections.transformParking.ar ?? {}), servicePartnerPerksLabel: v } } })} />
+                  <p className="mt-1 text-[11px] text-slate-400">Leave empty to hide it.</p>
+                </div>
+                <div>
                   <div className="mb-2 flex items-center justify-between">
                     <label className={labelClass}>Partnership Opportunities (points)</label>
                     <button
@@ -2460,16 +2550,26 @@ export default function BusinessPageEditor() {
                   <div className="space-y-2">
                     {(sections.transformParking.servicePartnerPerks ?? []).map((perk, pi) => (
                       <div key={pi} className="flex gap-2">
-                        <input
-                          value={perk ?? ""}
-                          onChange={(e) => setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).map((p, idx) => (idx === pi ? e.target.value : p)) } })}
-                          className={inputClass}
-                          placeholder={`Item ${pi + 1}`}
-                          maxLength={FIELD_LIMITS.item}
-                        />
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          <input
+                            value={perk ?? ""}
+                            onChange={(e) => updatePerk("servicePartnerPerks", pi, "en", e.target.value)}
+                            className={inputClass}
+                            placeholder={`Point ${pi + 1}`}
+                            maxLength={FIELD_LIMITS.item}
+                          />
+                          <input
+                            value={sections.transformParking.ar?.servicePartnerPerks?.[pi] ?? ""}
+                            onChange={(e) => updatePerk("servicePartnerPerks", pi, "ar", e.target.value)}
+                            className={inputClass}
+                            placeholder={`Point ${pi + 1} (Arabic)`}
+                            maxLength={FIELD_LIMITS.item}
+                            dir="rtl"
+                          />
+                        </div>
                         <button
                           type="button"
-                          onClick={() => { if (!confirmDelete("this benefit")) return; setSections({ ...sections, transformParking: { ...sections.transformParking, servicePartnerPerks: (sections.transformParking.servicePartnerPerks ?? []).filter((_, idx) => idx !== pi) } }); }}
+                          onClick={() => { if (!confirmDelete("this benefit")) return; removePerk("servicePartnerPerks", pi); }}
                           className="shrink-0 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

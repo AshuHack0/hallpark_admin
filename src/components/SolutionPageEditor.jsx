@@ -2346,6 +2346,7 @@ export default function SolutionPageEditor() {
                       rows={2}
                       placeholder="Gradient (e.g., from-[#0078E0]/85 via-[#0088FF]/60 to-[#0088FF]/20)"
                     />
+                    <label className={labelClass}>Points (one per line)</label>
                     <LinesTextarea
                       value={card.points}
                       onChange={(arr) => setIntegration((p) => ({
@@ -2355,6 +2356,18 @@ export default function SolutionPageEditor() {
                       className={inputClass}
                       rows={3}
                       placeholder="Points (one per line)"
+                    />
+                    <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Points (Arabic, one per line)</label>
+                    <LinesTextarea
+                      value={card.ar?.points}
+                      onChange={(arr) => setIntegration((p) => ({
+                        ...p,
+                        cards: p.cards.map((c, idx) => idx === i ? { ...c, ar: { ...(c.ar ?? {}), points: arr } } : c)
+                      }))}
+                      className={inputClass}
+                      rows={3}
+                      dir="rtl"
+                      placeholder="النقاط (نقطة في كل سطر)"
                     />
                   </div>
                 </div>

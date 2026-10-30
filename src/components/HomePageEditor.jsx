@@ -250,6 +250,7 @@ function emptySlide() {
     description: "",
     mediaType: "image", // "image" | "video"
     image: "",
+    mobileImage: "", // optional phone artwork; blank → site uses `image`
     cardImg: "",
     video: "",
   };
@@ -1354,6 +1355,24 @@ export default function HomePageEditor() {
                       onUpload={(file, rt) => handleUpload(index, "image", file, rt)}
                     />
                   )}
+                  {slideMediaType(slide) !== "video" ? (
+                    <div className="mt-4">
+                      <MediaField
+                        label="Mobile image (optional)"
+                        value={slide.mobileImage ?? ""}
+                        accept="image/*"
+                        resourceType="image"
+                        uploading={prog(index, "mobileImage") !== undefined}
+                        progress={prog(index, "mobileImage")}
+                        uploadError={uploadErrors[`${index}-mobileImage`]}
+                        onChange={(v) => updateSlide(index, "mobileImage", v)}
+                        onUpload={(file, rt) => handleUpload(index, "mobileImage", file, rt)}
+                      />
+                      <p className="mt-1.5 text-xs text-slate-500">
+                        Shown on phones instead of the image above (portrait, about 2:3 — e.g. 1080×1620; edges may be trimmed on wider phones). Leave empty to use the same image on mobile.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>

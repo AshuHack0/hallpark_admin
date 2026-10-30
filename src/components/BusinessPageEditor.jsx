@@ -2829,7 +2829,7 @@ export default function BusinessPageEditor() {
               {uploadErrors["cta-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
               ) : null}
-              {mobileImageField("cta-mobile", sections.cta?.mobileImage, (v) => setSectionMobile("cta", "mobileImage", v), "about 8:7 — e.g. 1080×950")}
+              {mobileImageField("cta-mobile", sections.cta?.mobileImage, (v) => setSectionMobile("cta", "mobileImage", v), "16:10, shown in its own frame below the text — e.g. 1200×750")}
             </div>
           </div>
         </CollapsibleSection>

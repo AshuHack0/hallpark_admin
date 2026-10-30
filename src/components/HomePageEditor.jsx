@@ -1109,6 +1109,30 @@ export default function HomePageEditor() {
     }
   }
 
+  // Optional phone-only variant of a section image. `apply(url)` stores it on
+  // the right section/item; the site shows it under 640px wide.
+  async function handleMobileImageUpload(key, file, apply) {
+    const err = validateImageFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "image", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct })),
+      );
+      apply(url);
+      setSuccess("Mobile image uploaded. Remember to Save.");
+    } catch (err) {
+      setUploadError(key, err.message ?? "Upload failed");
+    } finally {
+      setUploadProgress((p) => {
+        const next = { ...p };
+        delete next[key];
+        return next;
+      });
+    }
+  }
+
   async function handleSave(e) {
     e.preventDefault();
     setError("");
@@ -1194,6 +1218,26 @@ export default function HomePageEditor() {
   }
 
   const prog = (i, f) => uploadProgress[`${i}-${f}`];
+
+  // "Mobile image (optional)" field shown under a section's main image.
+  const mobileImageField = (key, value, apply, shape) => (
+    <div className="mt-3">
+      <MediaField
+        label="Mobile image (optional)"
+        value={value ?? ""}
+        accept="image/*"
+        resourceType="image"
+        uploading={uploadProgress[key] !== undefined}
+        progress={uploadProgress[key]}
+        uploadError={uploadErrors[key]}
+        onChange={apply}
+        onUpload={(file) => handleMobileImageUpload(key, file, apply)}
+      />
+      <p className="mt-1.5 text-xs text-slate-500">
+        Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
+      </p>
+    </div>
+  );
 
   return (
     <SectionSaveContext.Provider value={{ onSave: handleSave, saving }}>
@@ -1656,6 +1700,7 @@ export default function HomePageEditor() {
                   {uploadErrors[upKey] ? (
                     <p className="text-xs font-medium text-red-600" role="alert">{uploadErrors[upKey]}</p>
                   ) : null}
+                  {mobileImageField(`why-${i}-mobileImage`, it.mobileImage, (v) => updateWhyItem(i, "mobileImage", v), "about square — e.g. 1080×1150")}
                 </div>
               );
             })}
@@ -1775,6 +1820,7 @@ export default function HomePageEditor() {
                     onChange={(v) => updateAiCard(i, "imageSrc", v)}
                     onUpload={(file) => handleAiCardImageUpload(i, file)}
                   />
+                  {mobileImageField(`aicard-${i}-mobileImage`, card.mobileImage, (v) => updateAiCard(i, "mobileImage", v), "portrait, about 4:5 — e.g. 1080×1390")}
                   <input
                     value={card.imageAlt ?? ""}
                     onChange={(e) => updateAiCard(i, "imageAlt", e.target.value)}
@@ -2064,6 +2110,7 @@ export default function HomePageEditor() {
                 onUpload={(file) => handleBlackBannerImageUpload(file)}
               />
               <p className="mt-1 text-[10px] text-slate-400">Leave empty to hide the banner visual. PNG with transparent background recommended.</p>
+              {blackBanner.image ? mobileImageField("blackBanner-mobileImage", blackBanner.mobileImage, (v) => setBlackBanner((p) => ({ ...p, mobileImage: v })), "square — e.g. 1000×1000, shown in the circle") : null}
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">CTAs</p>
@@ -2319,6 +2366,9 @@ export default function HomePageEditor() {
                       onChange={(v) => updateServiceCard(i, "mediaSrc", v)}
                       onUpload={(file, rt) => handleServiceCardMediaUpload(i, file, rt)}
                     />
+                    {card.mediaType !== "video"
+                      ? mobileImageField(`glcard-${i}-mobileImage`, card.mobileImage, (v) => updateServiceCard(i, "mobileImage", v), "landscape 16:10 — e.g. 1200×750")
+                      : null}
                   </div>
                 </div>
               ))
@@ -3041,6 +3091,7 @@ export default function HomePageEditor() {
               onChange={(v) => setHalaParkInAction((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleHalaParkImageUpload(file)}
             />
+            {mobileImageField("hpa-mobileImage", halaParkInAction.mobileImage, (v) => setHalaParkInAction((p) => ({ ...p, mobileImage: v })), "about 4:3 — e.g. 1200×890")}
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>
               <button
@@ -3196,6 +3247,7 @@ export default function HomePageEditor() {
               onChange={(v) => setSupportCta((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleSupportImageUpload(file)}
             />
+            {mobileImageField("support-mobileImage", supportCta.mobileImage, (v) => setSupportCta((p) => ({ ...p, mobileImage: v })), "landscape 16:10 — e.g. 1200×750, shown above the cards on phones")}
           </div>
         </CollapsibleSection>
 

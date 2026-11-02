@@ -28,6 +28,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -533,7 +534,7 @@ export default function FAQPageEditor() {
   }
 
   // "Mobile image (optional)" field shown under an image.
-  const mobileImageField = (key, value, apply, shape) => (
+  const mobileImageField = (key, value, apply, shape, mobileW, mobileH) => (
     <div className="mt-3">
       <label className={labelClass}>Mobile image (optional)</label>
       <div className="flex gap-2">
@@ -558,6 +559,7 @@ export default function FAQPageEditor() {
       {uploadErrors[key] ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
       ) : null}
+      <ImageSizeHint w={mobileW} h={mobileH} />
       <p className="mt-1 text-[11px] text-slate-400">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
       </p>
@@ -667,7 +669,8 @@ export default function FAQPageEditor() {
               {uploadErrors["hero-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
               ) : null}
-              {mobileImageField("hero-mobile", hero.mobileImage, (v) => setHero((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040; the text sits on top of it")}
+              <ImageSizeHint w={2400} h={660} />
+              {mobileImageField("hero-mobile", hero.mobileImage, (v) => setHero((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040; the text sits on top of it", 800, 770)}
             </div>
           </div>
         </CollapsibleSection>
@@ -910,7 +913,8 @@ export default function FAQPageEditor() {
               {uploadErrors["bottomCta-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["bottomCta-image"]}</p>
               ) : null}
-              {mobileImageField("bottomCta-mobile", bottomCta.mobileImage, (v) => setBottomCta((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900")}
+              <ImageSizeHint w={1050} h={600} />
+              {mobileImageField("bottomCta-mobile", bottomCta.mobileImage, (v) => setBottomCta((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", 540, 410)}
               <p className="mt-1 text-[11px] text-slate-400">
                 Shown on the right of the band in a curved panel. Leave empty for the decorative rings and question mark.
               </p>
@@ -1052,6 +1056,7 @@ export default function FAQPageEditor() {
                 {uploadErrors["cat-icon"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cat-icon"]}</p>
                 ) : null}
+                <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                 {(newCategoryForm.iconImage ?? "").trim() !== "" && (
                   <img
                     src={newCategoryForm.iconImage}

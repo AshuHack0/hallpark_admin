@@ -6,6 +6,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import { confirmDelete } from "../lib/confirmDelete";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -573,6 +574,7 @@ export default function ContactPageEditor() {
                         />
                       </label>
                     </div>
+                    <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     <FieldError error={validateUrl(item.iconImage ?? "")} />
                     {uploadErrors[`contact-item-${i}-icon`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`contact-item-${i}-icon`]}</p>

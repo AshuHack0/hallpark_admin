@@ -18,6 +18,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -624,7 +625,7 @@ export default function CareersPageEditor() {
   }
 
   // "Mobile image (optional)" row shown under an image.
-  const mobileImageField = (key, value, apply, shape) => (
+  const mobileImageField = (key, value, apply, shape, hint) => (
     <div className="mt-2 grid gap-1">
       <span className={labelClass}>Mobile image (optional)</span>
       <div className="flex gap-2">
@@ -654,6 +655,7 @@ export default function CareersPageEditor() {
       {uploadErrors[key] ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
       ) : null}
+      <ImageSizeHint w={hint?.w} h={hint?.h} note={hint?.note} />
       <span className="text-[11px] text-slate-400">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
       </span>
@@ -779,7 +781,8 @@ export default function CareersPageEditor() {
                     {uploadErrors[`hero-img-${i}`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-img-${i}`]}</p>
                     ) : null}
-                    {mobileImageField(`hero-img-${i}-mobile`, content.hero.mobileImages?.[i], (v) => updateHeroMobileImage(i, v), "portrait, about 4:5 — e.g. 1080×1360")}
+                    <ImageSizeHint w={1360} h={1370} />
+                    {mobileImageField(`hero-img-${i}-mobile`, content.hero.mobileImages?.[i], (v) => updateHeroMobileImage(i, v), "portrait, about 4:5 — e.g. 1080×1360", { w: 1080, h: 1360 })}
                   </div>
                   <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                     <Upload className="h-3.5 w-3.5" />
@@ -1234,6 +1237,7 @@ export default function CareersPageEditor() {
                     {uploadErrors[`opp-${i}-icon`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`opp-${i}-icon`]}</p>
                     ) : null}
+                    <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                   </div>
                   <div>
                     <label className={labelClass}>Title</label>
@@ -1279,7 +1283,8 @@ export default function CareersPageEditor() {
                     {uploadErrors[`opp-${i}-image`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`opp-${i}-image`]}</p>
                     ) : null}
-                    {mobileImageField(`opp-${i}-mobile`, item.mobileImage, (v) => updateOpportunity(i, "mobileImage", v), "4:3 strip across the top of the card — e.g. 1200×900")}
+                    <ImageSizeHint w={550} h={850} />
+                    {mobileImageField(`opp-${i}-mobile`, item.mobileImage, (v) => updateOpportunity(i, "mobileImage", v), "4:3 strip across the top of the card — e.g. 1200×900", { w: 1200, h: 900 })}
                   </div>
                 </div>
               </div>
@@ -1523,6 +1528,7 @@ export default function CareersPageEditor() {
             {uploadErrors["hero-image"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
             ) : null}
+            <ImageSizeHint w={1360} h={1370} />
           </label>
           <label className="grid gap-1">
             <span className={labelClass}>Primary Button (View Open Positions)</span>
@@ -1662,6 +1668,7 @@ export default function CareersPageEditor() {
                   {uploadErrors[upKey] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[upKey]}</p>
                   ) : null}
+                  <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                 </label>
               ))}
             </div>
@@ -1854,6 +1861,7 @@ export default function CareersPageEditor() {
             {uploadErrors["open-positions-bg"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["open-positions-bg"]}</p>
             ) : null}
+            <ImageSizeHint w={2400} h={800} />
             <span className="text-[11px] text-slate-400">
               Sits behind the whole Open Positions section, under a white wash so the text stays readable. Leave empty for a plain white background.
             </span>
@@ -2010,7 +2018,8 @@ export default function CareersPageEditor() {
             {uploadErrors["job-image"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["job-image"]}</p>
             ) : null}
-            {mobileImageField("job-image-mobile", jobPostForm.mobileImage, (v) => setJobPostForm((p) => ({ ...p, mobileImage: v })), "16:10 — e.g. 1200×750")}
+            <ImageSizeHint w={570} h={356} />
+            {mobileImageField("job-image-mobile", jobPostForm.mobileImage, (v) => setJobPostForm((p) => ({ ...p, mobileImage: v })), "16:10 — e.g. 1200×750", { w: 1200, h: 750 })}
             <span className="text-[11px] text-slate-400">
               Shown at the top of this job&apos;s card. Leave empty and the card starts with the job title.
             </span>
@@ -2317,7 +2326,8 @@ export default function CareersPageEditor() {
             {uploadErrors["cta-image"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
             ) : null}
-            {mobileImageField("cta-image-mobile", ctaForm.mobileImage, (v) => setCtaForm((p) => ({ ...p, mobileImage: v })), "shown whole above the text on phones")}
+            <ImageSizeHint w={2400} h={770} />
+            {mobileImageField("cta-image-mobile", ctaForm.mobileImage, (v) => setCtaForm((p) => ({ ...p, mobileImage: v })), "shown whole above the text on phones", { w: 800, h: 500, note: "shown whole, any shape works" })}
             <span className="text-[11px] text-slate-400">
               Shown behind this band, under a dark overlay. Leave empty for a plain dark background.
             </span>

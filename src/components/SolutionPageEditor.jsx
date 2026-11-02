@@ -9,6 +9,7 @@ import { scrollToNewItem } from "../lib/scrollToNewItem";
 import { confirmDelete } from "../lib/confirmDelete";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { LinesTextarea } from "./ListInput.jsx";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500";
@@ -464,7 +465,7 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
 
   // "Mobile image (optional)" under a detail image: phones (under 640px) get
   // this upload instead; empty = the same image on mobile.
-  const mobileImageField = (field) => {
+  const mobileImageField = (field, hint) => {
     const key = `detail-${field}`;
     const busy = typeof fieldUpload[key] === "number";
     return (
@@ -490,6 +491,7 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
             }}
           />
         </label>
+        <ImageSizeHint w={hint?.w} h={hint?.h} note={hint?.note} />
         <p className="text-[11px] text-slate-400">
           Shown on phones instead of the image above (shown whole, at its own shape). Leave empty to use the same image on mobile.
         </p>
@@ -655,7 +657,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                {mobileImageField("mobileImage")}
+                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
+                {mobileImageField("mobileImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
               </div>
             </div>
           </div>
@@ -706,7 +709,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                {mobileImageField("mobileWhyImage")}
+                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
+                {mobileImageField("mobileWhyImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
               </div>
             </div>
           </div>
@@ -756,7 +760,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                {mobileImageField("mobileProblemImage")}
+                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
+                {mobileImageField("mobileProblemImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
               </div>
             </div>
           </div>
@@ -806,7 +811,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                {mobileImageField("mobileSolutionImage")}
+                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
+                {mobileImageField("mobileSolutionImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
               </div>
             </div>
           </div>
@@ -1337,7 +1343,7 @@ export default function SolutionPageEditor() {
   }
 
   // "Mobile image (optional)" field shown under an image.
-  const mobileImageField = (key, value, apply, shape) => (
+  const mobileImageField = (key, value, apply, shape, hint) => (
     <div className="mt-2">
       <label className={labelClass}>Mobile image (optional)</label>
       <div className="flex gap-2">
@@ -1361,6 +1367,7 @@ export default function SolutionPageEditor() {
       {uploadErrors[key] ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
       ) : null}
+      <ImageSizeHint w={hint?.w} h={hint?.h} note={hint?.note} />
       <p className="mt-1 text-[11px] text-slate-400">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
       </p>
@@ -1536,6 +1543,7 @@ export default function SolutionPageEditor() {
                       {uploadErrors[`showcase-${col}-${idx}`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`showcase-${col}-${idx}`]}</p>
                       ) : null}
+                      <ImageSizeHint w={320} h={380} />
                     </div>
                   ))}
                   {(hero.showcase?.[col] ?? []).length === 0 && (
@@ -1694,7 +1702,8 @@ export default function SolutionPageEditor() {
             {uploadErrors["challenges-image"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["challenges-image"]}</p>
             ) : null}
-            {mobileImageField("challenges-mobile", challenges.mobileImage, (v) => setChallenges((p) => ({ ...p, mobileImage: v })), "shown whole, at its own shape")}
+            <ImageSizeHint w={1310} h={880} />
+            {mobileImageField("challenges-mobile", challenges.mobileImage, (v) => setChallenges((p) => ({ ...p, mobileImage: v })), "shown whole, at its own shape", { w: 800, h: 540 })}
             <FieldError error={validateUrl(challenges.image ?? "")} />
           </div>
 
@@ -1936,7 +1945,8 @@ export default function SolutionPageEditor() {
                     {uploadErrors[`solutions-${i}`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`solutions-${i}`]}</p>
                     ) : null}
-                    {mobileImageField(`solutions-${i}-mobile`, card.mobileImage, (v) => setSolutions((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "wide, about 2:1 — e.g. 1200×580")}
+                    <ImageSizeHint w={700} h={385} />
+                    {mobileImageField(`solutions-${i}-mobile`, card.mobileImage, (v) => setSolutions((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "wide, about 2:1 — e.g. 1200×580", { w: 1200, h: 580 })}
                     <FieldError error={validateUrl(card.image ?? "")} />
 
                     {/* Slug — links the card to its detail page */}
@@ -2114,6 +2124,7 @@ export default function SolutionPageEditor() {
                         {uploadErrors[`advantage-${ai}-icon`] ? (
                           <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`advantage-${ai}-icon`]}</p>
                         ) : null}
+                        <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                       </div>
                     </div>
                   </div>
@@ -2334,7 +2345,8 @@ export default function SolutionPageEditor() {
                     {uploadErrors[`integration-${i}`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`integration-${i}`]}</p>
                     ) : null}
-                    {mobileImageField(`integration-${i}-mobile`, card.mobileImage, (v) => setIntegration((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "about 3:2 — e.g. 1200×830")}
+                    <ImageSizeHint w={1300} h={1160} />
+                    {mobileImageField(`integration-${i}-mobile`, card.mobileImage, (v) => setIntegration((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "about 3:2 — e.g. 1200×830", { w: 1200, h: 830 })}
                     <FieldError error={validateUrl(card.image ?? "")} />
                     <textarea
                       value={card.gradient ?? ""}
@@ -2456,7 +2468,8 @@ export default function SolutionPageEditor() {
                 {uploadErrors["trust-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["trust-image"]}</p>
                 ) : null}
-                {mobileImageField("trust-mobile", trust.mobileImage, (v) => setTrust((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040")}
+                <ImageSizeHint w={1310} h={800} />
+                {mobileImageField("trust-mobile", trust.mobileImage, (v) => setTrust((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040", { w: 1080, h: 1040 })}
               </div>
             </div>
           </div>
@@ -2650,6 +2663,7 @@ export default function SolutionPageEditor() {
                           {uploadErrors[`seamless-${i}-icon`] ? (
                             <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`seamless-${i}-icon`]}</p>
                           ) : null}
+                          <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                         </div>
                       </div>
                     </div>
@@ -2739,7 +2753,8 @@ export default function SolutionPageEditor() {
                 {uploadErrors["features-0"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["features-0"]}</p>
                 ) : null}
-                {mobileImageField("features-mobile", features.mobileImage, (v) => setFeatures((p) => ({ ...p, mobileImage: v })), "shown whole, at its own shape")}
+                <ImageSizeHint w={1920} h={1080} />
+                {mobileImageField("features-mobile", features.mobileImage, (v) => setFeatures((p) => ({ ...p, mobileImage: v })), "shown whole, at its own shape", { w: 800, h: 450 })}
               </div>
             </div>
           </div>
@@ -2828,6 +2843,7 @@ export default function SolutionPageEditor() {
                         {uploadErrors[iconKey] ? (
                           <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[iconKey]}</p>
                         ) : null}
+                        <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                       </div>
                     </div>
                   </div>
@@ -3023,7 +3039,8 @@ export default function SolutionPageEditor() {
                   {uploadErrors["deployment-0"] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["deployment-0"]}</p>
                   ) : null}
-                  {mobileImageField("deployment-mobile", deployment.mobileImage, (v) => setDeployment((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1110")}
+                  <ImageSizeHint w={1330} h={800} note="also the video's poster frame" />
+                  {mobileImageField("deployment-mobile", deployment.mobileImage, (v) => setDeployment((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1110", { w: 1080, h: 1110 })}
                 </div>
               </div>
             </div>
@@ -3237,7 +3254,8 @@ export default function SolutionPageEditor() {
                 {uploadErrors["why-0"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["why-0"]}</p>
                 ) : null}
-                {mobileImageField("why-mobile", why.mobileImage, (v) => setWhy((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1100")}
+                <ImageSizeHint w={1310} h={800} />
+                {mobileImageField("why-mobile", why.mobileImage, (v) => setWhy((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1100", { w: 1080, h: 1100 })}
               </div>
             </div>
           </div>
@@ -3400,7 +3418,8 @@ export default function SolutionPageEditor() {
                 {uploadErrors["cta-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
                 ) : null}
-                {mobileImageField("cta-mobile", cta.mobileImage, (v) => setCtA((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900")}
+                <ImageSizeHint w={1210} h={1000} />
+                {mobileImageField("cta-mobile", cta.mobileImage, (v) => setCtA((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", { w: 1120, h: 840 })}
               </div>
             </div>
           </div>

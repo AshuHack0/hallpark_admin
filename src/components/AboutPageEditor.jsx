@@ -21,6 +21,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
+import ImageSizeHint from "./ImageSizeHint";
 import { DEFAULT_ABOUT_SECTIONS, mergeAboutSections } from "../constants/aboutDefaults.js";
 
 const inputClass =
@@ -249,7 +250,7 @@ export default function AboutPageEditor() {
 
   // Small reusable image field: path input + preview + Upload button.
   // eslint-disable-next-line react/prop-types
-  function ImageField({ label = "Image", value, onChange, setForm, uploadKey, field = "image" }) {
+  function ImageField({ label = "Image", value, onChange, setForm, uploadKey, field = "image", w, h, mobileW, mobileH, note }) {
     return (
       <label className="grid gap-1">
         <span className={labelClass}>{label}</span>
@@ -289,6 +290,7 @@ export default function AboutPageEditor() {
           <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[uploadKey]}</p>
         ) : null}
         <FieldError error={validateUrl(value)} />
+        <ImageSizeHint w={w} h={h} mobileW={mobileW} mobileH={mobileH} note={note} />
       </label>
     );
   }
@@ -1486,6 +1488,7 @@ export default function AboutPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`about-hero-${i}`]}</p>
                 ) : null}
                 <FieldError error={validateUrl(slide.img)} />
+                <ImageSizeHint w={1150} h={950} note="for a video slide, use the same shape" />
                 {/\.(mp4|webm|mov)(\?|$)/i.test(slide.img ?? "") ? null : (
                   <div className="mt-2 grid gap-1">
                     <span className={labelClass}>Mobile image (optional)</span>
@@ -1520,6 +1523,7 @@ export default function AboutPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`about-hero-${i}-mobile`]}</p>
                     ) : null}
                     <FieldError error={validateUrl(slide.mobileImg)} />
+                    <ImageSizeHint w={640} h={520} />
                     <p className="text-[11px] text-slate-400">Shown on phones instead of the image above (about 5:4 — e.g. 1080×880). Leave empty to use the same image on mobile.</p>
                   </div>
                 )}
@@ -1645,6 +1649,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setMissionSectionForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setMissionSectionForm}
             uploadKey="image-mission"
+            w={1300}
+            h={1000}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -1652,6 +1658,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setMissionSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setMissionSectionForm}
             uploadKey="image-mission-mobile"
+            w={660}
+            h={560}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
@@ -1711,6 +1719,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setVisionSectionForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setVisionSectionForm}
             uploadKey="image-vision"
+            w={2400}
+            h={765}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -1718,6 +1728,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setVisionSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setVisionSectionForm}
             uploadKey="image-vision-mobile"
+            w={800}
+            h={400}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (shown whole, at its own shape). Leave empty to use the same image on mobile.</p>
@@ -1838,6 +1850,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setStorySectionForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setStorySectionForm}
             uploadKey="image-story"
+            w={1300}
+            h={1000}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -1845,6 +1859,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setStorySectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setStorySectionForm}
             uploadKey="image-story-mobile"
+            w={660}
+            h={560}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
@@ -1930,6 +1946,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setWhatWeDoSectionForm}
             uploadKey="image-whatWeDo"
+            w={800}
+            h={380}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -1937,6 +1955,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setWhatWeDoSectionForm}
             uploadKey="image-whatWeDo-mobile"
+            w={720}
+            h={390}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (wide, about 7:4 — e.g. 1200×690). Leave empty to use the same image on mobile.</p>
@@ -2015,6 +2035,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setTechnologyForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setTechnologyForm}
             uploadKey="image-technology"
+            w={1310}
+            h={840}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -2022,6 +2044,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setTechnologyForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setTechnologyForm}
             uploadKey="image-technology-mobile"
+            w={670}
+            h={580}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 7:6 — e.g. 1080×930). Leave empty to use the same image on mobile.</p>
@@ -2101,6 +2125,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setCtaForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setCtaForm}
             uploadKey="image-cta"
+            w={1000}
+            h={840}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -2108,6 +2134,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setCtaForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setCtaForm}
             uploadKey="image-cta-mobile"
+            w={570}
+            h={430}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (4:3 — e.g. 1200×900). Leave empty to use the same image on mobile.</p>

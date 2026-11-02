@@ -5,6 +5,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
 import PageLinkSelect from "./PageLinkSelect";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -364,6 +365,7 @@ export default function SettingsPageEditor() {
               />
             </label>
           </div>
+          <ImageSizeHint w={360} h={100} note="PNG/SVG, transparent background, trimmed to its edges" />
           {uploadErrors["logo"] ? (
             <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["logo"]}</p>
           ) : null}
@@ -621,6 +623,7 @@ export default function SettingsPageEditor() {
                   </button>
                 ) : null}
               </div>
+              <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
               {uploadErrors[`store-icon-${i}`] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`store-icon-${i}`]}</p>
               ) : null}
@@ -985,6 +988,7 @@ export default function SettingsPageEditor() {
               />
             </label>
           </div>
+          <ImageSizeHint w={300} h={300} note="square" />
           <FieldError error={validateUrl(footer.qrImage)} />
           {uploadErrors["footer-qr"] ? (
             <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["footer-qr"]}</p>

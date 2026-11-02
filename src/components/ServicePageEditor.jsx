@@ -9,6 +9,7 @@ import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
 import { FRONTEND_PAGES } from "../constants/pages.js";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -370,7 +371,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
 
   // "Mobile image (optional)" under a detail image: phones (under 640px) get
   // this upload instead; empty = the same image on mobile.
-  const mobileImageField = (field, shape) => {
+  const mobileImageField = (field, shape, size = {}) => {
     const key = `detail-${field}`;
     const busy = typeof fieldUpload[key] === "number";
     return (
@@ -396,6 +397,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
             }}
           />
         </label>
+        <ImageSizeHint w={size.w} h={size.h} note={size.note} />
         <p className="text-[11px] text-slate-400">
           Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
         </p>
@@ -561,7 +563,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                {mobileImageField("mobileImage", "4:3 — e.g. 1200×900")}
+                <ImageSizeHint w={1120} h={840} note="4:3" />
+                {mobileImageField("mobileImage", "4:3 — e.g. 1200×900", { w: 720, h: 540 })}
               </div>
             </div>
           </div>
@@ -612,7 +615,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                {mobileImageField("mobileWhyImage", "4:3 — e.g. 1200×900")}
+                <ImageSizeHint w={1200} h={900} note="4:3" />
+                {mobileImageField("mobileWhyImage", "4:3 — e.g. 1200×900", { w: 720, h: 540 })}
               </div>
             </div>
           </div>
@@ -662,7 +666,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                {mobileImageField("mobileProblemImage", "4:3 — e.g. 1200×900")}
+                <ImageSizeHint w={1040} h={780} note="4:3" />
+                {mobileImageField("mobileProblemImage", "4:3 — e.g. 1200×900", { w: 600, h: 450 })}
               </div>
             </div>
           </div>
@@ -712,7 +717,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                {mobileImageField("mobileSolutionImage", "4:3 — e.g. 1200×900")}
+                <ImageSizeHint w={1040} h={780} note="4:3" />
+                {mobileImageField("mobileSolutionImage", "4:3 — e.g. 1200×900", { w: 600, h: 450 })}
               </div>
             </div>
           </div>
@@ -1295,7 +1301,7 @@ export default function ServicePageEditor() {
   }
 
   // "Mobile image (optional)" field shown under an image.
-  const mobileImageField = (key, value, apply, shape) => (
+  const mobileImageField = (key, value, apply, shape, size = {}) => (
     <div className="mt-2">
       <label className={labelClass}>Mobile image (optional)</label>
       <div className="flex gap-2">
@@ -1319,6 +1325,7 @@ export default function ServicePageEditor() {
       {uploadErrors[key] ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
       ) : null}
+      <ImageSizeHint w={size.w} h={size.h} note={size.note} />
       <p className="mt-1 text-[11px] text-slate-400">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
       </p>
@@ -1514,7 +1521,8 @@ export default function ServicePageEditor() {
                   {uploadErrors[`hero-slide-${i}`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-slide-${i}`]}</p>
                   ) : null}
-                  {mobileImageField(`hero-slide-${i}-mobile`, s.mobileImg, (v) => updateHeroSlide(i, { mobileImg: v }), "portrait 9:16 — e.g. 1080×1920; only used when the slide has no video")}
+                  <ImageSizeHint w={540} h={960} note="portrait 9:16" />
+                  {mobileImageField(`hero-slide-${i}-mobile`, s.mobileImg, (v) => updateHeroSlide(i, { mobileImg: v }), "portrait 9:16 — e.g. 1080×1920; only used when the slide has no video", { w: 420, h: 750 })}
 
                   <label className={`${labelClass} mt-2`}>Video (optional — plays instead of the image)</label>
                   <div className="flex gap-2">
@@ -1880,8 +1888,9 @@ export default function ServicePageEditor() {
               {uploadErrors[`service-${i}-image`] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`service-${i}-image`]}</p>
               ) : null}
+              {(service.mediaType ?? "image") !== "video" ? <ImageSizeHint w={660} h={370} /> : null}
               {(service.mediaType ?? "image") !== "video"
-                ? mobileImageField(`service-${i}-mobile`, service.mobileImage, (v) => updateService(i, "mobileImage", v), "wide, about 16:9 — e.g. 1280×720")
+                ? mobileImageField(`service-${i}-mobile`, service.mobileImage, (v) => updateService(i, "mobileImage", v), "wide, about 16:9 — e.g. 1280×720", { w: 660, h: 370 })
                 : null}
 
               {(service.subCategories?.length ?? 0) > 0 && (
@@ -2125,6 +2134,7 @@ export default function ServicePageEditor() {
                           <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`partner-${i}-logo`]}</p>
                         ) : null}
                         <FieldError error={validateUrl(partner.logo)} />
+                        <ImageSizeHint w={420} h={190} note="logo trimmed to its edges, no empty margin" />
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <input
@@ -2331,6 +2341,7 @@ export default function ServicePageEditor() {
                       {uploadErrors[`trust-item-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`trust-item-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 </div>
@@ -2418,7 +2429,8 @@ export default function ServicePageEditor() {
             {uploadErrors["cta-image"] ? (
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
             ) : null}
-            {mobileImageField("cta-mobile", ctaSection.mobileImage, (v) => setCtaSection((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900")}
+            <ImageSizeHint w={1480} h={1300} />
+            {mobileImageField("cta-mobile", ctaSection.mobileImage, (v) => setCtaSection((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", { w: 880, h: 660 })}
             <p className="mt-1 text-[11px] text-slate-400">
               Shown on the right of the band inside a large curved cutout, with the text on the left. Leave empty for the plain band with the “P” watermark.
             </p>

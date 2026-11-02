@@ -7,6 +7,7 @@ import { confirmDelete } from "../lib/confirmDelete";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
+import ImageSizeHint from "./ImageSizeHint";
 
 const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
 const labelClass = "block text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 mb-2";
@@ -484,7 +485,7 @@ export default function AppPageEditor() {
 
   // "Mobile image (optional)" field shown under an image: phones (under 640px)
   // get this upload instead; empty = the same image on mobile.
-  const mobileImageField = (key, value, onChange, onFile, shape) => (
+  const mobileImageField = (key, value, onChange, onFile, shape, size = {}) => (
     <div className="mt-3">
       <label className={labelClass}>Mobile image (optional)</label>
       <div className="flex gap-2">
@@ -518,6 +519,7 @@ export default function AppPageEditor() {
       {uploadErrors[key] ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
       ) : null}
+      <ImageSizeHint w={size.w} h={size.h} note={size.note} />
       <p className="mt-1 text-[11px] text-slate-400">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
       </p>
@@ -695,6 +697,7 @@ export default function AppPageEditor() {
               {uploadErrors["hero-phoneImage"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-phoneImage"]}</p>
               ) : null}
+              <ImageSizeHint w={650} h={1320} note="phone screen, portrait" />
             </div>
 
             {/* Phone video — takes priority over the screenshot when set */}
@@ -848,6 +851,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`hero-stat-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-stat-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 </div>
@@ -994,6 +998,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`hero-card-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-card-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 </div>
@@ -1181,6 +1186,7 @@ export default function AppPageEditor() {
                 {uploadErrors["platform-appScreen"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["platform-appScreen"]}</p>
                 ) : null}
+                <ImageSizeHint w={520} h={1060} note="phone screen, portrait" />
               </div>
 
               {/* Floating cards beside the phone — shown unless switched off */}
@@ -1237,12 +1243,14 @@ export default function AppPageEditor() {
                 {uploadErrors["platform-webScreen"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["platform-webScreen"]}</p>
                 ) : null}
+                <ImageSizeHint w={840} h={600} />
                 {mobileImageField(
                   "platform-mobileWebScreen",
                   sections.platform.mobileWebScreen,
                   (v) => setSections((prev) => ({ ...prev, platform: { ...prev.platform, mobileWebScreen: v } })),
                   (file) => handleImageUpload("platform", "mobileWebScreen", file),
                   "about 9:10 — e.g. 900×1000",
+                  { w: 720, h: 800 },
                 )}
               </div>
 
@@ -1378,6 +1386,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`platform-appfeat-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`platform-appfeat-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 )}
@@ -1457,6 +1466,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`platform-webfeat-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`platform-webfeat-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 )}
@@ -1626,6 +1636,7 @@ export default function AppPageEditor() {
                   {uploadErrors[`svc-tab-${i}-screen`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`svc-tab-${i}-screen`]}</p>
                   ) : null}
+                  <ImageSizeHint w={650} h={1320} note="phone screen, portrait" />
                 </div>
                 <div>
                   <label className={labelClass}>Tab Icon (optional)</label>
@@ -1660,6 +1671,7 @@ export default function AppPageEditor() {
                   {uploadErrors[`svc-tab-${i}-icon`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`svc-tab-${i}-icon`]}</p>
                   ) : null}
+                  <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                 </div>
               </div>
             )}
@@ -1848,6 +1860,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`scr-step-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`scr-step-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 )}
@@ -1915,6 +1928,7 @@ export default function AppPageEditor() {
                   {uploadErrors[`screenshot-${i}-image`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`screenshot-${i}-image`]}</p>
                   ) : null}
+                  <ImageSizeHint w={520} h={1060} note="phone screen, portrait" />
                 </div>
               </div>
             )}
@@ -2006,6 +2020,7 @@ export default function AppPageEditor() {
                 {uploadErrors["currency-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["currency-image"]}</p>
                 ) : null}
+                <ImageSizeHint w={650} h={1320} note="phone screen, portrait" />
               </div>
               <div>
                 <label className={labelClass}>Section Video (plays in the phone)</label>
@@ -2125,6 +2140,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`currency-card-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`currency-card-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                   </div>
                 )}
@@ -2320,6 +2336,7 @@ export default function AppPageEditor() {
                   {uploadErrors[`feat-card-${i}-icon`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-icon`]}</p>
                   ) : null}
+                  <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                 </div>
                 <div>
                   <label className={labelClass}>Card Image (optional)</label>
@@ -2354,12 +2371,14 @@ export default function AppPageEditor() {
                   {uploadErrors[`feat-card-${i}-img`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-img`]}</p>
                   ) : null}
+                  <ImageSizeHint w={700} h={300} />
                   {mobileImageField(
                     `feat-card-${i}-mobileImg`,
                     item.mobileImage,
                     (v) => update(i, { mobileImage: v }),
                     (file) => handleArrayImageUpload(`feat-card-${i}-mobileImg`, update, i, "mobileImage", file),
                     "wide, about 2:1 — e.g. 1140×600",
+                    { w: 640, h: 320 },
                   )}
                 </div>
                 <div>
@@ -2486,6 +2505,7 @@ export default function AppPageEditor() {
                 {uploadErrors["halapark-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["halapark-image"]}</p>
                 ) : null}
+                <ImageSizeHint w={1400} h={1040} />
                 {sections.halapark?.image ? (
                   <img src={sections.halapark.image} alt="" className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover" />
                 ) : null}
@@ -2495,6 +2515,7 @@ export default function AppPageEditor() {
                   (v) => setSections((prev) => ({ ...prev, halapark: { ...prev.halapark, mobileImage: v } })),
                   (file) => handleImageUpload("halapark", "mobileImage", file),
                   "about 4:3 — e.g. 1200×890",
+                  { w: 720, h: 530 },
                 )}
               </div>
               <div>
@@ -2554,6 +2575,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`storeicon-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`storeicon-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                     <div>
                       <label className={labelClass}>Alt Text</label>
@@ -2685,6 +2707,7 @@ export default function AppPageEditor() {
               {uploadErrors["ctaFooter-image"] ? (
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["ctaFooter-image"]}</p>
               ) : null}
+              <ImageSizeHint w={1100} h={820} note="4:3" />
               <p className="mt-1 text-[11px] text-slate-400">Leave empty to show a plain decorative panel instead.</p>
               <div className="mb-6">
                 {mobileImageField(
@@ -2693,6 +2716,7 @@ export default function AppPageEditor() {
                   (v) => setSections((prev) => ({ ...prev, ctaFooter: { ...prev.ctaFooter, mobileImage: v } })),
                   (file) => handleImageUpload("ctaFooter", "mobileImage", file),
                   "4:3 — e.g. 1200×900",
+                  { w: 640, h: 480 },
                 )}
               </div>
             </div>
@@ -2768,6 +2792,7 @@ export default function AppPageEditor() {
                       {uploadErrors[`ctafooter-store-${i}-icon`] ? (
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`ctafooter-store-${i}-icon`]}</p>
                       ) : null}
+                      <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     </div>
                     <div>
                       <label className={labelClass}>Store URL</label>

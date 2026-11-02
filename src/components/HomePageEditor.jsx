@@ -4,6 +4,7 @@ import { ExternalLink, Plus, Trash2, Upload, Loader2, Save, ChevronDown, ImageIc
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
+import ImageSizeHint from "./ImageSizeHint";
 import { validateUrl, validateImageFile, validateVideoFile, validateEmail, validatePhone } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
 import { scrollToNewItem } from "../lib/scrollToNewItem";
@@ -264,7 +265,7 @@ function slideMediaType(slide) {
 }
 
 // A labelled text input + Cloudinary upload button for one media field.
-function MediaField({ label, value, accept, resourceType, uploading, progress, onChange, onUpload, uploadError }) {
+function MediaField({ label, value, accept, resourceType, uploading, progress, onChange, onUpload, uploadError, w, h, mobileW, mobileH, note }) {
   return (
     <div>
       <label className={labelClass}>{label}</label>
@@ -308,6 +309,7 @@ function MediaField({ label, value, accept, resourceType, uploading, progress, o
           />
         </label>
       </div>
+      <ImageSizeHint w={w} h={h} mobileW={mobileW} mobileH={mobileH} note={note} />
       <FieldError error={validateUrl(value)} />
       {uploadError ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadError}</p>
@@ -1220,7 +1222,7 @@ export default function HomePageEditor() {
   const prog = (i, f) => uploadProgress[`${i}-${f}`];
 
   // "Mobile image (optional)" field shown under a section's main image.
-  const mobileImageField = (key, value, apply, shape) => (
+  const mobileImageField = (key, value, apply, shape, size) => (
     <div className="mt-3">
       <MediaField
         label="Mobile image (optional)"
@@ -1232,6 +1234,8 @@ export default function HomePageEditor() {
         uploadError={uploadErrors[key]}
         onChange={apply}
         onUpload={(file) => handleMobileImageUpload(key, file, apply)}
+        w={size?.w}
+        h={size?.h}
       />
       <p className="mt-1.5 text-xs text-slate-500">
         Shown on phones instead of the image above{shape ? ` (${shape})` : ""}. Leave empty to use the same image on mobile.
@@ -1397,6 +1401,7 @@ export default function HomePageEditor() {
                       uploadError={uploadErrors[`${index}-image`]}
                       onChange={(v) => updateSlide(index, "image", v)}
                       onUpload={(file, rt) => handleUpload(index, "image", file, rt)}
+                      w={2400} h={1080}
                     />
                   )}
                   {slideMediaType(slide) !== "video" ? (
@@ -1411,6 +1416,7 @@ export default function HomePageEditor() {
                         uploadError={uploadErrors[`${index}-mobileImage`]}
                         onChange={(v) => updateSlide(index, "mobileImage", v)}
                         onUpload={(file, rt) => handleUpload(index, "mobileImage", file, rt)}
+                        w={800} h={1200}
                       />
                       <p className="mt-1.5 text-xs text-slate-500">
                         Shown on phones instead of the image above (portrait, about 2:3 — e.g. 1080×1620; edges may be trimmed on wider phones). Leave empty to use the same image on mobile.
@@ -1528,6 +1534,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`who-hl-${i}-icon`]}
                     onChange={(v) => updateWhoHighlight(i, "iconImage", v)}
                     onUpload={(file) => handleWhoIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -1625,6 +1632,7 @@ export default function HomePageEditor() {
                         progress={uploadProgress[`why-item-${i}-icon`]}
                         onChange={(v) => updateWhyItem(i, "iconImage", v)}
                         onUpload={(file) => handleWhyIconUpload(i, file)}
+                        w={160} h={160} note="PNG/SVG with transparent background"
                       />
                     </div>
                     <input
@@ -1697,10 +1705,11 @@ export default function HomePageEditor() {
                       />
                     </label>
                   </div>
+                  <ImageSizeHint w={1300} h={1370} />
                   {uploadErrors[upKey] ? (
                     <p className="text-xs font-medium text-red-600" role="alert">{uploadErrors[upKey]}</p>
                   ) : null}
-                  {mobileImageField(`why-${i}-mobileImage`, it.mobileImage, (v) => updateWhyItem(i, "mobileImage", v), "about square — e.g. 1080×1150")}
+                  {mobileImageField(`why-${i}-mobileImage`, it.mobileImage, (v) => updateWhyItem(i, "mobileImage", v), "about square — e.g. 1080×1150", { w: 800, h: 850 })}
                 </div>
               );
             })}
@@ -1819,8 +1828,9 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`aicard-${i}`] ?? 0}
                     onChange={(v) => updateAiCard(i, "imageSrc", v)}
                     onUpload={(file) => handleAiCardImageUpload(i, file)}
+                    w={1330} h={1040}
                   />
-                  {mobileImageField(`aicard-${i}-mobileImage`, card.mobileImage, (v) => updateAiCard(i, "mobileImage", v), "portrait, about 4:5 — e.g. 1080×1390")}
+                  {mobileImageField(`aicard-${i}-mobileImage`, card.mobileImage, (v) => updateAiCard(i, "mobileImage", v), "portrait, about 4:5 — e.g. 1080×1390", { w: 780, h: 1000 })}
                   <input
                     value={card.imageAlt ?? ""}
                     onChange={(e) => updateAiCard(i, "imageAlt", e.target.value)}
@@ -1960,6 +1970,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`how-step-${i}-icon`]}
                     onChange={(v) => updateHowStep(i, "iconImage", v)}
                     onUpload={(file) => handleHowStepIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
                 </div>
               </div>
@@ -2084,6 +2095,7 @@ export default function HomePageEditor() {
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleBannerFeatureIconUpload(i, file); e.target.value = ""; }} />
                       </label>
                     </div>
+                    <ImageSizeHint w={160} h={160} note="PNG/SVG with transparent background" />
                     {uploadErrors[`blackBanner-feature-${i}`] ? (
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`blackBanner-feature-${i}`]}</p>
                     ) : null}
@@ -2108,9 +2120,10 @@ export default function HomePageEditor() {
                 progress={uploadProgress["blackBanner-image"]}
                 onChange={(v) => setBlackBanner((p) => ({ ...p, image: v }))}
                 onUpload={(file) => handleBlackBannerImageUpload(file)}
+                w={700} h={700} note="square, shown in the circle"
               />
               <p className="mt-1 text-[10px] text-slate-400">Leave empty to hide the banner visual. PNG with transparent background recommended.</p>
-              {blackBanner.image ? mobileImageField("blackBanner-mobileImage", blackBanner.mobileImage, (v) => setBlackBanner((p) => ({ ...p, mobileImage: v })), "square — e.g. 1000×1000, shown in the circle") : null}
+              {blackBanner.image ? mobileImageField("blackBanner-mobileImage", blackBanner.mobileImage, (v) => setBlackBanner((p) => ({ ...p, mobileImage: v })), "square — e.g. 1000×1000, shown in the circle", { w: 600, h: 600 }) : null}
             </div>
 
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">CTAs</p>
@@ -2365,9 +2378,10 @@ export default function HomePageEditor() {
                       progress={uploadProgress[`glcard-${i}`] ?? 0}
                       onChange={(v) => updateServiceCard(i, "mediaSrc", v)}
                       onUpload={(file, rt) => handleServiceCardMediaUpload(i, file, rt)}
+                      w={card.mediaType === "video" ? undefined : 1560} h={530}
                     />
                     {card.mediaType !== "video"
-                      ? mobileImageField(`glcard-${i}-mobileImage`, card.mobileImage, (v) => updateServiceCard(i, "mobileImage", v), "landscape 16:10 — e.g. 1200×750")
+                      ? mobileImageField(`glcard-${i}-mobileImage`, card.mobileImage, (v) => updateServiceCard(i, "mobileImage", v), "landscape 16:10 — e.g. 1200×750", { w: 800, h: 500 })
                       : null}
                   </div>
                 </div>
@@ -2482,6 +2496,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`sol-card-${i}-icon`]}
                     onChange={(v) => updateSolutionCard(i, "iconImage", v)}
                     onUpload={(file) => handleSolutionCardIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
 
                   <label className={labelClass}>Description</label>
@@ -2646,6 +2661,7 @@ export default function HomePageEditor() {
                       progress={uploadProgress[`logo-${i}`] ?? 0}
                       onChange={(v) => updateLogo(i, "image", v)}
                       onUpload={(file) => handleLogoUpload(i, file)}
+                      w={420} h={190} note="logo trimmed to its edges, no empty margin"
                     />
                     <input
                       value={logo.alt ?? ""}
@@ -2807,6 +2823,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`gm-cap-${i}-icon`]}
                     onChange={(v) => updateCapability(i, "iconImage", v)}
                     onUpload={(file) => handleCapIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
                 </div>
               </div>
@@ -2862,6 +2879,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`gm-stat-${i}-icon`]}
                     onChange={(v) => updateImpactStat(i, "iconImage", v)}
                     onUpload={(file) => handleStatIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
                 </div>
               </div>
@@ -3090,8 +3108,9 @@ export default function HomePageEditor() {
               progress={uploadProgress["hpa-image"]}
               onChange={(v) => setHalaParkInAction((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleHalaParkImageUpload(file)}
+              w={1400} h={1040}
             />
-            {mobileImageField("hpa-mobileImage", halaParkInAction.mobileImage, (v) => setHalaParkInAction((p) => ({ ...p, mobileImage: v })), "about 4:3 — e.g. 1200×890")}
+            {mobileImageField("hpa-mobileImage", halaParkInAction.mobileImage, (v) => setHalaParkInAction((p) => ({ ...p, mobileImage: v })), "about 4:3 — e.g. 1200×890", { w: 720, h: 530 })}
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>
               <button
@@ -3125,6 +3144,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress[`storeLink-${i}-icon`]}
                     onChange={(v) => updateStoreLink(i, "icon", v)}
                     onUpload={(file) => handleStoreIconUpload(i, file)}
+                    w={160} h={160} note="PNG/SVG with transparent background"
                   />
                   <input
                     value={link.alt ?? ""}
@@ -3246,8 +3266,9 @@ export default function HomePageEditor() {
               progress={uploadProgress["support-image"]}
               onChange={(v) => setSupportCta((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleSupportImageUpload(file)}
+              w={2400} h={1120}
             />
-            {mobileImageField("support-mobileImage", supportCta.mobileImage, (v) => setSupportCta((p) => ({ ...p, mobileImage: v })), "landscape 16:10 — e.g. 1200×750, shown above the cards on phones")}
+            {mobileImageField("support-mobileImage", supportCta.mobileImage, (v) => setSupportCta((p) => ({ ...p, mobileImage: v })), "landscape 16:10 — e.g. 1200×750, shown above the cards on phones", { w: 800, h: 500 })}
           </div>
         </CollapsibleSection>
 
@@ -3304,6 +3325,7 @@ export default function HomePageEditor() {
                   progress={uploadProgress["promo-image"]}
                   onChange={(v) => setPromoPopup((prev) => ({ ...prev, image: v }))}
                   onUpload={(file, rt) => handlePromoUpload(file, rt)}
+                  w={1600} h={1200} note="any shape, shown uncropped"
                 />
               )}
               {promoPopup.mediaType !== "video" ? (
@@ -3318,6 +3340,7 @@ export default function HomePageEditor() {
                     progress={uploadProgress["promo-mobileImage"]}
                     onChange={(v) => setPromoPopup((prev) => ({ ...prev, mobileImage: v }))}
                     onUpload={(file, rt) => handlePromoUpload(file, rt, "mobileImage")}
+                    w={800} h={1000}
                   />
                   <p className="mt-1.5 text-xs text-slate-500">
                     Shown on phones instead of the image above. Leave empty to use the same image on mobile.

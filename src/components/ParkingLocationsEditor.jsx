@@ -9,6 +9,7 @@ import { scrollToNewItem } from "../lib/scrollToNewItem";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
 import PageLinkSelect from "./PageLinkSelect.jsx";
+import ImageSizeHint from "./ImageSizeHint";
 
 /*
  * PARKING LOCATIONS PAGE EDITOR — /parking-locations
@@ -212,7 +213,7 @@ function EnabledToggle({ enabled, onChange }) {
   );
 }
 
-function MediaField({ label, value, uploading, progress, onChange, onUpload, uploadError, hint }) {
+function MediaField({ label, value, uploading, progress, onChange, onUpload, uploadError, hint, w, h, mobileW, mobileH, note }) {
   return (
     <div>
       <label className={labelClass}>{label}</label>
@@ -256,6 +257,7 @@ function MediaField({ label, value, uploading, progress, onChange, onUpload, upl
           />
         </label>
       </div>
+      <ImageSizeHint w={w} h={h} mobileW={mobileW} mobileH={mobileH} note={note} />
       <FieldError error={validateUrl(value)} />
       {uploadError ? (
         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadError}</p>
@@ -596,6 +598,8 @@ export default function ParkingLocationsEditor() {
                 handleUpload("hero-image", file, (url) => setSection("hero", (p) => ({ ...p, image: url })))
               }
               hint="Optional. Leave empty to show the text full width."
+              w={1200}
+              h={900}
             />
           </div>
 
@@ -881,6 +885,8 @@ export default function ParkingLocationsEditor() {
                         onUpload={(file) =>
                           handleUpload(key, file, (url) => updateListItem("locations", "items", i, { image: url }))
                         }
+                        w={800}
+                        h={500}
                       />
 
                       <div>
@@ -1053,6 +1059,9 @@ export default function ParkingLocationsEditor() {
                             updateListItem("certificates", "items", i, { image: url }),
                           )
                         }
+                        w={500}
+                        h={200}
+                        note="logo trimmed to its edges, no empty margin"
                         hint="Shown at its natural shape — a transparent PNG works best."
                       />
                     </div>
@@ -1255,6 +1264,8 @@ export default function ParkingLocationsEditor() {
                               updateListItem("reviews", "items", i, { avatar: url }),
                             )
                           }
+                          w={400}
+                          h={400}
                           hint="Optional — the first letter of the name is used when empty."
                         />
                       </div>
@@ -1340,6 +1351,8 @@ export default function ParkingLocationsEditor() {
                 handleUpload("cta-image", file, (url) => setSection("cta", (p) => ({ ...p, image: url })))
               }
               hint="Shown on the right in a curved container, with the message and buttons on the left. Leave empty for the centred layout."
+              w={1200}
+              h={960}
             />
           </div>
         </CollapsibleSection>

@@ -782,7 +782,7 @@ export default function CareersPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-img-${i}`]}</p>
                     ) : null}
                     <ImageSizeHint w={1360} h={1370} />
-                    {mobileImageField(`hero-img-${i}-mobile`, content.hero.mobileImages?.[i], (v) => updateHeroMobileImage(i, v), "portrait, about 4:5 — e.g. 1080×1360", { w: 1080, h: 1360 })}
+                    {mobileImageField(`hero-img-${i}-mobile`, content.hero.mobileImages?.[i], (v) => updateHeroMobileImage(i, v), "portrait, about 4:5", { w: 1080, h: 1360 })}
                   </div>
                   <label className="shrink-0 inline-flex cursor-pointer items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] hover:bg-[#dcecff]">
                     <Upload className="h-3.5 w-3.5" />
@@ -1284,7 +1284,7 @@ export default function CareersPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`opp-${i}-image`]}</p>
                     ) : null}
                     <ImageSizeHint w={550} h={850} />
-                    {mobileImageField(`opp-${i}-mobile`, item.mobileImage, (v) => updateOpportunity(i, "mobileImage", v), "4:3 strip across the top of the card — e.g. 1200×900", { w: 1200, h: 900 })}
+                    {mobileImageField(`opp-${i}-mobile`, item.mobileImage, (v) => updateOpportunity(i, "mobileImage", v), "4:3 strip across the top of the card", { w: 1200, h: 900 })}
                   </div>
                 </div>
               </div>
@@ -2019,7 +2019,7 @@ export default function CareersPageEditor() {
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["job-image"]}</p>
             ) : null}
             <ImageSizeHint w={570} h={356} />
-            {mobileImageField("job-image-mobile", jobPostForm.mobileImage, (v) => setJobPostForm((p) => ({ ...p, mobileImage: v })), "16:10 — e.g. 1200×750", { w: 1200, h: 750 })}
+            {mobileImageField("job-image-mobile", jobPostForm.mobileImage, (v) => setJobPostForm((p) => ({ ...p, mobileImage: v })), "16:10", { w: 1200, h: 750 })}
             <span className="text-[11px] text-slate-400">
               Shown at the top of this job&apos;s card. Leave empty and the card starts with the job title.
             </span>

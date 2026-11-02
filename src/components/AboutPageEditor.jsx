@@ -1524,7 +1524,7 @@ export default function AboutPageEditor() {
                     ) : null}
                     <FieldError error={validateUrl(slide.mobileImg)} />
                     <ImageSizeHint w={640} h={520} />
-                    <p className="text-[11px] text-slate-400">Shown on phones instead of the image above (about 5:4 — e.g. 1080×880). Leave empty to use the same image on mobile.</p>
+                    <p className="text-[11px] text-slate-400">Shown on phones instead of the image above (about 5:4). Leave empty to use the same image on mobile.</p>
                   </div>
                 )}
                 <label className="mt-2 grid gap-1">
@@ -1662,7 +1662,7 @@ export default function AboutPageEditor() {
             h={560}
             field="mobileImage"
           />
-          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1863,7 +1863,7 @@ export default function AboutPageEditor() {
             h={560}
             field="mobileImage"
           />
-          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5 — e.g. 1080×910). Leave empty to use the same image on mobile.</p>
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 6:5). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -1959,7 +1959,7 @@ export default function AboutPageEditor() {
             h={390}
             field="mobileImage"
           />
-          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (wide, about 7:4 — e.g. 1200×690). Leave empty to use the same image on mobile.</p>
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (wide, about 7:4). Leave empty to use the same image on mobile.</p>
         </div>
       </Modal>
 
@@ -2048,7 +2048,7 @@ export default function AboutPageEditor() {
             h={580}
             field="mobileImage"
           />
-          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 7:6 — e.g. 1080×930). Leave empty to use the same image on mobile.</p>
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (about 7:6). Leave empty to use the same image on mobile.</p>
           <label className="grid gap-1">
             <span className={labelClass}>Image badge</span>
             <input
@@ -2138,7 +2138,7 @@ export default function AboutPageEditor() {
             h={430}
             field="mobileImage"
           />
-          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (4:3 — e.g. 1200×900). Leave empty to use the same image on mobile.</p>
+          <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (4:3). Leave empty to use the same image on mobile.</p>
           <label className="grid gap-1">
             <span className={labelClass}>Primary button text</span>
             <input

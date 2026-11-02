@@ -1946,7 +1946,7 @@ export default function SolutionPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`solutions-${i}`]}</p>
                     ) : null}
                     <ImageSizeHint w={700} h={385} />
-                    {mobileImageField(`solutions-${i}-mobile`, card.mobileImage, (v) => setSolutions((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "wide, about 2:1 — e.g. 1200×580", { w: 1200, h: 580 })}
+                    {mobileImageField(`solutions-${i}-mobile`, card.mobileImage, (v) => setSolutions((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "wide, about 2:1", { w: 1200, h: 580 })}
                     <FieldError error={validateUrl(card.image ?? "")} />
 
                     {/* Slug — links the card to its detail page */}
@@ -2346,7 +2346,7 @@ export default function SolutionPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`integration-${i}`]}</p>
                     ) : null}
                     <ImageSizeHint w={1300} h={1160} />
-                    {mobileImageField(`integration-${i}-mobile`, card.mobileImage, (v) => setIntegration((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "about 3:2 — e.g. 1200×830", { w: 1200, h: 830 })}
+                    {mobileImageField(`integration-${i}-mobile`, card.mobileImage, (v) => setIntegration((p) => ({ ...p, cards: p.cards.map((c, idx) => idx === i ? { ...c, mobileImage: v } : c) })), "about 3:2", { w: 1200, h: 830 })}
                     <FieldError error={validateUrl(card.image ?? "")} />
                     <textarea
                       value={card.gradient ?? ""}
@@ -2469,7 +2469,7 @@ export default function SolutionPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["trust-image"]}</p>
                 ) : null}
                 <ImageSizeHint w={1310} h={800} />
-                {mobileImageField("trust-mobile", trust.mobileImage, (v) => setTrust((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040", { w: 1080, h: 1040 })}
+                {mobileImageField("trust-mobile", trust.mobileImage, (v) => setTrust((p) => ({ ...p, mobileImage: v })), "about square", { w: 1080, h: 1040 })}
               </div>
             </div>
           </div>
@@ -3040,7 +3040,7 @@ export default function SolutionPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["deployment-0"]}</p>
                   ) : null}
                   <ImageSizeHint w={1330} h={800} note="also the video's poster frame" />
-                  {mobileImageField("deployment-mobile", deployment.mobileImage, (v) => setDeployment((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1110", { w: 1080, h: 1110 })}
+                  {mobileImageField("deployment-mobile", deployment.mobileImage, (v) => setDeployment((p) => ({ ...p, mobileImage: v })), "about square", { w: 1080, h: 1110 })}
                 </div>
               </div>
             </div>
@@ -3255,7 +3255,7 @@ export default function SolutionPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["why-0"]}</p>
                 ) : null}
                 <ImageSizeHint w={1310} h={800} />
-                {mobileImageField("why-mobile", why.mobileImage, (v) => setWhy((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1100", { w: 1080, h: 1100 })}
+                {mobileImageField("why-mobile", why.mobileImage, (v) => setWhy((p) => ({ ...p, mobileImage: v })), "about square", { w: 1080, h: 1100 })}
               </div>
             </div>
           </div>
@@ -3419,7 +3419,7 @@ export default function SolutionPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
                 ) : null}
                 <ImageSizeHint w={1210} h={1000} />
-                {mobileImageField("cta-mobile", cta.mobileImage, (v) => setCtA((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", { w: 1120, h: 840 })}
+                {mobileImageField("cta-mobile", cta.mobileImage, (v) => setCtA((p) => ({ ...p, mobileImage: v })), "4:3", { w: 1120, h: 840 })}
               </div>
             </div>
           </div>

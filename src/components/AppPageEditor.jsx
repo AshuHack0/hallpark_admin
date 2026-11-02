@@ -1249,7 +1249,7 @@ export default function AppPageEditor() {
                   sections.platform.mobileWebScreen,
                   (v) => setSections((prev) => ({ ...prev, platform: { ...prev.platform, mobileWebScreen: v } })),
                   (file) => handleImageUpload("platform", "mobileWebScreen", file),
-                  "about 9:10 — e.g. 900×1000",
+                  "about 9:10",
                   { w: 720, h: 800 },
                 )}
               </div>
@@ -2377,7 +2377,7 @@ export default function AppPageEditor() {
                     item.mobileImage,
                     (v) => update(i, { mobileImage: v }),
                     (file) => handleArrayImageUpload(`feat-card-${i}-mobileImg`, update, i, "mobileImage", file),
-                    "wide, about 2:1 — e.g. 1140×600",
+                    "wide, about 2:1",
                     { w: 640, h: 320 },
                   )}
                 </div>
@@ -2514,7 +2514,7 @@ export default function AppPageEditor() {
                   sections.halapark?.mobileImage,
                   (v) => setSections((prev) => ({ ...prev, halapark: { ...prev.halapark, mobileImage: v } })),
                   (file) => handleImageUpload("halapark", "mobileImage", file),
-                  "about 4:3 — e.g. 1200×890",
+                  "about 4:3",
                   { w: 720, h: 530 },
                 )}
               </div>
@@ -2715,7 +2715,7 @@ export default function AppPageEditor() {
                   sections.ctaFooter?.mobileImage,
                   (v) => setSections((prev) => ({ ...prev, ctaFooter: { ...prev.ctaFooter, mobileImage: v } })),
                   (file) => handleImageUpload("ctaFooter", "mobileImage", file),
-                  "4:3 — e.g. 1200×900",
+                  "4:3",
                   { w: 640, h: 480 },
                 )}
               </div>

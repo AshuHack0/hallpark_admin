@@ -902,7 +902,7 @@ export default function BusinessPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-deck-${di}`]}</p>
                   ) : null}
                   <ImageSizeHint w={700} h={880} />
-                  {mobileImageField(`hero-deck-${di}-mobile`, slide.mobileImg, (v) => setSections((prev) => ({ ...prev, hero: { ...prev.hero, deckImages: (prev.hero?.deckImages ?? []).map((s, idx) => (idx === di ? { ...s, mobileImg: v } : s)) } })), "portrait, about 4:5 — e.g. 1080×1330", 540, 690)}
+                  {mobileImageField(`hero-deck-${di}-mobile`, slide.mobileImg, (v) => setSections((prev) => ({ ...prev, hero: { ...prev.hero, deckImages: (prev.hero?.deckImages ?? []).map((s, idx) => (idx === di ? { ...s, mobileImg: v } : s)) } })), "portrait, about 4:5", 540, 690)}
                   </div>
                 ))}
               </div>
@@ -1171,7 +1171,7 @@ export default function BusinessPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whyChoose-image"]}</p>
                   ) : null}
                   <ImageSizeHint w={700} h={700} />
-                  {mobileImageField(`whyChoose-${i}-mobile`, sections.whyChoose?.[i]?.mobileImage, (v) => setItemMobile("whyChoose", i, "mobileImage", v), "wide, about 2:1 — e.g. 1200×640", 720, 360)}
+                  {mobileImageField(`whyChoose-${i}-mobile`, sections.whyChoose?.[i]?.mobileImage, (v) => setItemMobile("whyChoose", i, "mobileImage", v), "wide, about 2:1", 720, 360)}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the left side of the card. If left blank, the gradient colors below are used instead.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -1347,7 +1347,7 @@ export default function BusinessPageEditor() {
                       <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["solutions-image"]}</p>
                     ) : null}
                     <ImageSizeHint w={850} h={350} />
-                    {mobileImageField(`solutions-${i}-mobile`, sections.solutions?.[i]?.mobileImage, (v) => setItemMobile("solutions", i, "mobileImage", v), "wide, about 2:1 — e.g. 1200×640", 680, 360)}
+                    {mobileImageField(`solutions-${i}-mobile`, sections.solutions?.[i]?.mobileImage, (v) => setItemMobile("solutions", i, "mobileImage", v), "wide, about 2:1", 680, 360)}
                   </div>
                   <div>
                     <label className={labelClass}>Icon (emoji)</label>
@@ -1565,7 +1565,7 @@ export default function BusinessPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["whoWeWork-image"]}</p>
                   ) : null}
                   <ImageSizeHint w={1300} h={950} />
-                  {mobileImageField(`whoWeWork-${i}-mobile`, sections.whoWeWork?.[i]?.mobileImage, (v) => setItemMobile("whoWeWork", i, "mobileImage", v), "about square — e.g. 1080×1040", 680, 650)}
+                  {mobileImageField(`whoWeWork-${i}-mobile`, sections.whoWeWork?.[i]?.mobileImage, (v) => setItemMobile("whoWeWork", i, "mobileImage", v), "about square", 680, 650)}
                   <p className="mt-1 text-[11px] text-slate-400">Shown on the right side of the partner card. Leave blank to render no photo.</p>
                 </div>
                 <div>
@@ -1775,7 +1775,7 @@ export default function BusinessPageEditor() {
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["partnersShowcase-image"]}</p>
                 ) : null}
                 <ImageSizeHint w={1250} h={950} />
-                {mobileImageField("partnersShowcase-mobile", sections.partnersShowcase?.mobileImage, (v) => setSectionMobile("partnersShowcase", "mobileImage", v), "about square — e.g. 1080×1040", 640, 620)}
+                {mobileImageField("partnersShowcase-mobile", sections.partnersShowcase?.mobileImage, (v) => setSectionMobile("partnersShowcase", "mobileImage", v), "about square", 640, 620)}
               </div>
               <div>
                 <label className={labelClass}>CTA Label</label>
@@ -2339,7 +2339,7 @@ export default function BusinessPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-parkingPartnerBgImage"]}</p>
                   ) : null}
                   <ImageSizeHint w={570} h={1240} />
-                  {mobileImageField("transformParking-parkingMobile", sections.transformParking?.parkingPartnerMobileBgImage, (v) => setSectionMobile("transformParking", "parkingPartnerMobileBgImage", v), "16:9 strip across the top of the card — e.g. 1280×720", 680, 380)}
+                  {mobileImageField("transformParking-parkingMobile", sections.transformParking?.parkingPartnerMobileBgImage, (v) => setSectionMobile("transformParking", "parkingPartnerMobileBgImage", v), "16:9 strip across the top of the card", 680, 380)}
                   <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
                 </div>
                 <div>
@@ -2512,7 +2512,7 @@ export default function BusinessPageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["transformParking-servicePartnerBgImage"]}</p>
                   ) : null}
                   <ImageSizeHint w={570} h={1240} />
-                  {mobileImageField("transformParking-serviceMobile", sections.transformParking?.servicePartnerMobileBgImage, (v) => setSectionMobile("transformParking", "servicePartnerMobileBgImage", v), "16:9 strip across the top of the card — e.g. 1280×720", 680, 380)}
+                  {mobileImageField("transformParking-serviceMobile", sections.transformParking?.servicePartnerMobileBgImage, (v) => setSectionMobile("transformParking", "servicePartnerMobileBgImage", v), "16:9 strip across the top of the card", 680, 380)}
                   <p className="mt-1 text-[11px] text-slate-400">Leave empty for the plain card (subtle triangle shapes only).</p>
                 </div>
                 <div>
@@ -2845,7 +2845,7 @@ export default function BusinessPageEditor() {
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
               ) : null}
               <ImageSizeHint w={2400} h={720} note="photo only, no dark border" />
-              {mobileImageField("cta-mobile", sections.cta?.mobileImage, (v) => setSectionMobile("cta", "mobileImage", v), "16:10, shown in its own frame below the text — e.g. 1200×750", 800, 830)}
+              {mobileImageField("cta-mobile", sections.cta?.mobileImage, (v) => setSectionMobile("cta", "mobileImage", v), "about square, shown behind the text on phones", 800, 830)}
             </div>
           </div>
         </CollapsibleSection>

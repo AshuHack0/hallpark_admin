@@ -564,7 +564,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                   />
                 </label>
                 <ImageSizeHint w={1120} h={840} note="4:3" />
-                {mobileImageField("mobileImage", "4:3 — e.g. 1200×900", { w: 720, h: 540 })}
+                {mobileImageField("mobileImage", "4:3", { w: 720, h: 540 })}
               </div>
             </div>
           </div>
@@ -616,7 +616,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                   />
                 </label>
                 <ImageSizeHint w={1200} h={900} note="4:3" />
-                {mobileImageField("mobileWhyImage", "4:3 — e.g. 1200×900", { w: 720, h: 540 })}
+                {mobileImageField("mobileWhyImage", "4:3", { w: 720, h: 540 })}
               </div>
             </div>
           </div>
@@ -667,7 +667,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                   />
                 </label>
                 <ImageSizeHint w={1040} h={780} note="4:3" />
-                {mobileImageField("mobileProblemImage", "4:3 — e.g. 1200×900", { w: 600, h: 450 })}
+                {mobileImageField("mobileProblemImage", "4:3", { w: 600, h: 450 })}
               </div>
             </div>
           </div>
@@ -718,7 +718,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                   />
                 </label>
                 <ImageSizeHint w={1040} h={780} note="4:3" />
-                {mobileImageField("mobileSolutionImage", "4:3 — e.g. 1200×900", { w: 600, h: 450 })}
+                {mobileImageField("mobileSolutionImage", "4:3", { w: 600, h: 450 })}
               </div>
             </div>
           </div>
@@ -1522,7 +1522,7 @@ export default function ServicePageEditor() {
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`hero-slide-${i}`]}</p>
                   ) : null}
                   <ImageSizeHint w={540} h={960} note="portrait 9:16" />
-                  {mobileImageField(`hero-slide-${i}-mobile`, s.mobileImg, (v) => updateHeroSlide(i, { mobileImg: v }), "portrait 9:16 — e.g. 1080×1920; only used when the slide has no video", { w: 420, h: 750 })}
+                  {mobileImageField(`hero-slide-${i}-mobile`, s.mobileImg, (v) => updateHeroSlide(i, { mobileImg: v }), "portrait 9:16; only used when the slide has no video", { w: 420, h: 750 })}
 
                   <label className={`${labelClass} mt-2`}>Video (optional — plays instead of the image)</label>
                   <div className="flex gap-2">
@@ -1890,7 +1890,7 @@ export default function ServicePageEditor() {
               ) : null}
               {(service.mediaType ?? "image") !== "video" ? <ImageSizeHint w={660} h={370} /> : null}
               {(service.mediaType ?? "image") !== "video"
-                ? mobileImageField(`service-${i}-mobile`, service.mobileImage, (v) => updateService(i, "mobileImage", v), "wide, about 16:9 — e.g. 1280×720", { w: 660, h: 370 })
+                ? mobileImageField(`service-${i}-mobile`, service.mobileImage, (v) => updateService(i, "mobileImage", v), "wide, about 16:9", { w: 660, h: 370 })
                 : null}
 
               {(service.subCategories?.length ?? 0) > 0 && (
@@ -2430,7 +2430,7 @@ export default function ServicePageEditor() {
               <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["cta-image"]}</p>
             ) : null}
             <ImageSizeHint w={1480} h={1300} />
-            {mobileImageField("cta-mobile", ctaSection.mobileImage, (v) => setCtaSection((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", { w: 880, h: 660 })}
+            {mobileImageField("cta-mobile", ctaSection.mobileImage, (v) => setCtaSection((p) => ({ ...p, mobileImage: v })), "4:3", { w: 880, h: 660 })}
             <p className="mt-1 text-[11px] text-slate-400">
               Shown on the right of the band inside a large curved cutout, with the text on the left. Leave empty for the plain band with the “P” watermark.
             </p>

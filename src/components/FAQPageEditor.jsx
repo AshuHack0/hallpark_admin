@@ -670,7 +670,7 @@ export default function FAQPageEditor() {
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["hero-image"]}</p>
               ) : null}
               <ImageSizeHint w={2400} h={660} />
-              {mobileImageField("hero-mobile", hero.mobileImage, (v) => setHero((p) => ({ ...p, mobileImage: v })), "about square — e.g. 1080×1040; the text sits on top of it", 800, 770)}
+              {mobileImageField("hero-mobile", hero.mobileImage, (v) => setHero((p) => ({ ...p, mobileImage: v })), "about square; the text sits on top of it", 800, 770)}
             </div>
           </div>
         </CollapsibleSection>
@@ -914,7 +914,7 @@ export default function FAQPageEditor() {
                 <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["bottomCta-image"]}</p>
               ) : null}
               <ImageSizeHint w={1050} h={600} />
-              {mobileImageField("bottomCta-mobile", bottomCta.mobileImage, (v) => setBottomCta((p) => ({ ...p, mobileImage: v })), "4:3 — e.g. 1200×900", 540, 410)}
+              {mobileImageField("bottomCta-mobile", bottomCta.mobileImage, (v) => setBottomCta((p) => ({ ...p, mobileImage: v })), "4:3", 540, 410)}
               <p className="mt-1 text-[11px] text-slate-400">
                 Shown on the right of the band in a curved panel. Leave empty for the decorative rings and question mark.
               </p>

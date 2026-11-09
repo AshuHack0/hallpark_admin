@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Paperclip, MousePointerClick } from "lucide-react";
+import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Paperclip, MousePointerClick, Handshake } from "lucide-react";
 import { api } from "../lib/api";
 
 const STATUS_OPTIONS = ["new", "read", "contacted", "closed"];
@@ -15,6 +15,23 @@ function StatusBadge({ status }) {
   return (
     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[status] ?? STATUS_STYLES.new}`}>
       {status}
+    </span>
+  );
+}
+
+// Partner type chosen in the website popup. Older requests (before the field
+// existed) have none and show "Not specified".
+const TYPE_LABELS = { parking: "Parking Partner", service: "Service Partner" };
+const TYPE_STYLES = {
+  parking: "bg-sky-50 text-sky-700 border border-sky-200",
+  service: "bg-violet-50 text-violet-700 border border-violet-200",
+};
+const typeLabel = (t) => TYPE_LABELS[t] || "Not specified";
+
+function TypeBadge({ type }) {
+  return (
+    <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TYPE_STYLES[type] ?? "bg-slate-50 text-slate-400 border border-slate-200"}`}>
+      {typeLabel(type)}
     </span>
   );
 }
@@ -140,6 +157,7 @@ function PartnerRequestDetail({ item, onBack, onStatusChange, onDelete }) {
         <div className="grid gap-5 px-6 py-5 sm:grid-cols-2">
           <DetailField icon={Mail}              label="Email"        value={item.email} href={`mailto:${item.email}`} />
           <DetailField icon={Phone}             label="Phone"        value={item.phone} href={`tel:${(item.phone || "").replace(/\s+/g, "")}`} />
+          <DetailField icon={Handshake}         label="Partner Type" value={typeLabel(item.partnerType)} />
           <DetailField icon={Building2}         label="Company"      value={item.companyName} />
           <DetailField icon={MousePointerClick} label="Opened From"  value={item.source} />
           {/* Up to 5 documents (new) — plus the legacy single `document` on older records */}
@@ -178,6 +196,7 @@ export default function PartnerRequestsPage() {
   const [selected, setSelected] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     document.title = "Partner Requests — HalaPark Admin";
@@ -212,6 +231,22 @@ export default function PartnerRequestsPage() {
     );
   }
 
+  const counts = {
+    all: items.length,
+    parking: items.filter((p) => p.partnerType === "parking").length,
+    service: items.filter((p) => p.partnerType === "service").length,
+    none: items.filter((p) => !TYPE_LABELS[p.partnerType]).length,
+  };
+  const shown = typeFilter === "all"
+    ? items
+    : items.filter((p) => (typeFilter === "none" ? !TYPE_LABELS[p.partnerType] : p.partnerType === typeFilter));
+  const FILTERS = [
+    ["all", "All"],
+    ["parking", "Parking Partner"],
+    ["service", "Service Partner"],
+    ...(counts.none ? [["none", "Not specified"]] : []),
+  ];
+
   return (
     <div>
       <div>
@@ -220,6 +255,27 @@ export default function PartnerRequestsPage() {
           {items.length} request{items.length !== 1 ? "s" : ""} · click a row to view details
         </p>
       </div>
+
+      {items.length > 0 ? (
+        <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Filter by partner type">
+          {FILTERS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={typeFilter === key}
+              onClick={() => setTypeFilter(key)}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                typeFilter === key
+                  ? "border-[#0088FF] bg-[#0088FF] text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-[#0088FF]/40 hover:text-[#0088FF]"
+              }`}
+            >
+              {label} <span className={typeFilter === key ? "text-white/70" : "text-slate-400"}>{counts[key]}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {items.length === 0 ? (
         <div className="mt-8 rounded-[20px] border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-500">
@@ -231,6 +287,7 @@ export default function PartnerRequestsPage() {
             <thead className="border-b border-slate-100 bg-[#f8fbff] text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Phone</th>
                 <th className="px-4 py-3">Opened From</th>
@@ -240,7 +297,7 @@ export default function PartnerRequestsPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((p) => {
+              {shown.map((p) => {
                 const id = p._id ?? p.id;
                 return (
                   <tr
@@ -259,6 +316,7 @@ export default function PartnerRequestsPage() {
                         </div>
                       </div>
                     </td>
+                    <td className="px-4 py-3"><TypeBadge type={p.partnerType} /></td>
                     <td className="px-4 py-3 text-slate-600">{p.email}</td>
                     <td className="px-4 py-3 text-slate-600">{p.phone}</td>
                     <td className="max-w-[220px] truncate px-4 py-3 text-xs text-slate-500">{p.source || "—"}</td>

@@ -23,10 +23,10 @@ import {
   Droplets,
   Truck,
 } from "lucide-react";
-import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/api";
+import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
-import { validateUrl, validateImageFile, validateVideoFile, youtubeId } from "../lib/validators";
+import { validateUrl, validateImageFile, youtubeId } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
 import ImageSizeHint from "./ImageSizeHint";
 
@@ -288,37 +288,6 @@ export default function FAQPageEditor() {
       );
       setHero((prev) => ({ ...prev, [field]: url }));
       setSuccess("Image uploaded successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setUploadError(key, err.message ?? "Upload failed");
-      console.error(err);
-    } finally {
-      setUploadProgress((p) => ({ ...p, [key]: undefined }));
-    }
-  }
-
-  // Uploads a video for the question modal and writes the URL into the modal's
-  // OWN form state (newQuestionForm.videos) — never directly into faqCategories.
-  // The change only lands on the real question when the user hits Save, and is
-  // fully discarded on Cancel.
-  async function handleModalVideoUpload(videoIndex, file) {
-    if (!file) return;
-    const key = `modal-video-${videoIndex}`;
-    const err = validateVideoFile(file);
-    if (err) { setUploadError(key, err); return; }
-    clearUploadError(key);
-    setUploadProgress((p) => ({ ...p, [key]: 0 }));
-    try {
-      const url = await uploadVideoToCloudinary(file, (pct) =>
-        setUploadProgress((p) => ({ ...p, [key]: pct }))
-      );
-      setNewQuestionForm((prev) => ({
-        ...prev,
-        videos: (Array.isArray(prev.videos) ? prev.videos : []).map((v, vIndex) =>
-          vIndex === videoIndex ? url : v
-        ),
-      }));
-      setSuccess("Video uploaded successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setUploadError(key, err.message ?? "Upload failed");
@@ -1136,97 +1105,26 @@ export default function FAQPageEditor() {
                 <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Answer (Arabic)</label>
                 <RichTextArea value={newQuestionForm.ar?.answer ?? ""} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
               </div>
-              <div className="border-t border-slate-200 pt-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold uppercase text-slate-600">Videos</p>
+              {/* Older uploaded/URL videos are no longer added here (YouTube
+                  only). Existing ones are kept and still shown on the site until
+                  removed. */}
+              {(Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : []).filter((v) => (v ?? "").trim()).length > 0 ? (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  <span>
+                    This question also has {newQuestionForm.videos.filter((v) => (v ?? "").trim()).length} older uploaded video(s), still shown on the site.
+                  </span>
                   <button
                     type="button"
-                    onClick={() =>
-                      setNewQuestionForm((prev) => ({
-                        ...prev,
-                        videos: [...(Array.isArray(prev.videos) ? prev.videos : []), ""],
-                      }))
-                    }
-                    className="inline-flex items-center gap-1 rounded-lg bg-[#0088FF] px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                    onClick={() => {
+                      if (!confirmDelete("the older uploaded video(s) on this question")) return;
+                      setNewQuestionForm((prev) => ({ ...prev, videos: [] }));
+                    }}
+                    className="shrink-0 rounded-md border border-amber-300 bg-white px-2 py-1 font-semibold text-amber-800 hover:border-red-300 hover:text-red-600"
                   >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Video
+                    Remove
                   </button>
                 </div>
-                <div className="space-y-2">
-                  {(Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : []).map((video, videoIndex) => {
-                    const uploadKey = `modal-video-${videoIndex}`;
-                    const progress = uploadProgress[uploadKey];
-                    const uploading = progress !== undefined;
-                    return (
-                      <div key={videoIndex}>
-                      <div className="flex gap-2">
-                        <input
-                          value={video ?? ""}
-                          onChange={(e) =>
-                            setNewQuestionForm({
-                              ...newQuestionForm,
-                              videos: newQuestionForm.videos.map((v, vi) =>
-                                vi === videoIndex ? e.target.value : v
-                              ),
-                            })
-                          }
-                          className={inputClass}
-                          placeholder="YouTube/Vimeo/Cloudinary URL"
-                          maxLength={FIELD_LIMITS.link}
-                        />
-                        <label className={`shrink-0 inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold ${
-                          uploading
-                            ? "cursor-not-allowed border-slate-200 text-slate-400"
-                            : "cursor-pointer border-[#0088FF]/30 bg-[#EEF6FF] text-[#0088FF] hover:bg-[#dcecff]"
-                        }`}>
-                          {uploading ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              {progress}%
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-3.5 w-3.5" />
-                              Upload
-                            </>
-                          )}
-                          <input
-                            type="file"
-                            accept="video/*"
-                            className="hidden"
-                            disabled={uploading}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              e.target.value = "";
-                              if (file) handleModalVideoUpload(videoIndex, file);
-                            }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!confirmDelete("this video")) return;
-                            setNewQuestionForm({
-                              ...newQuestionForm,
-                              videos: newQuestionForm.videos.filter((_, vi) => vi !== videoIndex),
-                            });
-                          }}
-                          className="shrink-0 rounded-lg border border-slate-200 p-2 text-slate-400 hover:border-red-300 hover:text-red-500"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <FieldError error={validateUrl(video)} />
-                      {uploadErrors[uploadKey] ? (
-                        <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[uploadKey]}</p>
-                      ) : null}
-                      <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              ) : null}
               {/* YouTube video per language — shown on the site in an embedded
                   player for that language only (Arabic page uses the Arabic link). */}
               <div className="border-t border-slate-200 pt-4">

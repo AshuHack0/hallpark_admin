@@ -29,6 +29,29 @@ export function validateUrl(value) {
   return "Enter a full URL (https://…) or a path starting with /.";
 }
 
+/**
+ * YouTube video id from any common link form — watch?v=, youtu.be/, /shorts/,
+ * /embed/, /live/, /v/, m./music. hosts, youtube-nocookie. Returns "" when the
+ * link is not a YouTube video link. (Same rule as the website's FAQ player.)
+ */
+export function youtubeId(value) {
+  const v = (value ?? "").trim();
+  if (!v) return "";
+  let u;
+  try { u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`); } catch { return ""; }
+  const host = u.hostname.replace(/^(www\.|m\.|music\.)/, "");
+  let id = "";
+  if (host === "youtu.be") id = u.pathname.split("/")[1] || "";
+  else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+    id = u.searchParams.get("v") || "";
+    if (!id) {
+      const m = u.pathname.match(/^\/(?:shorts|embed|live|v)\/([^/?#]+)/);
+      if (m) id = m[1];
+    }
+  }
+  return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+}
+
 /** Email address. Empty passes. */
 export function validateEmail(value) {
   const v = (value ?? "").trim();

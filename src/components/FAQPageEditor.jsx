@@ -26,7 +26,7 @@ import {
 import { api, uploadMediaToCloudinary, uploadVideoToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
-import { validateUrl, validateImageFile, validateVideoFile } from "../lib/validators";
+import { validateUrl, validateImageFile, validateVideoFile, youtubeId } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
 import ImageSizeHint from "./ImageSizeHint";
 
@@ -423,7 +423,15 @@ export default function FAQPageEditor() {
     const videos = (Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [])
       .map((v) => (v ?? "").trim())
       .filter(Boolean);
-    const ar = newQuestionForm.ar; // Arabic translations ride along with the item.
+    // Per-language YouTube links: English on the item, Arabic under `ar`.
+    const youtubeUrl = (newQuestionForm.youtubeUrl ?? "").trim();
+    const ar = { ...(newQuestionForm.ar ?? {}), youtubeUrl: (newQuestionForm.ar?.youtubeUrl ?? "").trim() };
+    for (const [label, link] of [["English", youtubeUrl], ["Arabic", ar.youtubeUrl]]) {
+      if (link && !youtubeId(link)) {
+        setError(`The ${label} YouTube link isn't a valid YouTube video link.`);
+        return;
+      }
+    }
     const id = toSlug(question) || `q-${Date.now()}`;
     setFaqCategories((prev) =>
       prev.map((category, index) =>
@@ -432,10 +440,10 @@ export default function FAQPageEditor() {
               ...category,
               items:
                 editQuestionIndex === null
-                  ? [...(category.items ?? []), { id, question, answer, videos, ar }]
+                  ? [...(category.items ?? []), { id, question, answer, videos, youtubeUrl, ar }]
                   : (category.items ?? []).map((item, i) =>
                       i === editQuestionIndex
-                        ? { ...item, id: item.id || id, question, answer, videos, ar }
+                        ? { ...item, id: item.id || id, question, answer, videos, youtubeUrl, ar }
                         : item,
                     ),
             }
@@ -507,6 +515,7 @@ export default function FAQPageEditor() {
       ar: item.ar ?? {},
       videoUrl: "",
       videos: Array.isArray(item.videos) ? item.videos : [],
+      youtubeUrl: item.youtubeUrl ?? "",
     });
     setQuestionModalOpen(true);
   };
@@ -793,6 +802,11 @@ export default function FAQPageEditor() {
                         <p className="text-xs text-slate-500 line-clamp-2">{item.answer}</p>
                         {Array.isArray(item.videos) && item.videos.length > 0 && (
                           <p className="text-xs text-[#0088FF]">{item.videos.length} video(s)</p>
+                        )}
+                        {(item.youtubeUrl || item.ar?.youtubeUrl) && (
+                          <p className="text-xs text-red-600">
+                            YouTube: {[item.youtubeUrl && "EN", item.ar?.youtubeUrl && "AR"].filter(Boolean).join(" + ")}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1208,6 +1222,48 @@ export default function FAQPageEditor() {
                         <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[uploadKey]}</p>
                       ) : null}
                       <p className="mt-1 text-[11px] text-slate-400">Max video size 64&nbsp;MB (Cloudinary free tier). Compress larger videos before uploading.</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* YouTube video per language — shown on the site in an embedded
+                  player for that language only (Arabic page uses the Arabic link). */}
+              <div className="border-t border-slate-200 pt-4">
+                <p className="mb-1 text-xs font-semibold uppercase text-slate-600">YouTube Video</p>
+                <p className="mb-3 text-[11px] text-slate-400">
+                  Paste a YouTube link (watch, youtu.be, Shorts or embed). The English page plays the English link and the Arabic page plays the Arabic link.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[
+                    { lang: "English", value: newQuestionForm.youtubeUrl ?? "", set: (v) => setNewQuestionForm((prev) => ({ ...prev, youtubeUrl: v })) },
+                    { lang: "Arabic", value: newQuestionForm.ar?.youtubeUrl ?? "", set: (v) => setNewQuestionForm((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), youtubeUrl: v } })) },
+                  ].map(({ lang, value, set }) => {
+                    const id = youtubeId(value);
+                    const bad = value.trim() !== "" && !id;
+                    return (
+                      <div key={lang}>
+                        <label className={lang === "Arabic" ? "mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600" : labelClass}>
+                          YouTube ({lang})
+                        </label>
+                        <input
+                          value={value}
+                          onChange={(e) => set(e.target.value)}
+                          className={inputClass}
+                          placeholder="https://www.youtube.com/watch?v=…"
+                          maxLength={FIELD_LIMITS.link}
+                          dir="ltr"
+                        />
+                        {bad ? (
+                          <p className="mt-1 text-xs font-medium text-red-600" role="alert">Not a valid YouTube video link.</p>
+                        ) : null}
+                        {id ? (
+                          <img
+                            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+                            alt={`${lang} video preview`}
+                            className="mt-2 aspect-video w-full rounded-lg border border-slate-200 object-cover"
+                          />
+                        ) : null}
                       </div>
                     );
                   })}

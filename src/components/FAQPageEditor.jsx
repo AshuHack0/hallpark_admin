@@ -198,7 +198,7 @@ export default function FAQPageEditor() {
   const [questionModalCategoryIndex, setQuestionModalCategoryIndex] = useState(null);
   const [newCategoryForm, setNewCategoryForm] = useState({ title: "", icon: "Building2", iconImage: "" });
   const [categoryError, setCategoryError] = useState("");
-  const [newQuestionForm, setNewQuestionForm] = useState({ question: "", answer: "", videoUrl: "", videos: [] });
+  const [newQuestionForm, setNewQuestionForm] = useState({ question: "", answer: "", youtubeUrl: "", ar: {} });
 
   const faqCount = useMemo(
     () => faqCategories.reduce((acc, category) => acc + (category.items?.length ?? 0), 0),
@@ -388,10 +388,6 @@ export default function FAQPageEditor() {
       return;
     }
     setError("");
-    // Persist the modal's own video list; drop rows the user left blank.
-    const videos = (Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : [])
-      .map((v) => (v ?? "").trim())
-      .filter(Boolean);
     // Per-language YouTube links: English on the item, Arabic under `ar`.
     const youtubeUrl = (newQuestionForm.youtubeUrl ?? "").trim();
     const ar = { ...(newQuestionForm.ar ?? {}), youtubeUrl: (newQuestionForm.ar?.youtubeUrl ?? "").trim() };
@@ -409,17 +405,23 @@ export default function FAQPageEditor() {
               ...category,
               items:
                 editQuestionIndex === null
-                  ? [...(category.items ?? []), { id, question, answer, videos, youtubeUrl, ar }]
-                  : (category.items ?? []).map((item, i) =>
-                      i === editQuestionIndex
-                        ? { ...item, id: item.id || id, question, answer, videos, youtubeUrl, ar }
-                        : item,
-                    ),
+                  ? [...(category.items ?? []), { id, question, answer, youtubeUrl, ar }]
+                  : (category.items ?? []).map((item, i) => {
+                      if (i !== editQuestionIndex) return item;
+                      // FAQ videos are YouTube-only now: saving a question
+                      // clears its legacy video data (Drive folders, uploads,
+                      // old video list) so nothing unmanageable stays behind.
+                      const rest = { ...item };
+                      delete rest.videos;
+                      delete rest.videoUrl;
+                      delete rest.videoFolderUrl;
+                      return { ...rest, id: item.id || id, question, answer, youtubeUrl, ar };
+                    }),
             }
           : category,
       ),
     );
-    setNewQuestionForm({ question: "", answer: "", videoUrl: "", videos: [] });
+    setNewQuestionForm({ question: "", answer: "", youtubeUrl: "", ar: {} });
     setQuestionModalCategoryIndex(null);
     setEditQuestionIndex(null);
     setQuestionModalOpen(false);
@@ -469,7 +471,7 @@ export default function FAQPageEditor() {
   const openAddQuestionModal = (categoryIndex) => {
     setQuestionModalCategoryIndex(categoryIndex);
     setEditQuestionIndex(null);
-    setNewQuestionForm({ question: "", answer: "", videoUrl: "", videos: [] });
+    setNewQuestionForm({ question: "", answer: "", youtubeUrl: "", ar: {} });
     setQuestionModalOpen(true);
   };
 
@@ -481,10 +483,18 @@ export default function FAQPageEditor() {
     setNewQuestionForm({
       question: item.question ?? "",
       answer: item.answer ?? "",
-      ar: item.ar ?? {},
-      videoUrl: "",
-      videos: Array.isArray(item.videos) ? item.videos : [],
-      youtubeUrl: item.youtubeUrl ?? "",
+      // An older question's YouTube link (from the legacy video list) is
+      // pre-filled into empty YouTube fields — the site showed it for both
+      // languages — so it stays visible and editable here.
+      ...(() => {
+        const legacyYt = [...(Array.isArray(item.videos) ? item.videos : []), item.videoUrl]
+          .map((v) => (typeof v === "string" ? v.trim() : ""))
+          .find((v) => youtubeId(v)) || "";
+        return {
+          ar: { ...(item.ar ?? {}), youtubeUrl: (item.ar?.youtubeUrl ?? "").trim() || legacyYt },
+          youtubeUrl: (item.youtubeUrl ?? "").trim() || legacyYt,
+        };
+      })(),
     });
     setQuestionModalOpen(true);
   };
@@ -1105,26 +1115,6 @@ export default function FAQPageEditor() {
                 <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Answer (Arabic)</label>
                 <RichTextArea value={newQuestionForm.ar?.answer ?? ""} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
               </div>
-              {/* Older uploaded/URL videos are no longer added here (YouTube
-                  only). Existing ones are kept and still shown on the site until
-                  removed. */}
-              {(Array.isArray(newQuestionForm.videos) ? newQuestionForm.videos : []).filter((v) => (v ?? "").trim()).length > 0 ? (
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                  <span>
-                    This question also has {newQuestionForm.videos.filter((v) => (v ?? "").trim()).length} older uploaded video(s), still shown on the site.
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!confirmDelete("the older uploaded video(s) on this question")) return;
-                      setNewQuestionForm((prev) => ({ ...prev, videos: [] }));
-                    }}
-                    className="shrink-0 rounded-md border border-amber-300 bg-white px-2 py-1 font-semibold text-amber-800 hover:border-red-300 hover:text-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : null}
               {/* YouTube video per language — shown on the site in an embedded
                   player for that language only (Arabic page uses the Arabic link). */}
               <div className="border-t border-slate-200 pt-4">
@@ -1173,7 +1163,7 @@ export default function FAQPageEditor() {
                     setQuestionModalOpen(false);
                     setQuestionModalCategoryIndex(null);
                     setEditQuestionIndex(null);
-                    setNewQuestionForm({ question: "", answer: "", videoUrl: "", videos: [] });
+                    setNewQuestionForm({ question: "", answer: "", youtubeUrl: "", ar: {} });
                   }}
                   className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { Save, Loader2, Plus, Trash2, ChevronDown, Upload } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, ChevronDown, Upload, ArrowUp, ArrowDown } from "lucide-react";
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { validateUrl, validateEmail, validatePhone, validateImageFile } from "../lib/validators";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
@@ -275,6 +275,17 @@ export default function ContactPageEditor() {
     }));
   }
 
+  // Swap a detail with its neighbour — the site shows the cards in this order.
+  function moveDetailItem(index, dir) {
+    setSections((prev) => {
+      const items = [...prev.details.items];
+      const to = index + dir;
+      if (to < 0 || to >= items.length) return prev;
+      [items[index], items[to]] = [items[to], items[index]];
+      return { ...prev, details: { ...prev.details, items } };
+    });
+  }
+
   function validateBeforeSave() {
     if (!sections.hero.heading?.trim()) {
       return "Hero heading is required.";
@@ -521,14 +532,36 @@ export default function ContactPageEditor() {
               <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-700">Detail {i + 1}</p>
-                  <button
-                    type="button"
-                    onClick={() => { if (!confirmDelete("this contact detail")) return; removeDetailItem(i); }}
-                    className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"
-                    title="Delete this detail"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => moveDetailItem(i, -1)}
+                      disabled={i === 0}
+                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                      title="Move up"
+                      aria-label="Move up"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveDetailItem(i, 1)}
+                      disabled={i === sections.details.items.length - 1}
+                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                      title="Move down"
+                      aria-label="Move down"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (!confirmDelete("this contact detail")) return; removeDetailItem(i); }}
+                      className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"
+                      title="Delete this detail"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
                 <div className="grid gap-4">
                   <div>

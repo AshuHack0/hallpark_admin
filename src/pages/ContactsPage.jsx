@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Tag, Paperclip, FileText } from "lucide-react";
 import { api } from "../lib/api";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 const STATUS_OPTIONS = ["new", "read", "replied", "closed"];
 
@@ -262,11 +263,14 @@ export default function ContactsPage() {
 
   return (
     <div>
-      <div>
-        <h2 className="text-2xl font-semibold text-[#050A13]">Contact Submissions</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          {contacts.length} total · {closedCount} closed · click a row to view &amp; reply
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold text-[#050A13]">Contact Submissions</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            {contacts.length} total · {closedCount} closed · click a row to view &amp; reply
+          </p>
+        </div>
+        <ExportExcelButton types={["contacts"]} fileLabel="Contact-Submissions" />
       </div>
 
       {/* Status filter */}

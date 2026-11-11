@@ -397,6 +397,9 @@ export default function FAQPageEditor() {
         return;
       }
     }
+    // How the website frames the video: landscape (16:9) or portrait (9:16,
+    // phone-recorded / Shorts). One setting for both language links.
+    const videoOrientation = newQuestionForm.videoOrientation === "portrait" ? "portrait" : "landscape";
     const id = toSlug(question) || `q-${Date.now()}`;
     setFaqCategories((prev) =>
       prev.map((category, index) =>
@@ -405,7 +408,7 @@ export default function FAQPageEditor() {
               ...category,
               items:
                 editQuestionIndex === null
-                  ? [...(category.items ?? []), { id, question, answer, youtubeUrl, ar }]
+                  ? [...(category.items ?? []), { id, question, answer, youtubeUrl, videoOrientation, ar }]
                   : (category.items ?? []).map((item, i) => {
                       if (i !== editQuestionIndex) return item;
                       // FAQ videos are YouTube-only now: saving a question
@@ -415,7 +418,7 @@ export default function FAQPageEditor() {
                       delete rest.videos;
                       delete rest.videoUrl;
                       delete rest.videoFolderUrl;
-                      return { ...rest, id: item.id || id, question, answer, youtubeUrl, ar };
+                      return { ...rest, id: item.id || id, question, answer, youtubeUrl, videoOrientation, ar };
                     }),
             }
           : category,
@@ -483,6 +486,7 @@ export default function FAQPageEditor() {
     setNewQuestionForm({
       question: item.question ?? "",
       answer: item.answer ?? "",
+      videoOrientation: item.videoOrientation === "portrait" ? "portrait" : "landscape",
       // An older question's YouTube link (from the legacy video list) is
       // pre-filled into empty YouTube fields — the site showed it for both
       // languages — so it stays visible and editable here.
@@ -1155,6 +1159,37 @@ export default function FAQPageEditor() {
                       </div>
                     );
                   })}
+                </div>
+                {/* Video shape on the website: a phone-recorded (portrait) video
+                    in a landscape frame shows tiny with black bars both sides. */}
+                <div className="mt-4">
+                  <p className={labelClass}>Video orientation</p>
+                  <div className="mt-1 inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="radiogroup" aria-label="Video orientation">
+                    {[
+                      { value: "landscape", label: "Landscape (16:9)", box: "h-3 w-5" },
+                      { value: "portrait", label: "Portrait (9:16)", box: "h-5 w-3" },
+                    ].map((opt) => {
+                      const active = (newQuestionForm.videoOrientation === "portrait" ? "portrait" : "landscape") === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          onClick={() => setNewQuestionForm((prev) => ({ ...prev, videoOrientation: opt.value }))}
+                          className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                            active ? "bg-white text-[#0088FF] shadow-sm" : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          <span aria-hidden="true" className={`inline-block rounded-[3px] border-2 ${active ? "border-[#0088FF]" : "border-slate-400"} ${opt.box}`} />
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Choose Portrait for videos recorded upright on a phone (or YouTube Shorts) so they fill the player instead of showing black bars.
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2 pt-4 border-t border-slate-200">

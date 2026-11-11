@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, Mail, Phone, Building2, Layers, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import { api } from "../lib/api";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 const STATUS_OPTIONS = ["new", "read", "replied", "closed"];
 
@@ -271,6 +272,7 @@ export default function ProposalsPage() {
             {proposals.length} proposal{proposals.length !== 1 ? "s" : ""} · click a row to view details
           </p>
         </div>
+        <ExportExcelButton types={["proposals"]} fileLabel="Proposals" />
       </div>
 
       {proposals.length === 0 ? (

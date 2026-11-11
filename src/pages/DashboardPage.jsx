@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { FRONTEND_PAGES } from "../constants/pages.js";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 // ── Clickable stat card ─────────────────────────────────────────────────────
 function StatCard({ label, total, newCount, icon: Icon, color, bg, onClick }) {
@@ -137,6 +138,7 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
+        <ExportExcelButton fileLabel="All-Inquiries" label="Export all inquiries (Excel)" />
       </div>
 
       {/* Stat cards */}

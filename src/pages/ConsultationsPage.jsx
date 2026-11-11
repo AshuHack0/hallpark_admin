@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, Mail, Phone, Building2, Layers, Clock3, MessageSquare } from "lucide-react";
 import { api } from "../lib/api";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 const STATUS_OPTIONS = ["new", "read", "scheduled", "closed"];
 
@@ -241,6 +242,7 @@ export default function ConsultationsPage() {
             {items.length} request{items.length !== 1 ? "s" : ""} · click a row to view details
           </p>
         </div>
+        <ExportExcelButton types={["consultations"]} fileLabel="Consultations" />
       </div>
 
       {items.length === 0 ? (

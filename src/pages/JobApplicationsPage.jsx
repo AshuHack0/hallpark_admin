@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, ExternalLink, User, Mail, Phone, MapPin, Briefcase, MessageSquare, FileText, Calendar, Megaphone } from "lucide-react";
 import { api } from "../lib/api";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 const STATUS_OPTIONS = ["new", "reviewed", "contacted", "closed"];
 
@@ -254,6 +255,7 @@ export default function JobApplicationsPage() {
             {applications.length} application{applications.length !== 1 ? "s" : ""} · click a row to view details
           </p>
         </div>
+        <ExportExcelButton types={["jobApplications"]} fileLabel="Job-Applications" />
       </div>
 
       {applications.length === 0 ? (

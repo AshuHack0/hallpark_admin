@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, Mail, Phone, Briefcase, Building2, Hash, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import { api } from "../lib/api";
+import ExportExcelButton from "../components/ExportExcelButton";
 
 const STATUS_OPTIONS = ["new", "reviewed", "contacted", "closed"];
 
@@ -258,6 +259,7 @@ export default function QuotesPage() {
             {quotes.length} quote{quotes.length !== 1 ? "s" : ""} · click a row to view details
           </p>
         </div>
+        <ExportExcelButton types={["quotes"]} fileLabel="Quotes" />
       </div>
 
       {quotes.length === 0 ? (

@@ -15,23 +15,52 @@ import { mediaKind, resolveMediaUrl, videoPoster, youtubeThumb } from "../lib/me
 
 const HOLDER_ATTR = "data-upload-preview";
 
+const TEXT_INPUT =
+  'input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="number"])';
+const LOOKS_LIKE_LINK = /url|path|image|link|https?:|^\//i;
+
+// The URL box this Upload button fills: the nearest text box before it in the
+// same container, preferring one that looks like a link field (so a "Caption"
+// box between them is skipped).
+function linkInputFor(button) {
+  // Look among the button's earlier siblings; if there's no box there (the
+  // button sits in its own little wrapper), look one or two levels up.
+  for (let node = button, level = 0; node && level < 3; node = node.parentElement, level++) {
+    const before = [];
+    for (let sib = node.previousElementSibling; sib; sib = sib.previousElementSibling) {
+      if (sib.matches(TEXT_INPUT)) before.push(sib);
+      else before.push(...[...sib.querySelectorAll(TEXT_INPUT)].reverse());
+    }
+    if (before.length) {
+      return before.find((i) => LOOKS_LIKE_LINK.test(`${i.placeholder} ${i.value}`)) || before[0];
+    }
+  }
+  return null;
+}
+
+// Where the preview goes: under the whole line when the box and the button sit
+// side by side (a flex row), otherwise right under the Upload button.
+function anchorFor(button) {
+  const parent = button.parentElement;
+  const cs = parent && getComputedStyle(parent);
+  const sideBySide = cs && cs.display.includes("flex") && !cs.flexDirection.startsWith("column");
+  return sideBySide ? parent : button;
+}
+
 function findRows(root) {
   const rows = [];
-  root.querySelectorAll('input[type="file"]').forEach((file) => {
+  root.querySelectorAll('input[type="file"]:not([multiple])').forEach((file) => {
     const button = file.closest("label");
-    const row = button?.parentElement;
-    if (!row || row.closest(`[${HOLDER_ATTR}]`)) return;
-    const text = row.querySelector(
-      'input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="number"])',
-    );
-    if (text) rows.push({ row, text });
+    if (!button?.parentElement || button.closest(`[${HOLDER_ATTR}]`)) return;
+    const text = linkInputFor(button);
+    if (text) rows.push({ row: anchorFor(button), text });
   });
   return rows;
 }
 
 // The field already shows its own preview of this file (some editors do)?
 function hasOwnPreview(row, src) {
-  const scope = row.parentElement;
+  const scope = row.parentElement?.parentElement || row.parentElement;
   if (!scope || !src) return false;
   return [...scope.querySelectorAll("img, video")].some(
     (el) => !el.closest(`[${HOLDER_ATTR}]`) && (el.currentSrc === src || el.getAttribute("src") === src),
@@ -142,13 +171,15 @@ export default function UploadPreviews() {
     style.textContent = STYLES;
     document.head.appendChild(style);
 
-    let frame = 0;
+    // A short timer (not requestAnimationFrame, which pauses in background
+    // tabs) batches bursts of DOM changes into one pass.
+    let timer = 0;
     const schedule = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
+      if (timer) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
         sync(root);
-      });
+      }, 60);
     };
     // New fields appear (sections open, items added) and React updates the
     // input's value attribute when an upload finishes → re-sync.
@@ -164,7 +195,7 @@ export default function UploadPreviews() {
     return () => {
       observer.disconnect();
       root.removeEventListener("input", schedule, true);
-      if (frame) cancelAnimationFrame(frame);
+      if (timer) window.clearTimeout(timer);
       style.remove();
       root.querySelectorAll(`[${HOLDER_ATTR}]`).forEach((n) => n.remove());
     };

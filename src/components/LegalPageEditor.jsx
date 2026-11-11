@@ -76,7 +76,7 @@ export default function LegalPageEditor() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
+    <div className="w-full py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#050A13]">{pageName}</h1>

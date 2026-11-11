@@ -15,6 +15,7 @@ import { useState } from "react";
 import { FRONTEND_PAGES } from "../constants/pages.js";
 import { getUser, logout } from "../lib/api";
 import ScrollToTop from "./ScrollToTop.jsx";
+import UploadPreviews from "./UploadPreviews.jsx";
 
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
@@ -124,6 +125,7 @@ export default function AdminLayout() {
       </main>
 
       <ScrollToTop />
+      <UploadPreviews />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Tag, Paperclip, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Tag, Paperclip } from "lucide-react";
 import { api } from "../lib/api";
 import ExportExcelButton from "../components/ExportExcelButton";
+import AttachmentTile from "../components/AttachmentTile";
 
 const STATUS_OPTIONS = ["new", "read", "replied", "closed"];
 
@@ -176,33 +177,11 @@ function ContactDetail({ contact, onBack, onStatusChange, onDelete }) {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   Attachments ({contact.attachments.length})
                 </p>
-                <ul className="mt-2 space-y-2">
-                  {contact.attachments.map((file, index) => {
-                    const isImage = (file?.type ?? "").startsWith("image/");
-                    return (
-                      <li key={`${file?.url}-${index}`}>
-                        <a
-                          href={file?.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 transition hover:border-[#0088FF] hover:bg-[#EEF6FF]"
-                        >
-                          {isImage ? (
-                            <img src={file.url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                          ) : (
-                            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400">
-                              <FileText className="h-5 w-5" />
-                            </span>
-                          )}
-                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#050A13]" title={file?.name}>
-                            {file?.name || file?.url}
-                          </span>
-                          <span className="shrink-0 text-xs font-semibold text-[#0088FF]">Open</span>
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {contact.attachments.map((file, index) => (
+                    <AttachmentTile key={`${file?.url}-${index}`} file={file} index={index} />
+                  ))}
+                </div>
               </div>
             </div>
           )}

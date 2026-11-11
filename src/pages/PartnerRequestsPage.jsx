@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Trash2, Mail, Phone, Building2, MessageSquare, Paperclip, MousePointerClick, Handshake } from "lucide-react";
 import { api } from "../lib/api";
 import ExportExcelButton from "../components/ExportExcelButton";
+import AttachmentTile from "../components/AttachmentTile";
 
 const STATUS_OPTIONS = ["new", "read", "contacted", "closed"];
 
@@ -165,10 +166,20 @@ function PartnerRequestDetail({ item, onBack, onStatusChange, onDelete }) {
           {(() => {
             const docs = [...(Array.isArray(item.documents) ? item.documents : []), ...(item.document?.url ? [item.document] : [])].filter((d) => d?.url);
             return docs.length > 0 ? (
-              <div className="sm:col-span-2 space-y-2">
-                {docs.map((d, i) => (
-                  <DetailField key={`${d.url}-${i}`} icon={Paperclip} label={docs.length > 1 ? `Supporting Document ${i + 1}` : "Supporting Document"} value={d.name || "View document"} href={d.url} />
-                ))}
+              <div className="flex items-start gap-3 sm:col-span-2">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF]">
+                  <Paperclip className="h-4 w-4 text-[#0088FF]" strokeWidth={1.8} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    Supporting Documents ({docs.length})
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {docs.map((d, i) => (
+                      <AttachmentTile key={`${d.url}-${i}`} file={d} index={i} />
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : null;
           })()}

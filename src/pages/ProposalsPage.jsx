@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Trash2, Mail, Phone, Building2, Layers, MessageSquare, FileText, ExternalLink } from "lucide-react";
+import { ArrowLeft, Trash2, Mail, Phone, Building2, Layers, MessageSquare, FileText } from "lucide-react";
 import { api } from "../lib/api";
 import ExportExcelButton from "../components/ExportExcelButton";
+import AttachmentTile from "../components/AttachmentTile";
 
 const STATUS_OPTIONS = ["new", "read", "replied", "closed"];
 
@@ -193,20 +194,9 @@ function ProposalDetail({ proposal, onBack, onStatusChange, onDelete }) {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                     Attachments ({attachments.length})
                   </p>
-                  <div className="mt-1.5 flex flex-wrap gap-2">
+                  <div className="mt-2 flex flex-wrap gap-2">
                     {attachments.map((file, index) => (
-                      <a
-                        key={`${file?.url}-${index}`}
-                        href={file?.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={file?.name || file?.url}
-                        className="inline-flex max-w-[240px] items-center gap-1.5 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-1.5 text-xs font-semibold text-[#0088FF] hover:bg-[#0088FF] hover:text-white"
-                      >
-                        <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                        <span className="truncate">{file?.name || `File ${index + 1}`}</span>
-                        <ExternalLink className="h-3 w-3 shrink-0" strokeWidth={2} />
-                      </a>
+                      <AttachmentTile key={`${file?.url}-${index}`} file={file} index={index} />
                     ))}
                   </div>
                 </div>

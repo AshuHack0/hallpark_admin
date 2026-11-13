@@ -3108,9 +3108,9 @@ export default function HomePageEditor() {
               progress={uploadProgress["hpa-image"]}
               onChange={(v) => setHalaParkInAction((p) => ({ ...p, image: v }))}
               onUpload={(file) => handleHalaParkImageUpload(file)}
-              w={1400} h={1040}
+              w={1320} h={910}
             />
-            {mobileImageField("hpa-mobileImage", halaParkInAction.mobileImage, (v) => setHalaParkInAction((p) => ({ ...p, mobileImage: v })), "about 4:3", { w: 720, h: 530 })}
+            {mobileImageField("hpa-mobileImage", halaParkInAction.mobileImage, (v) => setHalaParkInAction((p) => ({ ...p, mobileImage: v })), "about 4:3", { w: 680, h: 470 })}
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">Store Links ({(halaParkInAction.storeLinks ?? []).length})</p>
               <button

@@ -2371,14 +2371,14 @@ export default function AppPageEditor() {
                   {uploadErrors[`feat-card-${i}-img`] ? (
                     <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[`feat-card-${i}-img`]}</p>
                   ) : null}
-                  <ImageSizeHint w={700} h={300} />
+                  <ImageSizeHint w={790} h={300} />
                   {mobileImageField(
                     `feat-card-${i}-mobileImg`,
                     item.mobileImage,
                     (v) => update(i, { mobileImage: v }),
                     (file) => handleArrayImageUpload(`feat-card-${i}-mobileImg`, update, i, "mobileImage", file),
                     "wide, about 2:1",
-                    { w: 640, h: 320 },
+                    { w: 580, h: 300 },
                   )}
                 </div>
                 <div>
@@ -2505,7 +2505,7 @@ export default function AppPageEditor() {
                 {uploadErrors["halapark-image"] ? (
                   <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors["halapark-image"]}</p>
                 ) : null}
-                <ImageSizeHint w={1400} h={1040} />
+                <ImageSizeHint w={1320} h={910} />
                 {sections.halapark?.image ? (
                   <img src={sections.halapark.image} alt="" className="mt-2 h-24 w-40 rounded-lg border border-slate-200 object-cover" />
                 ) : null}
@@ -2515,7 +2515,7 @@ export default function AppPageEditor() {
                   (v) => setSections((prev) => ({ ...prev, halapark: { ...prev.halapark, mobileImage: v } })),
                   (file) => handleImageUpload("halapark", "mobileImage", file),
                   "about 4:3",
-                  { w: 720, h: 530 },
+                  { w: 680, h: 470 },
                 )}
               </div>
               <div>

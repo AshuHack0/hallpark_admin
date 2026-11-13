@@ -1728,8 +1728,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setVisionSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setVisionSectionForm}
             uploadKey="image-vision-mobile"
-            w={800}
-            h={400}
+            w={680}
+            h={510}
             field="mobileImage"
           />
           <p className="-mt-1 text-[11px] text-slate-400">Shown on phones instead of the image above (shown whole, at its own shape). Leave empty to use the same image on mobile.</p>
@@ -1946,8 +1946,8 @@ export default function AboutPageEditor() {
             onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, image: e.target.value }))}
             setForm={setWhatWeDoSectionForm}
             uploadKey="image-whatWeDo"
-            w={800}
-            h={380}
+            w={920}
+            h={385}
           />
           <ImageField
             label="Mobile image (optional)"
@@ -1955,7 +1955,7 @@ export default function AboutPageEditor() {
             onChange={(e) => setWhatWeDoSectionForm((p) => ({ ...p, mobileImage: e.target.value }))}
             setForm={setWhatWeDoSectionForm}
             uploadKey="image-whatWeDo-mobile"
-            w={720}
+            w={680}
             h={390}
             field="mobileImage"
           />

@@ -615,7 +615,7 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1200} h={900} note="4:3" />
+                <ImageSizeHint w={1320} h={990} note="4:3" />
                 {mobileImageField("mobileWhyImage", "4:3", { w: 720, h: 540 })}
               </div>
             </div>
@@ -666,8 +666,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1040} h={780} note="4:3" />
-                {mobileImageField("mobileProblemImage", "4:3", { w: 600, h: 450 })}
+                <ImageSizeHint w={1200} h={900} note="4:3" />
+                {mobileImageField("mobileProblemImage", "4:3", { w: 560, h: 420 })}
               </div>
             </div>
           </div>
@@ -717,8 +717,8 @@ function ServiceDetailEditModal({ initial, isNew, allDetails, services, onSave, 
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1040} h={780} note="4:3" />
-                {mobileImageField("mobileSolutionImage", "4:3", { w: 600, h: 450 })}
+                <ImageSizeHint w={1200} h={900} note="4:3" />
+                {mobileImageField("mobileSolutionImage", "4:3", { w: 560, h: 420 })}
               </div>
             </div>
           </div>

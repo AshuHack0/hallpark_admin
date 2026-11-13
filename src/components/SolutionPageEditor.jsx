@@ -657,8 +657,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
-                {mobileImageField("mobileImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
+                <ImageSizeHint w={1080} h={810} note="4:3 frame, cropped to fill" />
+                {mobileImageField("mobileImage", { w: 680, h: 510, note: "4:3 frame, cropped to fill" })}
               </div>
             </div>
           </div>
@@ -709,8 +709,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
-                {mobileImageField("mobileWhyImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
+                <ImageSizeHint w={1320} h={990} note="4:3 frame, cropped to fill" />
+                {mobileImageField("mobileWhyImage", { w: 680, h: 510, note: "4:3 frame, cropped to fill" })}
               </div>
             </div>
           </div>
@@ -760,8 +760,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
-                {mobileImageField("mobileProblemImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
+                <ImageSizeHint w={1200} h={900} note="4:3 frame, cropped to fill" />
+                {mobileImageField("mobileProblemImage", { w: 560, h: 420, note: "4:3 frame, cropped to fill" })}
               </div>
             </div>
           </div>
@@ -811,8 +811,8 @@ function DetailEditModal({ initial, isNew, allDetails, cardSlugs, onSave, onClos
                     }}
                   />
                 </label>
-                <ImageSizeHint w={1080} h={720} note="shown whole, at its own shape" />
-                {mobileImageField("mobileSolutionImage", { w: 800, h: 540, note: "shown whole, any shape works" })}
+                <ImageSizeHint w={1200} h={900} note="4:3 frame, cropped to fill" />
+                {mobileImageField("mobileSolutionImage", { w: 560, h: 420, note: "4:3 frame, cropped to fill" })}
               </div>
             </div>
           </div>

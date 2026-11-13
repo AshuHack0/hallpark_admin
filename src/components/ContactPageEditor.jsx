@@ -649,17 +649,26 @@ export default function ContactPageEditor() {
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Link</label>
+                    <label className={labelClass}>{item.key === "address" ? "Google Maps link" : "Link"}</label>
                     <input
                       value={item.href ?? ""}
                       onChange={(e) => updateDetailItem(i, { href: e.target.value })}
                       className={inputClass}
-                      placeholder="tel:+971... / mailto:... / https://..."
+                      placeholder={item.key === "address" ? "https://maps.app.goo.gl/..." : "tel:+971... / mailto:... / https://..."}
                       maxLength={FIELD_LIMITS.link}
                     />
                     <CharCount value={item.href ?? ""} max={FIELD_LIMITS.link} />
                     <FieldError error={validateUrl(item.href)} />
-                    <span className="text-[11px] text-slate-400">
+                    {item.key === "address" ? (
+                      /* The website opens this link in a new tab. Without a
+                         Google Maps link it searches the address text, and an
+                         area (e.g. "Media City, Dubai") shows no pin. */
+                      <span className={`block text-[11px] ${/^https:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|(www\.)?google\.[a-z.]+\/maps)/i.test((item.href ?? "").trim()) ? "text-slate-400" : "text-amber-600"}`}>
+                        For a pin on the exact office: open the office in Google Maps → Share → Copy link, and paste it here.
+                        {" "}Without it, the site searches the address text, and an area name shows no pin.
+                      </span>
+                    ) : null}
+                    <span className={`text-[11px] text-slate-400 ${item.key === "address" ? "hidden" : ""}`}>
                       optional — tel:/mailto:/https link
                     </span>
                   </div>

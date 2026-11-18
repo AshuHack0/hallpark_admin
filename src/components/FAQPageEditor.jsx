@@ -26,7 +26,7 @@ import {
 import { api, uploadMediaToCloudinary } from "../lib/api";
 import { FIELD_LIMITS, CharCount, FieldError, ArInput } from "./CappedField";
 import RichTextArea from "./RichTextArea.jsx";
-import { validateUrl, validateImageFile, youtubeId } from "../lib/validators";
+import { validateUrl, validateImageFile, validateVideoFile, youtubeId } from "../lib/validators";
 import { confirmDelete } from "../lib/confirmDelete";
 import ImageSizeHint from "./ImageSizeHint";
 
@@ -390,7 +390,17 @@ export default function FAQPageEditor() {
     setError("");
     // Per-language YouTube links: English on the item, Arabic under `ar`.
     const youtubeUrl = (newQuestionForm.youtubeUrl ?? "").trim();
-    const ar = { ...(newQuestionForm.ar ?? {}), youtubeUrl: (newQuestionForm.ar?.youtubeUrl ?? "").trim() };
+    const ar = {
+      ...(newQuestionForm.ar ?? {}),
+      youtubeUrl: (newQuestionForm.ar?.youtubeUrl ?? "").trim(),
+      videoFile: (newQuestionForm.ar?.videoFile ?? "").trim(),
+    };
+    // Uploaded video per language — plays instead of that language's YouTube link.
+    const videoFile = (newQuestionForm.videoFile ?? "").trim();
+    if (videoUploading) {
+      setError("Wait for the video upload to finish before saving.");
+      return;
+    }
     for (const [label, link] of [["English", youtubeUrl], ["Arabic", ar.youtubeUrl]]) {
       if (link && !youtubeId(link)) {
         setError(`The ${label} YouTube link isn't a valid YouTube video link.`);
@@ -408,7 +418,7 @@ export default function FAQPageEditor() {
               ...category,
               items:
                 editQuestionIndex === null
-                  ? [...(category.items ?? []), { id, question, answer, youtubeUrl, videoOrientation, ar }]
+                  ? [...(category.items ?? []), { id, question, answer, youtubeUrl, videoFile, videoOrientation, ar }]
                   : (category.items ?? []).map((item, i) => {
                       if (i !== editQuestionIndex) return item;
                       // FAQ videos are YouTube-only now: saving a question
@@ -418,7 +428,7 @@ export default function FAQPageEditor() {
                       delete rest.videos;
                       delete rest.videoUrl;
                       delete rest.videoFolderUrl;
-                      return { ...rest, id: item.id || id, question, answer, youtubeUrl, videoOrientation, ar };
+                      return { ...rest, id: item.id || id, question, answer, youtubeUrl, videoFile, videoOrientation, ar };
                     }),
             }
           : category,
@@ -487,6 +497,7 @@ export default function FAQPageEditor() {
       question: item.question ?? "",
       answer: item.answer ?? "",
       videoOrientation: item.videoOrientation === "portrait" ? "portrait" : "landscape",
+      videoFile: (item.videoFile ?? "").trim(),
       // An older question's YouTube link (from the legacy video list) is
       // pre-filled into empty YouTube fields — the site showed it for both
       // languages — so it stays visible and editable here.
@@ -502,6 +513,31 @@ export default function FAQPageEditor() {
     });
     setQuestionModalOpen(true);
   };
+
+  // FAQ question → uploaded video (per language). Stored on the question as
+  // `videoFile` (English) / `ar.videoFile` (Arabic); the site plays it first
+  // and falls back to that language's YouTube link when there is none.
+  const videoUploading = ["faq-video-en", "faq-video-ar"].some((k) => uploadProgress[k] !== undefined);
+  async function handleFaqVideoUpload(lang, file) {
+    const key = `faq-video-${lang}`;
+    const err = validateVideoFile(file);
+    if (err) { setUploadError(key, err); return; }
+    clearUploadError(key);
+    setUploadProgress((p) => ({ ...p, [key]: 0 }));
+    try {
+      const url = await uploadMediaToCloudinary(file, "video", (pct) =>
+        setUploadProgress((p) => ({ ...p, [key]: pct }))
+      );
+      setNewQuestionForm((prev) =>
+        lang === "ar" ? { ...prev, ar: { ...(prev.ar ?? {}), videoFile: url } } : { ...prev, videoFile: url }
+      );
+    } catch (uploadErr) {
+      setUploadError(key, uploadErr.message ?? "Upload failed");
+      console.error(uploadErr);
+    } finally {
+      setUploadProgress((p) => ({ ...p, [key]: undefined }));
+    }
+  }
 
   // Optional phone-only variant of an image. `apply(url)` stores it; the site
   // shows it under 640px wide.
@@ -785,6 +821,11 @@ export default function FAQPageEditor() {
                         <p className="text-xs text-slate-500 line-clamp-2">{item.answer}</p>
                         {Array.isArray(item.videos) && item.videos.length > 0 && (
                           <p className="text-xs text-[#0088FF]">{item.videos.length} video(s)</p>
+                        )}
+                        {(item.videoFile || item.ar?.videoFile) && (
+                          <p className="text-xs text-[#0088FF]">
+                            Uploaded video: {[item.videoFile && "EN", item.ar?.videoFile && "AR"].filter(Boolean).join(" + ")}
+                          </p>
                         )}
                         {(item.youtubeUrl || item.ar?.youtubeUrl) && (
                           <p className="text-xs text-red-600">
@@ -1119,10 +1160,70 @@ export default function FAQPageEditor() {
                 <label className="mb-1 mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600">Answer (Arabic)</label>
                 <RichTextArea value={newQuestionForm.ar?.answer ?? ""} onChange={(v) => setNewQuestionForm({ ...newQuestionForm, ar: { ...(newQuestionForm.ar ?? {}), answer: v } })} maxLength={FIELD_LIMITS.description} rows={4} dir="rtl" variant="arabic" />
               </div>
+              {/* Uploaded video per language — the site plays it first; the
+                  YouTube link below is the fallback when none is uploaded. */}
+              <div className="border-t border-slate-200 pt-4">
+                <p className="mb-1 text-xs font-semibold uppercase text-slate-600">Uploaded Video</p>
+                <p className="mb-3 text-[11px] text-slate-400">
+                  Optional. When a video is uploaded it plays on the website instead of the YouTube video below; leave it empty to use YouTube. MP4, WEBM or MOV, max 64&nbsp;MB.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[
+                    { lang: "en", label: "English", value: newQuestionForm.videoFile ?? "", set: (v) => setNewQuestionForm((prev) => ({ ...prev, videoFile: v })) },
+                    { lang: "ar", label: "Arabic", value: newQuestionForm.ar?.videoFile ?? "", set: (v) => setNewQuestionForm((prev) => ({ ...prev, ar: { ...(prev.ar ?? {}), videoFile: v } })) },
+                  ].map(({ lang, label, value, set }) => {
+                    const key = `faq-video-${lang}`;
+                    const busy = uploadProgress[key] !== undefined;
+                    return (
+                      <div key={lang}>
+                        <label className={lang === "ar" ? "mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-600" : labelClass}>
+                          Video ({label})
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                            className={inputClass}
+                            placeholder="Upload a video, or paste its link"
+                            maxLength={FIELD_LIMITS.link}
+                            dir="ltr"
+                          />
+                          <label className={`shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#0088FF]/30 bg-[#EEF6FF] px-3 py-2 text-xs font-semibold text-[#0088FF] ${busy ? "cursor-wait" : "cursor-pointer hover:bg-[#dcecff]"}`}>
+                            {busy ? (
+                              <><Loader2 className="h-3.5 w-3.5 animate-spin" />{uploadProgress[key]}%</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" />Upload</>
+                            )}
+                            <input
+                              type="file"
+                              accept="video/mp4,video/webm,video/quicktime,video/*"
+                              className="hidden"
+                              disabled={busy}
+                              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFaqVideoUpload(lang, f); e.target.value = ""; }}
+                            />
+                          </label>
+                          {value && !busy ? (
+                            <button type="button" onClick={() => set("")} className="shrink-0 rounded-lg border border-slate-200 px-2.5 text-slate-500 hover:border-red-200 hover:text-red-600" aria-label={`Remove ${label} video`}>
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          ) : null}
+                        </div>
+                        <FieldError error={validateUrl(value)} />
+                        {uploadErrors[key] ? (
+                          <p className="mt-1 text-xs font-medium text-red-600" role="alert">{uploadErrors[key]}</p>
+                        ) : null}
+                        {value.trim() ? (
+                          <video src={value.trim()} controls preload="metadata" playsInline className="mt-2 aspect-video w-full rounded-lg border border-slate-200 bg-black" />
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               {/* YouTube video per language — shown on the site in an embedded
                   player for that language only (Arabic page uses the Arabic link). */}
               <div className="border-t border-slate-200 pt-4">
-                <p className="mb-1 text-xs font-semibold uppercase text-slate-600">YouTube Video</p>
+                <p className="mb-1 text-xs font-semibold uppercase text-slate-600">YouTube Video <span className="font-normal normal-case text-slate-400">(used when no video is uploaded)</span></p>
                 <p className="mb-3 text-[11px] text-slate-400">
                   Paste a YouTube link (watch, youtu.be, Shorts or embed). The English page plays the English link and the Arabic page plays the Arabic link.
                 </p>

@@ -7,6 +7,7 @@ import { confirmDelete } from "../lib/confirmDelete";
 import RichTextArea from "./RichTextArea.jsx";
 import { CsvInput } from "./ListInput.jsx";
 import ImageSizeHint from "./ImageSizeHint";
+import { parseMapPin, pinEmbedUrl, pinOpenUrl } from "../lib/mapPin";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#0088FF] focus:bg-white focus:ring-2 focus:ring-[#0088FF]/15";
@@ -958,6 +959,9 @@ export default function ContactPageEditor() {
                 onChange={(v) => setMap((p) => ({ ...p, ar: { ...(p.ar ?? {}), address: v } }))}
               />
             </div>
+            <div className="sm:col-span-2">
+              <OfficePinField value={sections.map.pin ?? ""} onChange={(v) => setMap((p) => ({ ...p, pin: v }))} />
+            </div>
             <div>
               <label className={labelClass}>Phone</label>
               <input
@@ -1021,5 +1025,55 @@ export default function ContactPageEditor() {
       </div>
     </div>
     </SectionSaveContext.Provider>
+  );
+}
+
+
+// Contact › Map: the exact office spot. Drives the red pin on the website's
+// embedded map, its "Open in Maps" link and the Office Address card link.
+// eslint-disable-next-line react/prop-types
+function OfficePinField({ value, onChange }) {
+  const raw = (value ?? "").trim();
+  const pin = parseMapPin(raw);
+  const shortLink = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl)\//i.test(raw);
+  return (
+    <div>
+      <label className={labelClass}>Office pin location</label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={inputClass}
+        placeholder="25.0957, 55.1536  — or a full Google Maps link"
+        maxLength={FIELD_LIMITS.link}
+      />
+      <p className="mt-1 text-[11px] leading-5 text-slate-500">
+        Puts a red pin on the exact office in the website map, its &ldquo;Open in Maps&rdquo; button and the Office Address card.
+        In Google Maps, right-click the office building → click the coordinates at the top to copy them, and paste here.
+        A full link from the browser&rsquo;s address bar also works.
+      </p>
+      {raw && !pin ? (
+        <p className="mt-1 text-[11px] font-medium text-red-600">
+          {shortLink
+            ? "Short maps.app.goo.gl links can't be read. Open the link, then copy the long link from the address bar — or paste the coordinates."
+            : "No location found. Paste coordinates like 25.0957, 55.1536 or a full Google Maps link."}
+        </p>
+      ) : null}
+      {!raw ? (
+        <p className="mt-1 text-[11px] font-medium text-amber-600">
+          Empty: the website searches the address text instead, and an area name (e.g. &ldquo;Media City&rdquo;) shows no pin.
+        </p>
+      ) : null}
+      {pin ? (
+        <div className="mt-2 overflow-hidden rounded-xl border border-slate-200">
+          <div className="flex items-center justify-between gap-2 bg-slate-50 px-3 py-1.5 text-[11px] text-slate-600">
+            <span>Pin: {pin.lat}, {pin.lng}</span>
+            <a href={pinOpenUrl(pin)} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#0088FF] hover:underline">
+              Open in Google Maps
+            </a>
+          </div>
+          <iframe title="Office pin preview" src={pinEmbedUrl(pin)} className="h-56 w-full border-0" loading="lazy" />
+        </div>
+      ) : null}
+    </div>
   );
 }
